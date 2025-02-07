@@ -64,8 +64,6 @@ const scoI = {
 	height: 0.5,
 	pos: new THREE.Vector3(0, 17.6, 0.5),
 	color: 0xDDDDDD,
-	player1: 0,
-	player2: 0,
 }
 
 export default class Arena {
@@ -79,7 +77,7 @@ export default class Arena {
 		this.setPilar()
 		this.setScreen()
 		this.setDelimiter()
-		this.setScore()
+		this.setScore("0", "0")
 	}
 
 	setLight() {
@@ -181,39 +179,43 @@ export default class Arena {
 
 	setDelimiter() {
 		let geometry, material, delimiter
-		this.delimiters = [];
+		this.delimiters = []
 		for (let i = 0; i < 2; i++) {
 			geometry = new RoundedBoxGeometry(delI.size.x, delI.size.y, delI.size.z, 5, 0.5)
-			//const material = new THREE.MeshStandardMaterial({color: 0xFFFFFF})
+			//material = new THREE.MeshStandardMaterial({color: 0xFFFFFF})
 			material = new THREE.MeshStandardMaterial({
 				transparent: true,
 				opacity: 0
-			});
-			delimiter = new THREE.Mesh(geometry, material);
-			if (!i) delimiter.position.copy(delI.pos);
-			else delimiter.position.copy(new THREE.Vector3(delI.pos.x, delI.pos.y, -delI.pos.z));
-			this.scene.add(delimiter);
-			this.delimiters.push(delimiter);
+			})
+			delimiter = new THREE.Mesh(geometry, material)
+			if (!i) delimiter.position.copy(delI.pos)
+			else delimiter.position.copy(new THREE.Vector3(delI.pos.x, delI.pos.y, -delI.pos.z))
+			this.scene.add(delimiter)
+			this.delimiters.push(delimiter)
 		}
 	}
 
-	setScore() {
+	setScore(player1, player2) {
 		let geometry, material, score
-		const loader = new FontLoader();
+		this.scores = []
+		const loader = new FontLoader()
 		loader.load(scoI.fontURL, (font) => {
 			for (let i = 0; i < 2; i++) {
-				if (!i) geometry = new TextGeometry(`${scoI.player1} - ${scoI.player2}`, {font: font, size: scoI.size, height: scoI.height});
-				else geometry = new TextGeometry(`${scoI.player2} - ${scoI.player1}`, {font: font, size: scoI.size, height: scoI.height});
-				geometry.center();
-				material = new THREE.MeshBasicMaterial({color: scoI.color});
-				score = new THREE.Mesh(geometry, material);
+				if (!i) geometry = new TextGeometry(`${player1} - ${player2}`, {font: font, size: scoI.size, height: scoI.height})
+				else geometry = new TextGeometry(`${player2} - ${player1}`, {font: font, size: scoI.size, height: scoI.height})
+				geometry.center()
+				material = new THREE.MeshBasicMaterial({color: scoI.color})
+				score = new THREE.Mesh(geometry, material)
 				score.castShadow = true
 				score.receiveShadow = true
-				if (!i) score.position.copy(scoI.pos);
-				else score.position.copy(new THREE.Vector3(scoI.pos.x, scoI.pos.y, -scoI.pos.z));
-				this.scene.add(score);
-				this.score = score;
+				if (!i) score.position.copy(scoI.pos)
+				else {
+					score.position.copy(new THREE.Vector3(scoI.pos.x, scoI.pos.y, -scoI.pos.z))
+					score.rotateY(Math.PI)
+				}
+				this.scene.add(score)
+				this.scores.push(score)
 			}
-		});
+		})
 	}
 }
