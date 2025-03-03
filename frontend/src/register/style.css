@@ -1,0 +1,161 @@
+.registerContainer {
+	position: relative;
+}
+
+.flouFilterRegister {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 0;
+	pointer-events: none;
+}
+
+.flouCanvaRegister {
+	filter: blur(5px);
+	width: 100%;
+	height: 100%;
+}
+
+.transpBoxRegister {
+	position: relative;
+	width: 25vw;
+	height: 60vh;
+	margin: auto;
+	background-color: rgba(0, 0, 0, 0.35);
+	border: 2px solid #FFFFFF;
+	box-shadow: 0px 0px 20px rgba(0, 0, 0, 1);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 10px;
+}
+
+.TitleRegister {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	top: 0%;
+	color: #FFFFFF;
+	font-size: 5vw;
+	font-family: 'Millimetre', sans-serif;
+	font-weight: 1000;
+}
+
+.userTitleRegister {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	top: 15%;
+	color: #FFFFFF;
+	font-size: 1.5vw;
+	font-family: 'Millimetre', sans-serif;
+	font-weight: 600;
+}
+
+.userInputRegister {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	top: 22%;
+	font-family: 'Millimetre', sans-serif;
+	font-weight: 600;
+	color:#FFFFFF;
+	background-color: rgba(0, 0, 0, 0.35);
+	box-shadow: 0px 0px 2vw rgba(0, 0, 0, 1);
+}
+
+.passTitleRegister {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	top: 35%;
+	color: #FFFFFF;
+	font-size: 1.5vw;
+	font-family: 'Millimetre', sans-serif;
+	font-weight: 600;
+}
+
+.passInputRegister {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	top: 42%;
+	font-family: 'Millimetre', sans-serif;
+	font-weight: 600;
+	color:#FFFFFF;
+	background-color: rgba(0, 0, 0, 0.35);
+	box-shadow: 0vw 0vw 2vw rgba(0, 0, 0, 1);
+}
+
+.passInput2Register {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	top: 50%;
+	font-family: 'Millimetre', sans-serif;
+	font-weight: 600;
+	color:#FFFFFF;
+	background-color: rgba(0, 0, 0, 0.35);
+	box-shadow: 0vw 0vw 2vw rgba(0, 0, 0, 1);
+}
+
+.passShowButtonRegister {
+	position: absolute;
+    width: 30px;
+    height: 30px;
+    color: #007bff;
+	background-color: #007bff;
+	left: 75%;
+	top: 43%;
+    cursor: pointer;
+}
+
+.passShowButton2Register {
+	position: absolute;
+    width: 30px;
+    height: 30px;
+    color: #007bff;
+	background-color: #007bff;
+	left: 75%;
+	top: 51%;
+    cursor: pointer;
+}
+
+.registerButtonRegister {
+	position: absolute;
+    width: 120px;
+    height: 50px;
+    color: #FFFFFF;
+	background-color: #007bff;
+	left: 35%;
+	transform: translateX(-50%);
+	top: 70%;
+    cursor: pointer;
+}
+
+.loginButtonRegister {
+	position: absolute;
+    width: 120px;
+    height: 50px;
+    color: #FFFFFF;
+	background-color: #007bff;
+	left: 65%;
+	transform: translateX(-50%);
+	top: 70%;
+    cursor: pointer;
+}
+
+.textRegister {
+    outline: none;
+    box-shadow: none;
+    background-color: inherit;
+    color: inherit; 
+	border: 0.8px solid #869fa941 !important;
+}
+
+.textRegister::placeholder {
+    color: #FFFFFF;
+    opacity: 1;
+}

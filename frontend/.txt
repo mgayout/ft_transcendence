@@ -1,0 +1,9 @@
+Local
+- 1vs1
+- Tournament
+- 1vs1 IA ?
+
+Online
+- 1vs1
+- Tournament
+- Multi

@@ -1,0 +1,164 @@
+.containerHome {
+	position: relative;
+}
+
+.flouFilterHome {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 0;
+	pointer-events: none;
+}
+
+.flouCanvaHome {
+	filter: blur(5px);
+	width: 100%;
+	height: 100%;
+}
+
+.transpBoxHome {
+	position: relative;
+	width: 60vw;
+	height: 75vh;
+	margin: auto;
+	background-color: rgba(0, 0, 0, 0.35);
+	border: 2px solid #FFFFFF;
+	box-shadow: 0px 0px 20px rgba(0, 0, 0, 1);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 10px;
+}
+
+.TitleHome {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	top: 0%;
+	color: #FFFFFF;
+	font-size: 5vw;
+	font-family: 'Millimetre', sans-serif;
+	font-weight: 1000;
+}
+
+.localTitleGM {
+	position: absolute;
+	left: 25%;
+	transform: translateX(-50%);
+	top: 15%;
+	color: #FFFFFF;
+	font-size: 2vw;
+	font-family: 'Millimetre', sans-serif;
+	font-weight: 600;
+}
+
+.local1vs1GM {
+	position: absolute;
+    width: 120px;
+    height: 50px;
+    color: #FFFFFF;
+	background-color: #007bff;
+	left: 15%;
+	transform: translateX(-50%);
+	top: 40%;
+    cursor: pointer;
+}
+
+.localTournamentGM {
+	position: absolute;
+    width: 120px;
+    height: 50px;
+    color: #FFFFFF;
+	background-color: #007bff;
+	left: 35%;
+	transform: translateX(-50%);
+	top: 40%;
+    cursor: pointer;
+}
+
+.localvsAIGM {
+	position: absolute;
+    width: 120px;
+    height: 50px;
+    color: #FFFFFF;
+	background-color: #007bff;
+	left: 25%;
+	transform: translateX(-50%);
+	top: 55%;
+    cursor: pointer;
+}
+
+.midlineGM {
+	position: relative;
+	width: 0.8vw;
+	height: 50vh;
+	margin: auto;
+	background-color: #FFFFFF;
+	border: 2px solid #FFFFFF;
+	box-shadow: 0px 0px 20px rgba(0, 0, 0, 1);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 10px;
+}
+
+.onlineTitleGM {
+	position: absolute;
+	left: 75%;
+	transform: translateX(-50%);
+	top: 15%;
+	color: #FFFFFF;
+	font-size: 2vw;
+	font-family: 'Millimetre', sans-serif;
+	font-weight: 600;
+}
+
+.online1vs1GM {
+	position: absolute;
+    width: 120px;
+    height: 50px;
+    color: #FFFFFF;
+	background-color: #007bff;
+	left: 65%;
+	transform: translateX(-50%);
+	top: 40%;
+    cursor: pointer;
+}
+
+.onlineTournamentGM {
+	position: absolute;
+    width: 120px;
+    height: 50px;
+    color: #FFFFFF;
+	background-color: #007bff;
+	left: 85%;
+	transform: translateX(-50%);
+	top: 40%;
+    cursor: pointer;
+}
+
+.onlineMultiGM {
+	position: absolute;
+    width: 120px;
+    height: 50px;
+    color: #FFFFFF;
+	background-color: #007bff;
+	left: 75%;
+	transform: translateX(-50%);
+	top: 55%;
+    cursor: pointer;
+}
+
+.discoButtonGM {
+	position: absolute;
+    width: 120px;
+    height: 50px;
+    color: #FFFFFF;
+	background-color: #007bff;
+	left: 50%;
+	transform: translateX(-50%);
+	top: 90%;
+    cursor: pointer;
+}

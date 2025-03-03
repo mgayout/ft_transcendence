@@ -1,0 +1,138 @@
+.containerLogin {
+	position: relative;
+}
+
+.flouFilterLogin {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 0;
+	pointer-events: none;
+}
+
+.flouCanvaLogin {
+	filter: blur(5px);
+	width: 100%;
+	height: 100%;
+}
+
+.transpBoxLogin {
+	position: relative;
+	width: 25vw;
+	height: 60vh;
+	margin: auto;
+	background-color: rgba(0, 0, 0, 0.35);
+	border: 2px solid #FFFFFF;
+	box-shadow: 0px 0px 20px rgba(0, 0, 0, 1);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 10px;
+}
+
+.TitleLogin {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	top: 0%;
+	color: #FFFFFF;
+	font-size: 5vw;
+	font-family: 'Millimetre', sans-serif;
+	font-weight: 1000;
+}
+
+.userTitleLogin {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	top: 25%;
+	color: #FFFFFF;
+	font-size: 1.5vw;
+	font-family: 'Millimetre', sans-serif;
+	font-weight: 600;
+}
+
+.userInputLogin {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	top: 32%;
+	font-family: 'Millimetre', sans-serif;
+	font-weight: 600;
+	color:#FFFFFF;
+	background-color: rgba(0, 0, 0, 0.35);
+	box-shadow: 0px 0px 2vw rgba(0, 0, 0, 1);
+}
+
+.passTitleLogin {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	top: 45%;
+	color: #FFFFFF;
+	font-size: 1.5vw;
+	font-family: 'Millimetre', sans-serif;
+	font-weight: 600;
+}
+
+.passInputLogin {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	top: 52%;
+	font-family: 'Millimetre', sans-serif;
+	font-weight: 600;
+	color:#FFFFFF;
+	background-color: rgba(0, 0, 0, 0.35);
+	box-shadow: 0vw 0vw 2vw rgba(0, 0, 0, 1);
+}
+
+.passShowButtonLogin {
+	position: absolute;
+    width: 30px;
+    height: 30px;
+    color: #007bff;
+	background-color: #007bff;
+	left: 75%;
+	top: 52.5%;
+    cursor: pointer;
+}
+
+.registerButtonLogin {
+	position: absolute;
+    width: 120px;
+    height: 50px;
+    color: #FFFFFF;
+	background-color: #007bff;
+	left: 35%;
+	transform: translateX(-50%);
+	top: 70%;
+    cursor: pointer;
+}
+
+.loginButtonLogin {
+	position: absolute;
+    width: 120px;
+    height: 50px;
+    color: #FFFFFF;
+	background-color: #007bff;
+	left: 65%;
+	transform: translateX(-50%);
+	top: 70%;
+    cursor: pointer;
+}
+
+.textLogin {
+    outline: none;
+    box-shadow: none;
+    background-color: inherit;
+    color: inherit; 
+	border: 0.8px solid #869fa941 !important;
+}
+
+.textLogin::placeholder {
+    color: #FFFFFF;
+    opacity: 1;
+}
