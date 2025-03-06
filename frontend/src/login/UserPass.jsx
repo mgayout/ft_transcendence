@@ -22,46 +22,42 @@ function UserPass() {
 	}
 
 	return (
-		<div>
-			<Form>
-				<p className="userTitleLogin">Username</p>
-				<Form.Group className="userInputLogin">
-					<Form.Control
-						type="text"
-						placeholder="Insert username"
-						value={username}
-						onChange={(e) => setUsername(e.target.value)}
-						maxLength={30}
-						className="textLogin" />
-				</Form.Group>
-				
-				<p className="passTitleLogin">Password</p>
-				<Form.Group className="passInputLogin">
-					<Form.Control
-						type={passShow ? "text" : "password"}
-						placeholder="Insert password"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						maxLength={30}
-						className="textLogin" />
-				</Form.Group>
-				<Button
-					onClick={handlePassShow}
-					className="passShowButtonLogin"
+		<Form>
+			<Form.Group className="userFormLogin">
+				<Form.Label className="userTitleLogin">Username</Form.Label>
+				<Form.Control
+					type="text"
+					placeholder="Insert username"
+					onChange={(e) => setUsername(e.target.value)}
+					className="textLogin"
 				/>
-
-				<Button
-					onClick={() => navigate("/register")}
-					className="registerButtonLogin"
-				>REGISTER</Button>
-
-				<Button
-					type="submit"
-					onClick={sendAuth}
-					className="loginButtonLogin"
-				>LOGIN</Button>
-			</Form>
-		</div>
+			</Form.Group>
+			<Form.Group className="passFormLogin">
+				<Form.Label className="passTitleLogin">Password</Form.Label>
+				<Form.Control
+					type={passShow ? "text" : "password"}
+					placeholder="Insert password"
+					onChange={(e) => setPassword(e.target.value)}
+					className="textLogin"
+				/>
+			</Form.Group>
+			<Button
+				type="button"
+				className="passShowButtonLogin btn btn-secondary"
+				onClick={handlePassShow}>
+					{!passShow ? <i class="bi bi-eye-fill"></i> : <i class="bi bi-eye-slash-fill"></i>}
+			</Button>
+			<Button
+				type="submit"
+				className="loginButtonLogin btn btn-secondary"
+				onClick={sendAuth}>LOGIN
+			</Button>
+			<Button
+				type="button"
+				className="registerButtonLogin btn btn-secondary"
+				onClick={() => navigate("/register")}>REGISTER
+			</Button>
+		</Form>
 	)
 }
 

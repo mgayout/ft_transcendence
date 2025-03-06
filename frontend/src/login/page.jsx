@@ -1,6 +1,6 @@
 import React, { useRef } from "react"
 import "bootstrap/dist/css/bootstrap.min.css"
-import Gameplay from "../gameplay/page.jsx"
+import Gameplay from "../gameplay/menu/page.jsx"
 import UserPass from "./UserPass.jsx"
 import './style.css'
 
@@ -19,7 +19,7 @@ function Login() {
 				<UserPass/>
 			</div>
 		</div>
-	  )
+	)
 }
 
 export default Login

@@ -19,10 +19,12 @@
 }
 
 .transpBoxLogin {
-	position: relative;
-	width: 25vw;
-	height: 60vh;
-	margin: auto;
+	position: absolute;
+	width: 20vw;
+	height: 50vh;
+	left: 50vw;
+	transform: translateX(-50%);
+	top: 35vh;
 	background-color: rgba(0, 0, 0, 0.35);
 	border: 2px solid #FFFFFF;
 	box-shadow: 0px 0px 20px rgba(0, 0, 0, 1);
@@ -43,72 +45,40 @@
 	font-weight: 1000;
 }
 
-.userTitleLogin {
+.userFormLogin {
 	position: absolute;
 	left: 50%;
 	transform: translateX(-50%);
-	top: 25%;
+	top: 15%;
+}
+
+.userTitleLogin {
+	position: relative;
 	color: #FFFFFF;
 	font-size: 1.5vw;
 	font-family: 'Millimetre', sans-serif;
 	font-weight: 600;
 }
 
-.userInputLogin {
+.passFormLogin {
 	position: absolute;
 	left: 50%;
 	transform: translateX(-50%);
-	top: 32%;
-	font-family: 'Millimetre', sans-serif;
-	font-weight: 600;
-	color:#FFFFFF;
-	background-color: rgba(0, 0, 0, 0.35);
-	box-shadow: 0px 0px 2vw rgba(0, 0, 0, 1);
+	top: 40%;
 }
 
 .passTitleLogin {
-	position: absolute;
-	left: 50%;
-	transform: translateX(-50%);
-	top: 45%;
+	position: relative;
 	color: #FFFFFF;
 	font-size: 1.5vw;
 	font-family: 'Millimetre', sans-serif;
 	font-weight: 600;
-}
-
-.passInputLogin {
-	position: absolute;
-	left: 50%;
-	transform: translateX(-50%);
-	top: 52%;
-	font-family: 'Millimetre', sans-serif;
-	font-weight: 600;
-	color:#FFFFFF;
-	background-color: rgba(0, 0, 0, 0.35);
-	box-shadow: 0vw 0vw 2vw rgba(0, 0, 0, 1);
 }
 
 .passShowButtonLogin {
 	position: absolute;
-    width: 30px;
-    height: 30px;
-    color: #007bff;
-	background-color: #007bff;
-	left: 75%;
-	top: 52.5%;
-    cursor: pointer;
-}
-
-.registerButtonLogin {
-	position: absolute;
-    width: 120px;
-    height: 50px;
-    color: #FFFFFF;
-	background-color: #007bff;
-	left: 35%;
-	transform: translateX(-50%);
-	top: 70%;
+	left: 78%;
+	top: 51%;
     cursor: pointer;
 }
 
@@ -116,23 +86,36 @@
 	position: absolute;
     width: 120px;
     height: 50px;
-    color: #FFFFFF;
-	background-color: #007bff;
-	left: 65%;
+	left: 50%;
 	transform: translateX(-50%);
 	top: 70%;
     cursor: pointer;
+	font-weight: 1000;
+}
+
+.registerButtonLogin {
+	position: absolute;
+    width: 100px;
+    height: 40px;
+	left: 85%;
+	transform: translateX(-50%);
+	top: 90%;
+    cursor: pointer;
+	font-weight: 700;
 }
 
 .textLogin {
+	color: #FFFFFF;
+	font-weight: 700;
+	opacity: 1;
     outline: none;
     box-shadow: none;
     background-color: inherit;
-    color: inherit; 
 	border: 0.8px solid #869fa941 !important;
 }
 
 .textLogin::placeholder {
-    color: #FFFFFF;
-    opacity: 1;
+	color: #FFFFFF;
+    font-weight: 700;
+	opacity: 1;
 }

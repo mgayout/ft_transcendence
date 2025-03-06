@@ -1,13 +1,13 @@
 import React, { useRef } from "react"
 import "bootstrap/dist/css/bootstrap.min.css"
-import Gameplay from "../../../gameplay/page.jsx"
+import Gameplay from "../../../gameplay/menu/page.jsx"
 import '../style.css'
 
-function Game() {
+function LocalvsGame() {
 
 	const canva = useRef(null)
 
 	return (<Gameplay canva={canva} />)
 }
 
-export default Game
+export default LocalvsGame

@@ -23,9 +23,9 @@ const createCanva = (canva, elem, color) => {
 	
 	const renderer = new THREE.WebGLRenderer({ canvas: canva, antialias: true })
 	renderer.shadowMap.enabled = true
+	renderer.shadowMap.type = THREE.PCFSoftShadowMap
 	renderer.toneMapping = THREE.ACESFilmicToneMapping
 	renderer.toneMappingExposure = 1.2
-	renderer.shadowMap.type = THREE.VSMShadowMap
 	renderer.setSize(window.innerWidth, window.innerHeight)
 
 	const objects = setAll(scene)
@@ -86,13 +86,14 @@ const createCanva = (canva, elem, color) => {
 	let animationFrameId
 
 	const animate = () => {
-    	velocity += gravity
-    	mesh.position.y += velocity
-
-    	if (mesh.position.y <= floorY) {
-    	    mesh.position.y = floorY
-    	    velocity = bounceVelocity
-    	}
+		if (mesh) {
+			velocity += gravity
+    		mesh.position.y += velocity
+    		if (mesh.position.y <= floorY) {
+    	    	mesh.position.y = floorY
+    	    	velocity = bounceVelocity
+    		}
+		}
 
     	renderer.render(scene, camera)
     	animationFrameId = requestAnimationFrame(animate)

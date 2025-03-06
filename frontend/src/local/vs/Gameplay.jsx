@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect } from "react"
 import createCanva from "./canva";
 
-const SkinView = ({canva, elem, color}) => {
+const Gameplay = ({canva, elem, color}) => {
 
 	useEffect(() => {
+		console.log(elem, color)
 		if (!canva.current) return
 		const { dispose } = createCanva(canva.current, elem, color)
 		return () => {dispose()}
@@ -12,4 +13,4 @@ const SkinView = ({canva, elem, color}) => {
 	return (<canvas ref={canva}/>)
 }
 
-export default SkinView
+export default Gameplay

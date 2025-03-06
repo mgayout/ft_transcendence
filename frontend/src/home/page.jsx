@@ -1,6 +1,6 @@
 import React, { useRef } from "react"
 import "bootstrap/dist/css/bootstrap.min.css"
-import Gameplay from '../gameplay/page'
+import Gameplay from '../gameplay/menu/page'
 import GameMenu from "./GameMenu"
 import './style.css'
 
