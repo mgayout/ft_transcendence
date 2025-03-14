@@ -40,9 +40,11 @@ function Settings({setSetting}) {
 						placeholder=""/>
 				</FloatingLabel>
 				<FloatingLabel
-					label="Player 2">
+					label="AI">
 					<Form.Control
 						type="text"
+						value={"Francinette"}
+						readOnly
 						placeholder=""/>
 				</FloatingLabel>
 			</Form.Group>

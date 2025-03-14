@@ -22,17 +22,17 @@ export const setFog = (scene) => {
 }
 
 export const setLine = (scene) => {
-	let lines = [], geometry, material, line, n = 20
+	let cubes = [], geometry, material, cube, n = 20
 	for (let i = 1; i < n; i++) {
 		geometry = new THREE.PlaneGeometry(0.8, 0.5)
 		material = new THREE.MeshBasicMaterial({color: 0x2a484a})
-		line = new THREE.Mesh(geometry, material)
-		line.position.set(17 - (i * ((17 * 2) / n)), -1.4, 0)
-		line.rotateX(-Math.PI * 0.5)
-		scene.add(line)
-		lines.push(line)
+		cube = new THREE.Mesh(geometry, material)
+		cube.position.set(17 - (i * ((17 * 2) / n)), -1.4, 0)
+		cube.rotateX(-Math.PI * 0.5)
+		scene.add(cube)
+		cubes.push(cube)
 	}
-	return {lines, n}
+	return {cubes, n}
 }
 
 export const setPilar = (scene) => {

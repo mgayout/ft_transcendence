@@ -141,7 +141,7 @@ const createCanva = (canva, elem, color) => {
 		renderer.dispose()
 	}
 
-	return {dispose}
+	return {dispose, renderer, camera}
 };
 
 export default createCanva

@@ -5,11 +5,11 @@
     font-family: Arial, sans-serif;
 }
 
-.home-page {
+.local-page {
     width: 100vw;
     height: 100vh;
     display: flex;
-    justify-content: center;
+	justify-content: center;
     align-items: center;
     position: relative;
     overflow: hidden;
@@ -34,15 +34,17 @@
 	text-shadow: 0vh 0.14vw 0.2vw #2a484a;
 	font-weight: 600;
 	font-size: 5vw;
+	cursor: pointer;
 }
 
-.home-login {
+.local-submit {
 	position: absolute;
-	width: 140px;
-	height: 50px;
-    left: 50%;
+	width: 10%;
+	height: 8%;
+	left: 50%;
     top: 90%;
-    font-size: 4vw;
+	transform: translate(-50%, -50%);
+    font-size: 5vw;
     border: none;
     cursor: pointer;
 }

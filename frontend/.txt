@@ -1,19 +1,13 @@
 //Login//
- - Bouton login centré
- - Bouton register en bas à droite
- - Message d'erreur
-	- Username incorrect
-	- Mot de passe incorrect
-	- "Utilisateur déjà connecté"
+ - Message d'erreur :
+	- Login incorrect
+	- Mdp incorrect
 
 //Register//
- - Bouton register centré
- - Bouton login en bas à droite
- - Message d'erreur
-	- Username déjà existant
-	- Mot de passe trop faible
-		- 8 caractères min
-		- 1 maj / 1 min / 1 chiffre / 1 caractère spécial
+ - Message d'erreur :
+	- Login incorrect (déjà utilisé ou non conforme)
+	- Mdp incorrect (politique de MDP ? 2 mdp non similaire)
+ - Double Auth
 
 //Home//
  - Friend list
@@ -24,6 +18,12 @@
 	- invite
 
 //Profile//
+ - Photo de Profil
+ - Nombre de partie jouée
+ - Taux de victoire
+ - ...
+
+
 
 
 

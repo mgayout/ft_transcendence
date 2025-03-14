@@ -1,121 +1,120 @@
-.containerLogin {
-	position: relative;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
 }
 
-.flouFilterLogin {
+.login-page {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+	flex-direction: column;
+}
+
+.background-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.title {
+    position: absolute;
+	top: 10%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	color: #FFFFFF;
+	text-shadow: 0vh 0.14vw 0.2vw #2a484a;
+	font-weight: 600;
+	font-size: 5vw;
+}
+
+.login-container {
 	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	z-index: 0;
-	pointer-events: none;
-}
-
-.flouCanvaLogin {
-	filter: blur(5px);
-	width: 100%;
-	height: 100%;
-}
-
-.transpBoxLogin {
-	position: absolute;
-	width: 20vw;
-	height: 50vh;
-	left: 50vw;
-	transform: translateX(-50%);
-	top: 35vh;
-	background-color: rgba(0, 0, 0, 0.35);
-	border: 2px solid #FFFFFF;
-	box-shadow: 0px 0px 20px rgba(0, 0, 0, 1);
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	top: 20%;
+	bottom: 20%;
+    background: rgba(0, 0, 0, 0.7);
+	box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+    width: 20%;
+	height: 55%;
 	border-radius: 10px;
 }
 
-.TitleLogin {
+.login-username {
 	position: absolute;
+	top: 25%;
 	left: 50%;
-	transform: translateX(-50%);
-	top: 0%;
-	color: #FFFFFF;
-	font-size: 5vw;
-	font-family: 'Millimetre', sans-serif;
-	font-weight: 1000;
+	transform: translate(-50%, -50%);
 }
 
-.userFormLogin {
+.login-password {
 	position: absolute;
+	top: 50%;
 	left: 50%;
-	transform: translateX(-50%);
-	top: 15%;
+	transform: translate(-50%, -50%);
 }
 
-.userTitleLogin {
-	position: relative;
+.login-label {
 	color: #FFFFFF;
+	font-weight: 500;
 	font-size: 1.5vw;
-	font-family: 'Millimetre', sans-serif;
-	font-weight: 600;
 }
 
-.passFormLogin {
-	position: absolute;
+.login-text {
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 1vw;
+    width: 100%;
+}
+
+.login-text::placeholder {
+    color: #FFFFFF;
+	font-weight: 500;
+    font-size: 0.8vw;
+}
+
+.input-container {
+    position: relative;
+    width: 100%;
+}
+
+.login-showpass {
+    position: absolute;
+    left: 90%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3vw;
+    border: none;
+    cursor: pointer;
+}
+
+.login-submit {
+    position: absolute;
+	width: 30%;
+	height: 8%;
 	left: 50%;
-	transform: translateX(-50%);
-	top: 40%;
-}
-
-.passTitleLogin {
-	position: relative;
-	color: #FFFFFF;
-	font-size: 1.5vw;
-	font-family: 'Millimetre', sans-serif;
-	font-weight: 600;
-}
-
-.passShowButtonLogin {
-	position: absolute;
-	left: 78%;
-	top: 51%;
+    top: 70%;
+	transform: translate(-50%, -50%);
+    font-size: 5vw;
+    border: none;
     cursor: pointer;
 }
 
-.loginButtonLogin {
+.login-register {
 	position: absolute;
-    width: 120px;
-    height: 50px;
-	left: 50%;
-	transform: translateX(-50%);
-	top: 70%;
+	width: 35%;
+	height: 8%;
+	left: 80%;
+    top: 95%;
+	transform: translate(-50%, -50%);
+    font-size: 4vw;
+    border: none;
     cursor: pointer;
-	font-weight: 1000;
-}
-
-.registerButtonLogin {
-	position: absolute;
-    width: 100px;
-    height: 40px;
-	left: 85%;
-	transform: translateX(-50%);
-	top: 90%;
-    cursor: pointer;
-	font-weight: 700;
-}
-
-.textLogin {
-	color: #FFFFFF;
-	font-weight: 700;
-	opacity: 1;
-    outline: none;
-    box-shadow: none;
-    background-color: inherit;
-	border: 0.8px solid #869fa941 !important;
-}
-
-.textLogin::placeholder {
-	color: #FFFFFF;
-    font-weight: 700;
-	opacity: 1;
 }
