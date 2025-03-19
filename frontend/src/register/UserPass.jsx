@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Button, Form } from "react-bootstrap"
+import { Button, Form, Modal } from "react-bootstrap"
 import axios from 'axios'
 import './style.css'
 
@@ -20,12 +20,27 @@ function UserPass() {
 	const showPass2 = () => setPassShow2(true)
 	const hidePass2 = () => setPassShow2(false)
 
+	const [show, setShow] = useState(false)
+	const handleClose = () => setShow(false)
+	const handleShow = () => setShow(true)
+
+	const error = ["Username is already taken.", "Passwords are not similar.", "Password is not strong enough."]
+	const context = ["",
+					"Password must contain at least 8 characters.",
+					"Password must contain at least one number.",
+					"Password must contain at least one lowercase letter.",
+					"Password must contain at least one capital letter.",
+					"Password must contain at least one special character (!@#$%^&*...)."]
+
+	const [errorId, setErrorId] = useState(0)
+	const [contextId, setContextId] = useState(0)
+
 	const sendAuth = async (e) => {
 		e.preventDefault()
 		try {
 			const response = await axios.post('http://127.0.0.1:8000/api/register/', {
 				username: username,
-				password1: password1,
+				password: password1,
 				password2: password2
 			})
 			//console.log(response)
@@ -38,11 +53,30 @@ function UserPass() {
 			setUsername("")
 			setPassword1("")
 			setPassword2("")
+			setContextId(0)
+			if (error.response.request.response == "{\"username\":[\"A user with that username already exists.\"]}")
+				setErrorId(0)
+			else if (error.response.request.response == "{\"password\": \"Les mots de passe ne correspondent pas.\"}")
+				setErrorId(1)
+			else {
+				setErrorId(2)
+				if (error.response.request.response == "{\"non_field_errors\":[\"Le mot de passe doit contenir au moins 8 caractères.\"]}")
+					setContextId(1)
+				else if (error.response.request.response == "{\"non_field_errors\":[\"Le mot de passe doit contenir au moins un chiffre.\"]}")
+					setContextId(2)
+				else if (error.response.request.response == "{\"non_field_errors\":[\"Le mot de passe doit contenir au moins une lettre minuscule.\"]}")
+					setContextId(3)
+				else if (error.response.request.response == "{\"non_field_errors\":[\"Le mot de passe doit contenir au moins une lettre majuscule.\"]}")
+					setContextId(4)
+				else if (error.response.request.response == "{\"non_field_errors\":[\"Le mot de passe doit contenir au moins un caractère spécial (!@#$%^&*...).\"]}")
+					setContextId(5)
+			}
+			handleShow()
 		}
 	}
 
 	return (
-		<Form>
+		<Form className="register-container">
 			<Form.Group className="register-username">
 				<Form.Label className="register-label">Username</Form.Label>
 				<Form.Control
@@ -98,6 +132,12 @@ function UserPass() {
 				className="register-login btn btn-secondary"
 				onClick={() => navigate("/")}>LOGIN
 			</Button>
+			<Modal show={show} onHide={handleClose} className="login-modal">
+				<Modal.Header closeButton>
+					<Modal.Title>Registration error</Modal.Title>
+				</Modal.Header>
+				<Modal.Body>{error[errorId]}<br/>{context[contextId]}</Modal.Body>
+			</Modal>
 		</Form>
 	)
 }

@@ -1,5 +1,6 @@
 import React from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
+import { UserAuth } from './api/UserAuth'
 import Login from './login/page'
 import Register from './register/page'
 import Home from './home/page'
@@ -13,18 +14,21 @@ const App = () => {
 	const isPublicRoute = publicPath.includes(location.pathname)
 
 	return (
-		<>
+		</*UserAuth*/>
 		{isPublicRoute ? (
 			<Routes>
 				<Route path="/" element={ <Login/> }/>
 				<Route path="/register" element={ <Register/> }/>
 			</Routes>) :
-			<Routes>
-				<Route path="/home" element={ <Home/> }/>
-				<Route path="/local" element={ <Local/> }/>
-				<Route path="/local/game" element={ <LocalGame/> }/>
-			</Routes>}
-		</>
+			<>
+				<Routes>
+					<Route path="/home" element={ <Home/> }/>
+					<Route path="/local" element={ <Local/> }/>
+					<Route path="/local/game" element={ <LocalGame/> }/>
+				</Routes>
+			</>
+			}
+		</ /*UserAuth*/>
 	)
 }
 

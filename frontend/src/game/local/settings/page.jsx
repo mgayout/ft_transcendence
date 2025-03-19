@@ -28,6 +28,7 @@ function Settings({starting}) {
 				<Form.Range min={0} max={2} value={ballSpeed} onChange={(e) => setBallSpeed(e.target.value)}/>
 			</Form.Group>
 			<Form.Group className="local-settings-name">
+				<Form.Label className="local-settings-label">Custom Names</Form.Label>
 				<FloatingLabel label="Player 1" className="">
 					<Form.Control type="text" placeholder="" value={nickname1}
 					onChange={(e) => setNickname1(e.target.value)}/>

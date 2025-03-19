@@ -1,68 +1,38 @@
-import React, {useEffect} from "react"
-import { useNavigate } from "react-router-dom"
-import { Button, Form } from "react-bootstrap"
+import React from "react"
+import { Button, Form, Dropdown } from "react-bootstrap"
 import './style.css'
 
-function Skin({elem, n ,setN, setColor}) {
+function Skin({elem, color ,setN, setColor}) {
 
-	const navigate = useNavigate()
+	const skins = ["white", "dark",	"blue", "red",
+					"yellow", "green", "orange", "purple"]
 
-	const skins = ["whiteSkinLvs",
-					"darkSkinLvs",
-					"blueSkinLvs",
-					"redSkinLvs",
-					"yellowSkinLvs",
-					"greenSkinLvs",
-					"orangeSkinLvs",
-					"purpleSkinLvs"]
-
-	useEffect(() => {
-		setN(0)
+	const updateObject = (id) => {
+		//envoie de color à elem
+		setN(id)
 		setColor(0)
-		return () => {}
-	}, [])
-
-	const setArrow = (type) => {
-		setColor(0)
-		if (type) {
-			setN((n - 1 + elem.length) % elem.length)
-		}
-		else {
-			setN((n + 1) % elem.length)
-		}
 	}
 
 	return (
 		<Form className="local-skin-container">
-			
+			<Dropdown className="local-skin-dropdown">
+				<Dropdown.Toggle className="local-skin-dropdown-toogle">Select an Object</Dropdown.Toggle>
+				<Dropdown.Menu>
+					<Dropdown.Item onClick={() => updateObject(0)}>Player 1</Dropdown.Item>
+					<Dropdown.Item onClick={() => updateObject(1)}>Player 2</Dropdown.Item>
+					<Dropdown.Item onClick={() => updateObject(2)}>Ball</Dropdown.Item>
+				</Dropdown.Menu>
+			</Dropdown>
+			<Form.Group>
+  				{skins.map((color, index) => (
+      			<Button
+					key={color}
+        			type="button"
+        			onClick={() => setColor(index)}
+        			className={`local-skin-btn local-skin-btn-${color}`}/>))}
+			</Form.Group>
 		</Form>
 	  )
 }
 
 export default Skin
-
-/*<p className="titleLabelLvs">{elem[n]}</p>
-			<Button
-				type="button"
-				onClick={() => setArrow(true)}
-				className="leftArrowLvs">
-					<i class="bi bi-arrow-left"></i>
-			</Button>
-			<Button
-				type="button"
-				onClick={() => setArrow(false)}
-				className="rightArrowLvs">
-					<i class="bi bi-arrow-right"></i>
-			</Button>
-			<Form.Group>
-  				{skins.map((skinClass, index) => (
-      			<Button
-        			type="button"
-        			onClick={() => setColor(index)}
-        			className={`${skinClass}`}/>))}
-			</Form.Group>
-			<Button
-				type="button"
-				onClick={() => navigate("/localvs/game")}
-				className="playButtonLvs">Play !
-			</Button>*/

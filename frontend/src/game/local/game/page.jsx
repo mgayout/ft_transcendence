@@ -3,11 +3,11 @@ import "bootstrap/dist/css/bootstrap.min.css"
 import Gameplay from "../../../gameplay/menu/page.jsx"
 import '../style.css'
 
-function LocalvsGame() {
+function LocalGame() {
 
 	const canva = useRef(null)
 
 	return (<Gameplay canva={canva} />)
 }
 
-export default LocalvsGame
+export default LocalGame

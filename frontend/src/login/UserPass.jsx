@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Button, Form } from "react-bootstrap"
+import { Button, Form, Modal } from "react-bootstrap"
 import axios from 'axios'
 import './style.css'
 
@@ -14,6 +14,10 @@ function UserPass() {
 	const [passShow, setPassShow] = useState(false)
 	const showPass = () => setPassShow(true)
 	const hidePass = () => setPassShow(false)
+
+	const [show, setShow] = useState(false)
+	const handleClose = () => setShow(false)
+	const handleShow = () => setShow(true)
 
 
 	const sendAuth = async (e) => {
@@ -36,11 +40,12 @@ function UserPass() {
 			console.log("Erreur de connexion :", error)
 			setUsername("")
 			setPassword("")
+			handleShow()
 		}
 	}
 
 	return (
-		<Form>
+		<Form className="login-container">
 			<Form.Group className="login-username">
 				<Form.Label className="login-label">Username</Form.Label>
 				<Form.Control
@@ -81,6 +86,12 @@ function UserPass() {
 				className="login-register btn btn-secondary"
 				onClick={() => navigate("/register")}>REGISTER
 			</Button>
+			<Modal show={show} onHide={handleClose} className="login-modal">
+				<Modal.Header closeButton>
+					<Modal.Title>Connection error</Modal.Title>
+				</Modal.Header>
+				<Modal.Body>Incorrect username or password.</Modal.Body>
+			</Modal>
 		</Form>
 	)
 }

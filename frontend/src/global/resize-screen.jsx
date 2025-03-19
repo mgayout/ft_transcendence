@@ -8,7 +8,7 @@ function ResizeScreen() {
 
 		const handleResize = () => {
 
-			if (window.innerWidth > 1000 && window.innerHeight > 700) {
+			if (window.innerWidth > 1200 && window.innerHeight > 700) {
 				setResize(true)
 			}
 			else {

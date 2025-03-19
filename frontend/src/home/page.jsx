@@ -1,4 +1,4 @@
-import React, { useRef } from "react"
+import React, { useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "react-bootstrap"
 import Gameplay from '../gameplay/settings/page'
@@ -15,9 +15,16 @@ function Home() {
 
 	const { resize } = ResizeScreen()
 
-	//verif login
+	useEffect(() => {
+
+		const token = localStorage.getItem('jwt')
+
+		if (!token)
+		  navigate('/')
+	  }, [navigate])
 
 	const disconnect = () => {
+
 		localStorage.removeItem("jwt")
 		navigate("/")
 	}

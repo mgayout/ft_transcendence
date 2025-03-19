@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react"
 import { Modal } from "react-bootstrap"
+import "./style.css"
 
 function ResizeModal({ resize }) {
 
 	const [show, setShow] = useState(false)
 
-	const handleCLose = () => setShow(false)
+	const handleClose = () => setShow(false)
 	const handleShow = () => setShow(true)
 
 	useEffect(() => {
@@ -14,12 +15,12 @@ function ResizeModal({ resize }) {
 			handleShow()
 		}
 		else {
-			handleCLose()
+			handleClose()
 		}
 	}, [resize])
 
 	return (
-		<Modal show={show} onHide={handleCLose}>
+		<Modal show={show} onHide={handleClose} className="global-modal">
 			<Modal.Header closeButton>
 				<Modal.Title>Warning</Modal.Title>
 			</Modal.Header>

@@ -16,12 +16,13 @@ function Local() {
 
 	const { resize } = ResizeScreen()
 
-	const [starting, setStarting] = useState(false)
-	const goPlay = () => setStarting(true)
+	const goPlay = () => {
+		//envoie des donnés
+		navigate("/local/game")
+	}
 
-	const elem = [ "Player 1", "Player 2", "Ball"]
-	const [n, setN] = useState(-1)
-	const [color, setColor] = useState(-1)
+	const [n, setN] = useState(0)
+	const [color, setColor] = useState(0)
 
 	const goHome = () => {
 		//remove la partie

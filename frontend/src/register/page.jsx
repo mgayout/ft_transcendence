@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react"
+import { useNavigate } from "react-router-dom"
 import Gameplay from "../gameplay/menu/page.jsx"
 import UserPass from "./UserPass.jsx"
 import ResizeScreen from "../global/resize-screen.jsx"
@@ -9,20 +10,28 @@ function Register() {
 
 	const canva = useRef(null)
 
+	const navigate = useNavigate()
+
 	const { resize } = ResizeScreen()
 
 	useEffect(() => {
+	
+			const token = localStorage.getItem('jwt')
+	
+			if (token)
+			  navigate('/home')
+		  }, [navigate])
 
-		if (canva.current) {
+	useEffect(() => {
+
+		if (canva.current)
 			canva.current.style.filter = 'blur(5px)'
-		}
-
 	}, [])
 
 	return (
 		<div className="register-page">
 			<Gameplay canva={canva} className="background-canvas"/>
-			{resize ?	<div className="register-container">
+			{resize ?	<div>
 							<h1 className="title">Pong.</h1><UserPass/>
 						</div>
 					: 	<></>}
