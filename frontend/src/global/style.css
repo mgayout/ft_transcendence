@@ -3,3 +3,35 @@
 	left: 50%;
 	transform: translateY(25%);
 }
+
+.global-quit-button {
+    display: flex;         /* Utiliser flexbox pour disposer les éléments */
+    gap: 20px;             /* Espacer les boutons de 20px */
+    justify-content: center; /* Centrer les boutons horizontalement (optionnel) */
+}
+
+.global-quit-yes {
+	color: #FFFFFF;
+	background-color: #00FF00 !important;
+	border: #000000 !important;
+	box-shadow: none !important;
+}
+
+.global-quit-no {
+	color: #FFFFFF;
+	background-color: #FF0000 !important;
+	border: #000000 !important;
+	box-shadow: none !important;
+}
+
+.global-friend-tab {
+	justify-content: center;
+	gap: 25%;
+}
+
+.global-friend-searchbar {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+

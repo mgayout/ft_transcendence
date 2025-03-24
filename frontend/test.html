@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fenêtre imbriquée avec barre de recherche</title>
+  <!-- Lien vers la feuille de style de Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    /* Fenêtre imbriquée avec taille limitée et défilement */
+    .nested-window {
+      background-color: #495057;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 5px;
+      height: 200px;  /* Hauteur fixe pour la fenêtre imbriquée */
+      overflow-y: auto; /* Permet le défilement vertical */
+    }
+
+    .nested-window ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    .nested-window li {
+      background-color: #6c757d;
+      margin: 5px 0;
+      padding: 8px;
+      border-radius: 3px;
+    }
+
+    /* Style de la barre de recherche */
+    .search-bar {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fenêtre imbriquée avec une barre de recherche -->
+  <div class="nested-window">
+    <input type="text" id="searchInput" class="form-control search-bar" placeholder="Rechercher un élément..." onkeyup="filterList()">
+    <ul id="itemList">
+      <li>Élément 1</li>
+      <li>Élément 2</li>
+      <li>Élément 3</li>
+      <li>Élément 4</li>
+      <li>Élément 5</li>
+      <li>Élément 6</li>
+      <li>Élément 7</li>
+      <li>Élément 8</li>
+      <li>Élément 9</li>
+      <li>Élément 10</li>
+      <li>Élément 11</li>
+      <li>Élément 12</li>
+      <li>Élément 13</li>
+      <li>Élément 14</li>
+      <li>Élément 15</li>
+    </ul>
+  </div>
+
+  <!-- Script pour filtrer la liste -->
+  <script>
+    function filterList() {
+      let input = document.getElementById('searchInput');
+      let filter = input.value.toUpperCase();
+      let ul = document.getElementById('itemList');
+      let li = ul.getElementsByTagName('li');
+
+      // Parcours chaque élément de la liste et le masque ou l'affiche selon la recherche
+      for (let i = 0; i < li.length; i++) {
+        let txtValue = li[i].textContent || li[i].innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+          li[i].style.display = "";
+        } else {
+          li[i].style.display = "none";
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>

@@ -24,16 +24,19 @@ function UserPass() {
 	const handleClose = () => setShow(false)
 	const handleShow = () => setShow(true)
 
-	const error = ["Username is already taken.", "Passwords are not similar.", "Password is not strong enough."]
-	const context = ["",
-					"Password must contain at least 8 characters.",
-					"Password must contain at least one number.",
-					"Password must contain at least one lowercase letter.",
-					"Password must contain at least one capital letter.",
-					"Password must contain at least one special character (!@#$%^&*...)."]
+	const error = [ "",
+				"Passwords are not similar.",
+				"Username is already taken.",
+				"Password is not strong enough.\nPassword must contain at least 8 characters.",
+				"Password is not strong enough.\nPassword must contain at least one number.",
+				"Password is not strong enough.\nPassword must contain at least one lowercase letter.",
+				"Password is not strong enough.\nPassword must contain at least one capital letter.",
+				"Password is not strong enough.\nPassword must contain at least one special character (!@#$%^&*...).",
+				"Username required.",
+				"Password required.",
+				"Second password required."]
 
 	const [errorId, setErrorId] = useState(0)
-	const [contextId, setContextId] = useState(0)
 
 	const sendAuth = async (e) => {
 		e.preventDefault()
@@ -43,34 +46,37 @@ function UserPass() {
 				password: password1,
 				password2: password2
 			})
-			//console.log(response)
-			if (response.request.statusText == "Created") {
+			if (response.request.response == "{\"code\":1000}") {
 				navigate("/")
 			}
 		}
 		catch (error) {
-			console.log(error)
+			//console.log(error)
 			setUsername("")
 			setPassword1("")
 			setPassword2("")
-			setContextId(0)
-			if (error.response.request.response == "{\"username\":[\"A user with that username already exists.\"]}")
-				setErrorId(0)
-			else if (error.response.request.response == "{\"password\": \"Les mots de passe ne correspondent pas.\"}")
-				setErrorId(1)
-			else {
-				setErrorId(2)
-				if (error.response.request.response == "{\"non_field_errors\":[\"Le mot de passe doit contenir au moins 8 caractères.\"]}")
-					setContextId(1)
-				else if (error.response.request.response == "{\"non_field_errors\":[\"Le mot de passe doit contenir au moins un chiffre.\"]}")
-					setContextId(2)
-				else if (error.response.request.response == "{\"non_field_errors\":[\"Le mot de passe doit contenir au moins une lettre minuscule.\"]}")
-					setContextId(3)
-				else if (error.response.request.response == "{\"non_field_errors\":[\"Le mot de passe doit contenir au moins une lettre majuscule.\"]}")
-					setContextId(4)
-				else if (error.response.request.response == "{\"non_field_errors\":[\"Le mot de passe doit contenir au moins un caractère spécial (!@#$%^&*...).\"]}")
-					setContextId(5)
-			}
+			if (error.response.request.response == "{\"code\":1001}")
+				setErrorId(1);
+			else if (error.response.request.response == "{\"code\":1002}")
+				setErrorId(2);
+			else if (error.response.request.response == "{\"code\":1003}")
+				setErrorId(3);
+			else if (error.response.request.response == "{\"code\":1004}")
+				setErrorId(4);
+			else if (error.response.request.response == "{\"code\":1005}")
+				setErrorId(5);
+			else if (error.response.request.response == "{\"code\":1006}")
+				setErrorId(6);
+			else if (error.response.request.response == "{\"code\":1007}")
+				setErrorId(7);
+			else if (error.response.request.response == "{\"code\":1009}")
+				setErrorId(8);
+			else if (error.response.request.response == "{\"code\":1010}")
+				setErrorId(9);
+			else if (error.response.request.response == "{\"code\":1011}")
+				setErrorId(10);
+			else
+				setErrorId(0);
 			handleShow()
 		}
 	}
@@ -123,12 +129,12 @@ function UserPass() {
 				</div>
 			</Form.Group>
 			<Button
-				type="button"
+				type="submit"
 				className="register-submit btn btn-secondary"
 				onClick={sendAuth}>REGISTER
 			</Button>
 			<Button
-				type="submit"
+				type="button"
 				className="register-login btn btn-secondary"
 				onClick={() => navigate("/")}>LOGIN
 			</Button>
@@ -136,7 +142,7 @@ function UserPass() {
 				<Modal.Header closeButton>
 					<Modal.Title>Registration error</Modal.Title>
 				</Modal.Header>
-				<Modal.Body>{error[errorId]}<br/>{context[contextId]}</Modal.Body>
+				<Modal.Body>{error[errorId]}</Modal.Body>
 			</Modal>
 		</Form>
 	)

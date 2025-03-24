@@ -19,6 +19,12 @@ function UserPass() {
 	const handleClose = () => setShow(false)
 	const handleShow = () => setShow(true)
 
+	const error = [ "",
+			"Username required.",
+			"Password required.",
+			"Username or Password incorrect."]
+
+		const [errorId, setErrorId] = useState(0)
 
 	const sendAuth = async (e) => {
 		e.preventDefault()
@@ -27,8 +33,8 @@ function UserPass() {
 				username: username,
 				password: password
 			})
-			//console.log("Connexion réussie :", response.data)
-			if (response.request.statusText == "OK") {
+			console.log(response)
+			if (response.request.response.includes("\"code\":1000")) {
 				if (response.data.tokens) {
 					localStorage.setItem('jwt', response.data.tokens)
 					if (localStorage.getItem("jwt"))
@@ -37,10 +43,18 @@ function UserPass() {
 			}
 		}
 		catch (error) {
-			console.log("Erreur de connexion :", error)
+			//console.log(error)
 			setUsername("")
 			setPassword("")
-			handleShow()
+			if (error.response.request.response == "{\"code\":1009}")
+				setErrorId(1)
+			else if (error.response.request.response == "{\"code\":1010}")
+				setErrorId(2)
+			else if (error.response.request.response == "{\"code\":1013}")
+				setErrorId(3)
+			else
+				setErrorId(0)
+				handleShow()
 		}
 	}
 
@@ -90,7 +104,7 @@ function UserPass() {
 				<Modal.Header closeButton>
 					<Modal.Title>Connection error</Modal.Title>
 				</Modal.Header>
-				<Modal.Body>Incorrect username or password.</Modal.Body>
+				<Modal.Body>{error[errorId]}</Modal.Body>
 			</Modal>
 		</Form>
 	)
