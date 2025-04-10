@@ -1,42 +1,6 @@
-.local-skin-container {
-    position: absolute;
-	top: 20%;
-	left: 95%;
-	transform: translateX(-100%);
-    background: rgba(0, 0, 0, 0.7);
-	box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
-    width: 20%;
-	height: 60%;
-	border-radius: 10px;
-}
-
-.local-skin-dropdown {
-	position: absolute;
-	top: 15% !important;
-	z-index: 1;
-}
-
-.local-skin-dropdown-toogle {
-	position: absolute;
-	left: 50% !important;
-	transform: translateX(-50%);
-	color: #000000 !important;
-	background-color: #FFFFFF !important;
-	border-color: #000000 !important;
-}
-
-.local-skin-dropdown:active {
-	outline: none !important;
-	box-shadow: none !important;
-}
-
 .local-skin-btn {
-	position: absolute;
 	left: var(--btn-left);
 	top: var(--btn-top);
-	transform: translateX(-50%);
-	width: 5vw;
-	height: 5vh;
 	background-color: var(--btn-color) !important;
 	border-color: #000000 !important;
 	border-radius: 10px;

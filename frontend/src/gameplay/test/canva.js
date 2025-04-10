@@ -27,13 +27,12 @@ const createCanva = (canva) => {
 	camera.position.set(40, 20, 0)
 	camera.lookAt(0, 5, 0)
 	
-	const renderer = new THREE.WebGLRenderer({ canvas: canva, antialias: false })
+	const renderer = new THREE.WebGLRenderer({ canvas: canva, antialias: true })
 	renderer.shadowMap.enabled = true
 	renderer.shadowMap.type = THREE.VSMShadowMap
 	renderer.toneMapping = THREE.ACESFilmicToneMapping
 	renderer.toneMappingExposure = 1.2
 	renderer.setSize(canva.width, canva.height)
-	renderer.setPixelRatio(0.3)
 
 	const objects = setAll(scene)
 
@@ -48,7 +47,31 @@ const createCanva = (canva) => {
 		camera.position.x = radius * Math.cos(angle);
   		camera.position.z = radius * Math.sin(angle);
 		camera.lookAt(0, 5, 0)
+		if (collision(objects.ball, objects.wall1) || collision(objects.ball, objects.wall2))
+			objects.ball.velocity.x *= -1
+		else if (collision(objects.ball, objects.paddle1) || collision(objects.ball, objects.paddle2))
+			objects.ball.velocity.z *= -1
+		objects.ball.position.add(objects.ball.velocity)
+		if (objects.ball.position.z < 0 && objects.ball.position.x > objects.paddle1.position.x
+			&& !collision(objects.paddle1, objects.wall1))
+			objects.paddle1.position.x += 0.1
+		else if (objects.ball.position.z < 0 && objects.ball.position.x < objects.paddle1.position.x
+			&& !collision(objects.paddle1, objects.wall2))
+			objects.paddle1.position.x -= 0.1
+		if (objects.ball.position.z > 0 && objects.ball.position.x > objects.paddle2.position.x
+			&& !collision(objects.paddle2, objects.wall1))
+			objects.paddle2.position.x += 0.1
+		else if (objects.ball.position.z > 0 && objects.ball.position.x < objects.paddle2.position.x
+			&& !collision(objects.paddle2, objects.wall2))
+			objects.paddle2.position.x -= 0.1
 		animationFrameId = requestAnimationFrame(animate)
+	}
+
+	const collision = (obj1, obj2) => {
+		const elem1 = new THREE.Box3().setFromObject(obj1)
+		const elem2 = new THREE.Box3().setFromObject(obj2)
+		if (elem1.intersectsBox(elem2)) return true
+		else return false
 	}
 
 	animationFrameId = requestAnimationFrame(animate);

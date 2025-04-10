@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { Form, FloatingLabel } from "react-bootstrap"
-import './style.css'
+import { Form } from "react-bootstrap"
 
 function Settings({starting}) {
 
@@ -18,25 +17,29 @@ function Settings({starting}) {
 	}, [starting])
 
 	return (
-		<Form className="local-settings-container">
-			<Form.Group className="local-settings-range">
-				<Form.Label className="local-settings-label">Number of rounds : {rounds}</Form.Label>
-				<Form.Range min={1} max={9} value={rounds} onChange={(e) => setRounds(e.target.value)}/>
-				<Form.Label className="local-settings-label">Paddle Speed : {speed[paddleSpeed]}</Form.Label>
-				<Form.Range min={0} max={2} value={paddleSpeed} onChange={(e) => setPaddleSpeed(e.target.value)}/>
-				<Form.Label className="local-settings-label">Ball Speed : {speed[ballSpeed]}</Form.Label>
-				<Form.Range min={0} max={2} value={ballSpeed} onChange={(e) => setBallSpeed(e.target.value)}/>
+		<Form>
+			<Form.Group className="fs-5 fs-lg-4 mb-3">
+				<Form.Label className="mb-2 text-light">Number of rounds : {rounds}</Form.Label>
+				<Form.Range min={1} max={9} value={rounds} onChange={(e) => setRounds(e.target.value)} />
+				<Form.Label className="mb-2 text-light">Paddle Speed : {speed[paddleSpeed]}</Form.Label>
+				<Form.Range min={0} max={2} value={paddleSpeed} onChange={(e) => setPaddleSpeed(e.target.value)} />
+				<Form.Label className="mb-2 text-light">Ball Speed : {speed[ballSpeed]}</Form.Label>
+				<Form.Range min={0} max={2} value={ballSpeed} onChange={(e) => setBallSpeed(e.target.value)} />
 			</Form.Group>
-			<Form.Group className="local-settings-name">
-				<Form.Label className="local-settings-label">Custom Names</Form.Label>
-				<FloatingLabel label="Player 1" className="">
-					<Form.Control type="text" placeholder="" value={nickname1}
-					onChange={(e) => setNickname1(e.target.value)}/>
-				</FloatingLabel>
-				<FloatingLabel label="Player 2">
-					<Form.Control type="text" placeholder="" value={nickname2}
-					onChange={(e) => setNickname2(e.target.value)}/>
-				</FloatingLabel>
+			<Form.Group className="fs-5 fs-lg-4 mb-3">
+				<Form.Label className="mb-2 text-light">Custom Names</Form.Label>
+				<Form.Control 
+					type="text" 
+					placeholder="Player 1" 
+					value={nickname1} 
+					onChange={(e) => setNickname1(e.target.value)}
+				/>
+				<Form.Control 
+					type="text" 
+					placeholder="Player 2" 
+					value={nickname2} 
+					onChange={(e) => setNickname2(e.target.value)}
+				/>
 			</Form.Group>
 		</Form>
 	  )

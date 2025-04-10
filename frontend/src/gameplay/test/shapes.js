@@ -40,7 +40,7 @@ export const setPilar = (scene) => {
 		new THREE.Vector3(0, 0, 0),
 		new THREE.Vector3(0, 15, 0),
 		new THREE.Vector3(-11, 18, 0),
-	], false), 32, 0.5, 8, false)
+	], false), 64, 0.5, 16, false)
 	const material = new THREE.MeshStandardMaterial({color: 0xDDDDDD})
 	const pilarL = new THREE.Mesh(geometry, material)
 	//pilarL.castShadow = true
@@ -61,7 +61,7 @@ export const setBorder = (scene) => {
 		new THREE.Vector3(5, 5, 0),
 		new THREE.Vector3(-5, 5, 0),
 		new THREE.Vector3(-5, 0, 0),
-	], true), 32, 0.5, 8, true)
+	], true), 64, 0.5, 16, true)
 	const material = new THREE.MeshStandardMaterial({color: 0xDDDDDD})
 	const border = new THREE.Mesh(geometry, material)
 	border.castShadow = true
@@ -72,7 +72,7 @@ export const setBorder = (scene) => {
 }
 
 export const setBScreen = (scene) => {
-	const geometry = new RoundedBoxGeometry(10.4, 6, 0.1, 3, 0.3)
+	const geometry = new RoundedBoxGeometry(10.4, 6, 0.1, 5, 0.5)
 	const material = new THREE.MeshStandardMaterial({color: 0x000000})
 	const bscreen = new THREE.Mesh(geometry, material)
 	bscreen.castShadow = true
@@ -101,7 +101,7 @@ export const setLight = (scene) => {
 }
 
 export const setPaddle = (scene, type) => {
-	const geometry = new RoundedBoxGeometry(5, 1, 1, 3, 0.3)
+	const geometry = new RoundedBoxGeometry(5, 1, 1, 5, 0.5)
 	const material = new THREE.MeshStandardMaterial({color: 0x2a484a})
 	const paddle = new THREE.Mesh(geometry, material)
 	paddle.castShadow = true
@@ -112,7 +112,7 @@ export const setPaddle = (scene, type) => {
 }
 
 export const setWall = (scene, type) => {
-	const geometry = new RoundedBoxGeometry(1, 2, 62, 3, 0.3)
+	const geometry = new RoundedBoxGeometry(1, 2, 62, 5, 0.5)
 	const material = new THREE.MeshStandardMaterial({color: 0xDDDDDD})
 	const wall = new THREE.Mesh(geometry, material)
 	wall.castShadow = true
@@ -123,12 +123,13 @@ export const setWall = (scene, type) => {
 }
 
 export const setBall = (scene) => {
-	const geometry = new RoundedBoxGeometry(1, 1, 1, 3, 0.3)
+	const geometry = new RoundedBoxGeometry(1, 1, 1, 5, 0.5)
 	const material = new THREE.MeshStandardMaterial({color: 0xffaa00})
 	const ball = new THREE.Mesh(geometry, material)
 	ball.castShadow = true
 	ball.receiveShadow = true
 	ball.position.set(0, 1, 0)
+    ball.velocity = new THREE.Vector3((Math.random() > 0.5 ? 1 : -1) * 0.1, 0, (Math.random() > 0.5 ? 1 : -1) * 0.1)
 	scene.add(ball)
 	return ball
 }

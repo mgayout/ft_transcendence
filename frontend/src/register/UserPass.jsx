@@ -1,8 +1,23 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Button, Form, Modal } from "react-bootstrap"
+import { Button, Form } from "react-bootstrap"
+import ErrorModal from "../global/error-modal"
 import axios from 'axios'
-import './style.css'
+
+/*const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+};*/
 
 function UserPass() {
 
@@ -11,6 +26,7 @@ function UserPass() {
 	const [username, setUsername] = useState('')
 	const [password1, setPassword1] = useState('')
 	const [password2, setPassword2] = useState('')
+	//const [errorMessage, setErrorMessage] = useState('');
 
 	const [passShow1, setPassShow1] = useState(false)
 	const showPass1 = () => setPassShow1(true)
@@ -21,131 +37,123 @@ function UserPass() {
 	const hidePass2 = () => setPassShow2(false)
 
 	const [show, setShow] = useState(false)
-	const handleClose = () => setShow(false)
-	const handleShow = () => setShow(true)
+	const hideModal = () => setShow(false)
+	const [code, setCode] = useState(0)
 
-	const error = [ "",
-				"Passwords are not similar.",
-				"Username is already taken.",
-				"Password is not strong enough.\nPassword must contain at least 8 characters.",
-				"Password is not strong enough.\nPassword must contain at least one number.",
-				"Password is not strong enough.\nPassword must contain at least one lowercase letter.",
-				"Password is not strong enough.\nPassword must contain at least one capital letter.",
-				"Password is not strong enough.\nPassword must contain at least one special character (!@#$%^&*...).",
-				"Username required.",
-				"Password required.",
-				"Second password required."]
-
-	const [errorId, setErrorId] = useState(0)
+	/*useEffect(() => {
+        axios.defaults.withCredentials = true; // Permet d’envoyer/recevoir les cookies
+    }, []);*/
 
 	const sendAuth = async (e) => {
 		e.preventDefault()
+		//const csrfToken = getCookie('csrftoken'); 
 		try {
 			const response = await axios.post('http://127.0.0.1:8000/api/register/', {
 				username: username,
 				password: password1,
 				password2: password2
-			})
-			if (response.request.response == "{\"code\":1000}") {
+			}/*,
+			{
+				headers: {
+					'X-CSRFToken': csrfToken // Ajoute le jeton CSRF dans l’en-tête
+				}}*/)
+			//console.log(response.data)
+			if (response.data.code == 1000) {
 				navigate("/")
 			}
 		}
 		catch (error) {
-			//console.log(error)
+			console.log(error)
 			setUsername("")
 			setPassword1("")
 			setPassword2("")
-			if (error.response.request.response == "{\"code\":1001}")
-				setErrorId(1);
-			else if (error.response.request.response == "{\"code\":1002}")
-				setErrorId(2);
-			else if (error.response.request.response == "{\"code\":1003}")
-				setErrorId(3);
-			else if (error.response.request.response == "{\"code\":1004}")
-				setErrorId(4);
-			else if (error.response.request.response == "{\"code\":1005}")
-				setErrorId(5);
-			else if (error.response.request.response == "{\"code\":1006}")
-				setErrorId(6);
-			else if (error.response.request.response == "{\"code\":1007}")
-				setErrorId(7);
-			else if (error.response.request.response == "{\"code\":1009}")
-				setErrorId(8);
-			else if (error.response.request.response == "{\"code\":1010}")
-				setErrorId(9);
-			else if (error.response.request.response == "{\"code\":1011}")
-				setErrorId(10);
-			else
-				setErrorId(0);
-			handleShow()
+			setCode(error.response.data.code)
+			console.log(error.response.data)
+			console.log(code)
+			setShow(true)
 		}
 	}
 
 	return (
-		<Form className="register-container">
-			<Form.Group className="register-username">
-				<Form.Label className="register-label">Username</Form.Label>
-				<Form.Control
-					type="text"
-					value={username}
-					placeholder="Insert username"
-					onChange={(e) => setUsername(e.target.value)}
-					className="register-text"
-				/>
-			</Form.Group>
-			<Form.Group className="register-password">
-				<Form.Label className="register-label">Password</Form.Label>
-				<div className="input-container">
-					<Form.Control
-						type={passShow1 ? "text" : "password"}
-						value={password1}
-						placeholder="Insert password"
-						onChange={(e) => setPassword1(e.target.value)}
-						className="register-text"
-					/>
-					<Button
-						type="button"
-						className="register-showpass1 btn btn-light"
-						onClick={(passShow1 ? hidePass1 : showPass1)}>
-							{passShow1	? <i className="bi bi-eye-slash-fill" style={{ color: '#000000'}}></i>
-										: <i className="bi bi-eye-fill" style={{ color: '#000000'}}></i>}
-					</Button>
-				</div>
-				<div className="input-container">
-					<Form.Control
-						type={passShow2 ? "text" : "password"}
-						value={password2}
-						placeholder="Confirm password"
-						onChange={(e) => setPassword2(e.target.value)}
-						className="register-text"
-					/>
-					<Button
-						type="button"
-						className="register-showpass2 btn btn-light"
-						onClick={(passShow2 ? hidePass2 : showPass2)}>
-							{passShow2	? <i className="bi bi-eye-slash-fill" style={{ color: '#000000'}}></i>
-										: <i className="bi bi-eye-fill" style={{ color: '#000000'}}></i>}
-					</Button>
-				</div>
-			</Form.Group>
-			<Button
-				type="submit"
-				className="register-submit btn btn-secondary"
-				onClick={sendAuth}>REGISTER
-			</Button>
-			<Button
-				type="button"
-				className="register-login btn btn-secondary"
-				onClick={() => navigate("/")}>LOGIN
-			</Button>
-			<Modal show={show} onHide={handleClose} className="login-modal">
-				<Modal.Header closeButton>
-					<Modal.Title>Registration error</Modal.Title>
-				</Modal.Header>
-				<Modal.Body>{error[errorId]}</Modal.Body>
-			</Modal>
-		</Form>
-	)
+        <Form>
+            <Form.Group className="fs-5 fs-lg-4 mb-2 mb-lg-4">
+                <Form.Label className="mb-2 text-light" htmlFor="username">Username</Form.Label>
+                <Form.Control
+                    type="text"
+                    value={username}
+                    placeholder="Insert username"
+                    onChange={(e) => setUsername(e.target.value)}
+					name="username"
+					id="username"
+					autoComplete="username"
+                />
+            </Form.Group>
+            <Form.Group className="fs-5 fs-lg-4 mb-2 mb-lg-4">
+                <Form.Label className="mb-2 text-light" htmlFor="password">Password</Form.Label>
+                <div className="d-flex">
+                    <Form.Control
+                        type={passShow1 ? "text" : "password"}
+                        value={password1}
+                        placeholder="Insert password"
+                        onChange={(e) => setPassword1(e.target.value)}
+                        className="rounded-0 rounded-start"
+						name="password"
+						id="password"
+						autoComplete="current-password"
+                    />
+                    <Button
+                        type="button"
+                        className="rounded-0 rounded-end btn btn-light"
+						aria-label="show"
+                        onClick={passShow1 ? hidePass1 : showPass1}
+                    >
+                        {passShow1 ? <i className="eye bi-eye-fill"></i>
+                                  : <i className="eye bi-eye-slash-fill"></i>}
+                    </Button>
+                </div>
+				<div className="d-flex">
+                    <Form.Control
+                        type={passShow2 ? "text" : "password"}
+                        value={password2}
+                        placeholder="Insert password"
+                        onChange={(e) => setPassword2(e.target.value)}
+                        className="rounded-0 rounded-start"
+						name="password"
+						id="password2"
+						autoComplete="current-password"
+                    />
+                    <Button
+                        type="button"
+                        className="rounded-0 rounded-end btn btn-light"
+						aria-label="show"
+                        onClick={passShow2 ? hidePass2 : showPass2}
+                    >
+                        {passShow2 ? <i className="eye bi-eye-fill"></i>
+                                  : <i className="eye bi-eye-slash-fill"></i>}
+                    </Button>
+                </div>
+            </Form.Group>
+			<div className="d-flex justify-content-center pt-3 mb-3 mb-lg-5">
+				<Button
+					type="submit"
+					className="btn btn-secondary rounded fw-bolder"
+					onClick={sendAuth}
+				>
+					REGISTER
+				</Button>
+			</div>
+			<div className="d-flex justify-content-end pt-3">
+				<Button
+					type="button"
+					className="btn btn-secondary rounded fw-bolder"
+					onClick={() => navigate("/")}
+				>
+					LOGIN
+				</Button>
+			</div>
+			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 0 } code={ code } />
+        </Form>
+    )
 }
 
 export default UserPass

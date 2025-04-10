@@ -35,3 +35,18 @@
 	justify-content: center;
 }
 
+.friend-list {
+	list-style-type: none; /* Enlève les puces */
+	padding-left: 0; /* Retire le retrait à gauche */
+	margin: 0; /* Supprime les marges par défaut */
+  }
+
+.friend-item {
+	display: block; /* Prend toute la largeur disponible */
+  width: 100%; /* Assure que chaque élément prend toute la largeur */
+  padding: 10px; /* Ajoute de l'espace autour du texte */
+  margin-bottom: 5px; /* Ajoute un espace entre les éléments */
+  border: 1px solid #ccc; /* Ajoute une bordure autour de chaque élément */
+  border-radius: 4px; /* Arrondit légèrement les coins de la bordure */
+  background-color: #f9f9f9; /* Donne un fond léger pour mieux voir l'encadrement */
+}
