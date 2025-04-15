@@ -1,0 +1,544 @@
+    services:
+        nginx:
+          depends_on:
+            - frontend
+          build:
+            context: ./requirements/nginx
+            dockerfile: Dockerfile
+          ports:
+            - "443:443/tcp"
+          image: nginx:1.27.1
+          container_name: nginx
+          env_file: ./env/.env_nginx
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.2
+          hostname: nginx
+          volumes:
+            - "static_service_app:/static/api"
+            - "static_service_chat:/static/chat"
+            - "./requirements/service_user_handler/django/conf/static:/static/users"
+            - "./requirements/service_user_handler/django/conf/media:/static/media"
+            - "./requirements/service_game_pong/django/conf/static:/static/pong"
+            - "./requirements/service_live_chat/django/conf/static:/static/live_chat"
+
+        frontend:
+          depends_on:
+            - service_app_django
+            - service_chat_django
+            - service_user_handler_django
+            - service_game_pong_django
+            - service_live_chat_django
+          image: node:23.9.0-alpine3.20a@sha256:d328a006af9cd556fec56d3fb325ce8fdee988b511dfdfe90d3182bed900aecd
+          container_name: frontend
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.3
+          hostname: frontend
+          volumes:
+            - "./requirements/frontend/conf/index.html:/home/frontend/index.html"
+            - "./requirements/frontend/conf/package-lock.json:/home/frontend/package-lock.json"
+            - "./requirements/frontend/conf/package.json:/home/frontend/package.json"
+            - "./requirements/frontend/conf/public:/home/frontend/public"
+            - "./requirements/frontend/conf/src:/home/frontend/src"
+            - "./requirements/frontend/conf/vite.config.js:/home/frontend/vite.config.js"
+          command: >
+            sh -c "apk update \
+            && apk upgrade \
+            && apk add vim \
+            && npm install --prefix /home/frontend \
+            && npm run build --prefix /home/frontend \
+            && npx serve /home/frontend/dist"
+
+        service_user_handler_django:
+          depends_on:
+            - service_user_handler_postgresql
+            - debezium
+            - redpanda-0
+            - redpanda-1
+            - redpanda-2
+            - vault
+          build:
+            context: ./requirements/service_user_handler/django
+            dockerfile: Dockerfile
+          image: python:3.13.0rc1_2
+          container_name: service_user_handler_django
+          env_file:
+            - ./env/.env_nginx
+            - ./env/.env_service_user_handler_django
+            - ./env/.env_service_user_handler_postgres
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.40
+          hostname: service_user_handler_django
+          volumes:
+            - "./requirements/service_user_handler/django/conf/core:/django_web_app/core"
+            - "./requirements/service_user_handler/django/conf/django_user_handler:/django_web_app/django_user_handler"
+            - "./requirements/service_user_handler/django/conf/static:/django_web_app/transcendence/staticfiles"
+            - "./requirements/service_user_handler/django/conf/media:/django_web_app/media"
+            - "./requirements/service_user_handler/django/conf/shared_models:/django_web_app/shared_models"
+              #- "./requirements/service_user_handler/django/conf/utils/vault_utils.py:/django_web_app/transcendence/utils/vault_utils.py"
+
+        service_user_handler_postgresql:
+          image: postgres@sha256:7b86711ac72674c8f2cf0fad7fd55cb07ae709c62fa0cddfa78e28e985fffe09
+          container_name: service_user_handler_postgresql
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.41
+          hostname: service_user_handler_postgresql
+          env_file:
+            - ./env/.env_service_user_handler_postgres
+          volumes:
+            - "./requirements/service_user_handler/postgresql/conf/data:/var/lib/postgresql/data"
+
+        service_game_pong_django:
+          depends_on:
+            - service_game_pong_postgresql
+            - debezium
+            - redpanda-0
+            - redpanda-1
+            - redpanda-2
+            - vault
+          build:
+            context: ./requirements/service_game_pong/django
+            dockerfile: Dockerfile
+          image: python:3.13.0rc1_game_pong
+          container_name: service_game_pong_django
+          env_file:
+            - ./env/.env_nginx
+            - ./env/.env_service_game_pong_django
+            - ./env/.env_service_game_pong_postgres
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.42
+          hostname: service_game_pong_django
+          volumes:
+            - "./requirements/service_game_pong/django/conf/core:/django_web_app/core"
+            - "./requirements/service_game_pong/django/conf/django_game_pong:/django_web_app/django_game_pong"
+            - "./requirements/service_game_pong/django/conf/static:/django_web_app/transcendence/staticfiles"
+            - "./requirements/service_game_pong/django/conf/shared_models:/django_web_app/shared_models"
+              #- "./requirements/service_game_pong/django/conf/utils/vault_utils.py:/django_web_app/transcendence/utils/vault_utils.py"
+
+        service_game_pong_postgresql:
+          image: postgres@sha256:7b86711ac72674c8f2cf0fad7fd55cb07ae709c62fa0cddfa78e28e985fffe09
+          container_name: service_game_pong_postgresql
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.43
+          hostname: service_game_pong_postgresql
+          env_file:
+            - ./env/.env_service_game_pong_postgres
+          volumes:
+            - "./requirements/service_game_pong/postgresql/conf/data:/var/lib/postgresql/data"
+
+        service_live_chat_django:
+          depends_on:
+            - service_live_chat_postgresql
+            - debezium
+            - redpanda-0
+            - redpanda-1
+            - redpanda-2
+            - vault
+          build:
+            context: ./requirements/service_live_chat/django
+            dockerfile: Dockerfile
+          image: python:3.13.0rc1_live_chat
+          container_name: service_live_chat_django
+          env_file:
+            - ./env/.env_nginx
+            - ./env/.env_service_live_chat_django
+            - ./env/.env_service_live_chat_postgres
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.44
+          hostname: service_live_chat_django
+          volumes:
+            - "./requirements/service_live_chat/django/conf/core:/django_web_app/core"
+            - "./requirements/service_live_chat/django/conf/django_live_chat:/django_web_app/django_live_chat"
+            - "./requirements/service_live_chat/django/conf/static:/django_web_app/transcendence/staticfiles"
+            - "./requirements/service_live_chat/django/conf/shared_models:/django_web_app/shared_models"
+            #- "./requirements/service_live_chat/django/conf/utils/vault_utils.py:/django_web_app/transcendence/utils/vault_utils.py"
+
+        service_live_chat_postgresql:
+          image: postgres@sha256:7b86711ac72674c8f2cf0fad7fd55cb07ae709c62fa0cddfa78e28e985fffe09
+          container_name: service_live_chat_postgresql
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.45
+          hostname: service_live_chat_postgresql
+          env_file:
+            - ./env/.env_service_live_chat_postgres
+          volumes:
+            - "./requirements/service_live_chat/postgresql/conf/data:/var/lib/postgresql/data"
+
+        service_app_django:
+          depends_on:
+            - service_app_postgresql
+            - debezium
+            - redpanda-0
+            - redpanda-1
+            - redpanda-2
+            - vault
+          build:
+            context: ./requirements/service_app/django
+            dockerfile: Dockerfile
+          image: python:3.13.0rc1
+          container_name: service_app_django
+          env_file:
+            - ./env/.env_nginx
+            - ./env/.env_service_app_django
+            - ./env/.env_service_app_postgres
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.4
+          hostname: service_app_django
+          volumes:
+            - "service_app_django:/django_web_app"
+            - "static_service_app:/static"
+            - "./requirements/service_app/django/conf/vault_utils.py:/django_web_app/game/utils/vault_utils.py"
+
+        service_app_postgresql:
+          image: postgres@sha256:7b86711ac72674c8f2cf0fad7fd55cb07ae709c62fa0cddfa78e28e985fffe09
+          container_name: service_app_postgresql
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.5
+          hostname: service_app_postgresql
+          env_file:
+            - ./env/.env_service_app_postgres
+          volumes:
+            - "./requirements/service_app/postgresql/conf/pg_hba.conf:/etc/postgresql/pg_hba.conf"
+            - "./requirements/service_app/postgresql/conf/postgresql.conf:/etc/postgresql/postgresql.conf"
+            - "./requirements/service_app/postgresql/tools/data:/docker-entrypoint-initdb.d"
+          command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf", "-c", "hba_file=/etc/postgresql/pg_hba.conf",]
+
+        service_chat_django:
+          depends_on:
+            - service_chat_postgresql
+            - debezium
+            - redpanda-0
+            - redpanda-1
+            - redpanda-2
+            - vault
+          build:
+            context: ./requirements/service_chat/django
+            dockerfile: Dockerfile
+          image: python:3.13.0rc1_1
+          container_name: service_chat_django
+          env_file:
+            - ./env/.env_nginx
+            - ./env/.env_service_chat_django
+            - ./env/.env_service_chat_postgres
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.6
+          hostname: service_chat_django
+          volumes:
+            - "service_chat_django:/django_web_chat"
+            - "static_service_chat:/static"
+
+        service_chat_postgresql:
+          image: postgres@sha256:7b86711ac72674c8f2cf0fad7fd55cb07ae709c62fa0cddfa78e28e985fffe09
+          container_name: service_chat_postgresql
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.7
+          hostname: service_chat_postgresql
+          env_file:
+            - ./env/.env_service_chat_postgres
+          volumes:
+            - "./requirements/service_chat/postgresql/conf/pg_hba.conf:/etc/postgresql/pg_hba.conf"
+            - "./requirements/service_chat/postgresql/conf/postgresql.conf:/etc/postgresql/postgresql.conf"
+            - "./requirements/service_chat/postgresql/tools/data:/docker-entrypoint-initdb.d"
+          command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf", "-c", "hba_file=/etc/postgresql/pg_hba.conf",]
+
+        vault:
+          depends_on:
+            - vault_postgresql
+            - vault_sealer
+          image: hashicorp/vault@sha256:c51bb287709b74daefab32d1246cac767c32b8c73cb86509957634dffcd66a0e
+          container_name: vault
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.9
+          env_file: ./env/.env_vault
+          hostname: vault
+          volumes:
+            - "./requirements/hashicorp_vault/vault/conf/config:/vault/config/:rw"
+            - "./requirements/hashicorp_vault/vault/conf/file:/vault/file/:rw"
+            - "./requirements/hashicorp_vault/vault/conf/logs:/vault/logs/:rw"
+            - "./requirements/hashicorp_vault/vault/conf/server.crt:/vault/certs/server.crt"
+            - "./requirements/hashicorp_vault/vault/conf/server.key:/vault/certs/server.key"
+            - "./requirements/hashicorp_vault/vault/conf/root.crt:/vault/certs/root.crt"
+          cap_add:
+            - IPC_LOCK
+          command: >
+            sh -c "mkdir -p /vault/certs \
+            && apk update \
+            && apk add openssl vim postgresql-client \
+            && openssl req -x509 -nodes -out /vault/certs/vault-cert.pem -keyout /vault/certs/vault-key.pem -subj '/C=FR/ST=Alpes-Maritimes/L=Nice/O=Ecole\ 42/OU=Ecole/CN=transcendence.fr/emailAddress=mcordes@student.42nice.fr' \
+            && vault server -config=/vault/config/vault.hcl"
+
+        vault_postgresql:
+          image: postgres@sha256:7b86711ac72674c8f2cf0fad7fd55cb07ae709c62fa0cddfa78e28e985fffe09
+          container_name: vault_postgresql
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.10
+          hostname: vault_postgresql
+          env_file:
+            - ./env/.env_vault_postgres
+          volumes:
+            - "./requirements/hashicorp_vault/postgresql/conf/server.crt:/etc/postgresql/server.crt"
+            - "./requirements/hashicorp_vault/postgresql/conf/server.key:/etc/postgresql/server.key"
+            - "./requirements/hashicorp_vault/postgresql/conf/root.crt:/etc/postgresql/root.crt"
+            - "./requirements/hashicorp_vault/postgresql/conf/data:/var/lib/postgresql/data"
+
+        vault_sealer:
+          image: hashicorp/vault@sha256:c51bb287709b74daefab32d1246cac767c32b8c73cb86509957634dffcd66a0e
+          container_name: vault_sealer
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.11
+          env_file: ./env/.env_vault_sealer
+          hostname: vault_sealer
+          volumes:
+            - "./requirements/hashicorp_vault_sealer/vault/conf/config:/vault/config/:rw"
+            - "./requirements/hashicorp_vault_sealer/vault/conf/file:/vault/file/:rw"
+          #  - "./requirements/hashicorp_vault/vault/conf/logs:/vault/logs/:rw"
+          #  - "./requirements/hashicorp_vault/vault/conf/server.crt:/vault/certs/server.crt"
+          #  - "./requirements/hashicorp_vault/vault/conf/server.key:/vault/certs/server.key"
+          #  - "./requirements/hashicorp_vault/vault/conf/root.crt:/vault/certs/root.crt"
+          cap_add:
+            - IPC_LOCK
+          command: >
+            sh -c "vault server -config=/vault/config/vault.hcl"
+
+#        redpanda-0:
+#          command:
+#            - redpanda
+#            - start
+#            - --kafka-addr internal://0.0.0.0:9092
+#            - --advertise-kafka-addr internal://redpanda-0:9092
+#            - --pandaproxy-addr internal://0.0.0.0:8082
+#            - --advertise-pandaproxy-addr internal://redpanda-0:8082
+#            - --schema-registry-addr internal://0.0.0.0:8081
+#            - --rpc-addr redpanda-0:33145
+#            - --advertise-rpc-addr redpanda-0:33145
+#            - --mode dev-container
+#            - --smp 1
+#            - --default-log-level=info
+#          image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
+##          build:
+##            context: ./requirements/eventbus
+##            dockerfile: Dockerfile
+##          image: red_panda_data:24.2.7
+#          container_name: redpanda-0
+##          init: true
+#          restart: always
+#          networks:
+#            network:
+#              ipv4_address: 172.20.0.8
+##          hostname: red_panda_data
+#          volumes:
+#              - "redpanda-0:/var/lib/redpanda/data"
+
+
+
+        redpanda-0:
+          image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
+          #image: redpandadata/redpanda@sha256:eca8188c285f65ee2edea3c76af7cec497dd60f58e93b67e1ab1be595b3debb5
+          container_name: redpanda-0
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.252
+          hostname: redpanda-0
+#          volumes:
+#            - redpanda-0:/var/lib/redpanda/data
+          command:
+            - redpanda start
+            - --mode dev-container
+            - --smp 1
+            - --kafka-addr internal://0.0.0.0:9092
+            - --advertise-kafka-addr internal://redpanda-0:9092
+            - --pandaproxy-addr internal://0.0.0.0:8082
+            - --advertise-pandaproxy-addr internal://redpanda-0:8082
+            - --schema-registry-addr internal://0.0.0.0:8081
+            - --rpc-addr redpanda-0:33145
+            - --advertise-rpc-addr redpanda-0:33145
+      
+        redpanda-1:
+          image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
+          #image: redpandadata/redpanda@sha256:eca8188c285f65ee2edea3c76af7cec497dd60f58e93b67e1ab1be595b3debb5
+          container_name: redpanda-1
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.253
+          hostname: redpanda-1
+#          volumes:
+#            - redpanda-1:/var/lib/redpanda/data
+          command:
+            - redpanda start
+            - --mode dev-container
+            - --smp 1
+            - --kafka-addr internal://0.0.0.0:9092
+            - --advertise-kafka-addr internal://redpanda-1:9092
+            - --pandaproxy-addr internal://0.0.0.0:8082
+            - --advertise-pandaproxy-addr internal://redpanda-1:8082
+            - --schema-registry-addr internal://0.0.0.0:8081
+            - --rpc-addr redpanda-1:33145
+            - --advertise-rpc-addr redpanda-1:33145
+            - --seeds redpanda-0:33145
+      
+        redpanda-2:
+          image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
+          #image: redpandadata/redpanda@sha256:eca8188c285f65ee2edea3c76af7cec497dd60f58e93b67e1ab1be595b3debb5
+          container_name: redpanda-2
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.254
+          hostname: redpanda-2
+#          volumes:
+#            - redpanda-2:/var/lib/redpanda/data
+          command:
+            - redpanda start
+            - --mode dev-container
+            - --smp 1
+            - --kafka-addr internal://0.0.0.0:9092
+            - --advertise-kafka-addr internal://redpanda-2:9092
+            - --pandaproxy-addr internal://0.0.0.0:8082
+            - --advertise-pandaproxy-addr internal://redpanda-2:8082
+            - --schema-registry-addr internal://0.0.0.0:8081
+            - --rpc-addr redpanda-2:33145
+            - --advertise-rpc-addr redpanda-2:33145
+            - --seeds redpanda-0:33145
+
+        debezium:
+          depends_on:
+            - service_app_postgresql
+            - service_chat_postgresql
+            - redpanda-0
+            - redpanda-1
+            - redpanda-2
+          image: debezium/connect@sha256:dace85f0627159fa62172d48f1defdfd25d057c42fc7d2ebfe14051fd295d93a
+          container_name: debezium
+          init: true
+          restart: always
+          networks:
+            network:
+              ipv4_address: 172.20.0.251
+          hostname: debezium
+          env_file:
+            - ./env/.env_debezium
+          volumes:
+            - "./requirements/debezium/tools/connectors:/connectors"
+
+                #        smart_contract:
+                #          depends_on:
+                #              - postgresql
+                #          build:
+                #            context: ./requirements/smart_contract
+                #            dockerfile: Dockerfile
+                #          image: solidity:10.11.6
+                #          container_name: smart_contract
+                #          env_file: .env
+                #          init: true
+                #          restart: always
+                #          hostname: smart_contract
+                #          volumes:
+                #              - "smart_contract:/projects"
+
+                #    volumes:
+                #      smart_contract:
+                #        driver: local
+                #        driver_opts:
+                #          type: 'none'
+                #          o: 'bind'
+                #          device: "../volume/smart_contract"
+
+    networks:
+      network:
+        driver: bridge
+        ipam:
+          config:
+            - subnet: 172.20.0.0/24
+
+    volumes:
+      static_service_app:
+        driver: local
+        driver_opts:
+          type: 'none'
+          o: 'bind'
+          device: "../volume/static/static_service_app"
+      service_app_django:
+        driver: local
+        driver_opts:
+          type: 'none'
+          o: 'bind'
+          device: "../volume/service_app/django"
+      service_app_postgresql:
+        driver: local
+        driver_opts:
+          type: 'none'
+          o: 'bind'
+          device: "../volume/service_app/postgresql"
+      static_service_chat:
+        driver: local
+        driver_opts:
+          type: 'none'
+          o: 'bind'
+          device: "../volume/static/static_service_chat"
+      service_chat_django:
+        driver: local
+        driver_opts:
+          type: 'none'
+          o: 'bind'
+          device: "../volume/service_chat/django"
+      service_chat_postgresql:
+        driver: local
+        driver_opts:
+          type: 'none'
+          o: 'bind'
+          device: "../volume/service_chat/postgresql"
+      redpanda-0:
+        driver: local
+        driver_opts:
+          type: 'none'
+          o: 'bind'
+          device: "../volume/eventbus"
