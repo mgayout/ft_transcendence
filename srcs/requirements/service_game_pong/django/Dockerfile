@@ -10,7 +10,7 @@ ARG ENV_DIR=$APP_DIR/.env/bin/activate
 #Installing utils
 RUN apk update \
 	&& apk upgrade \
-	&& apk add vim postgresql-dev postgresql-client gcc python3-dev musl-dev
+	&& apk add vim postgresql-dev postgresql-client gcc python3-dev musl-dev redis
 
 RUN mkdir $APP_DIR /static
 WORKDIR $APP_DIR

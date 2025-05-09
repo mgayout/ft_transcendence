@@ -1,42 +1,23 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.urls import path
 from . import views
 
-# ===========================
-# CONFIGURATION DU ROUTEUR DRF
-# ===========================
-
-router = DefaultRouter()
-router.register(r'players', views.PlayerViewSet)
-router.register(r'games', views.GameViewSet)
-router.register(r'matches', views.MatchViewSet, basename='match')
-router.register(r'tournaments', views.TournamentViewSet)
-
-# ===========================
-# DEFINITION DES URLS
-# ===========================
-
 urlpatterns = [
-    # Routes DRF avec router
-    path('api/', include(router.urls)),
+    path('invitations/', views.InvitationListAPI.as_view(), name='invitation-list'),
+    path('invitations/create/', views.InvitationCreateAPI.as_view(), name='invitation-create'),
+    path('invitations/<int:id>/accept/', views.InvitationAcceptAPI.as_view(), name='invitation-accept'),
+    path('invitations/<int:id>/decline/', views.InvitationDeclineAPI.as_view(), name='invitation-decline'),
+    path('matches/', views.MatchListAPI.as_view(), name='match-list'),
+    path('matches/<int:id>/', views.MatchDetailAPI.as_view(), name='match-detail'),
+    path('matches/<int:match_id>/games/<int:id>/', views.GameDetailAPI.as_view(), name='game-detail'),
 
-    # Routes liées aux fonctionnalités Web (Vue Django)
-    path('lobby-chat/', views.lobby_chat, name='lobby-chat'),
-    path('pong/', views.lobby_pong, name='lobby-pong'),
-
-    # Authentification API (Inscription & Connexion)
-    path('api/register/', views.register_api.as_view(), name='register_api'),
-    path('api/login/', views.login_api, name='login_api'),
-    path('api/logout/', views.logout_api, name='logout_api'),
-
-    # JWT Token Endpoints
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
-    path('api/send_friend_request/', views.SendFriendRequest.as_view(), name='send_friend_request'),
-    path('api/accept_friend_request/', views.AcceptFriendRequest.as_view(), name='accept_friend_request'),
-    path('api/reject_friend_request/', views.RejectFriendRequest.as_view(), name='reject_friend_request'),
-    path('api/block_player/', views.BlockPlayer.as_view(), name='block_player'),
-    path('api/unblock_player/', views.UnblockPlayer.as_view(), name='unblock_player'),
+    path('tournament/create/', views.TournamentCreateAPI.as_view(), name='tournament-create'),
+    path('tournament/list/', views.TournamentOpenListAPI.as_view(), name='tournament-list'),
+    path('tournament/history/<int:id>/', views.TournamentHistoryListAPI.as_view(), name='tournament-history'),
+    path('tournament/<int:tournament_id>/games/', views.TournamentMatchListAPI.as_view(), name='tournament-games'),
+    path('tournament/<int:id>/join/', views.TournamentJoinAPI.as_view(), name='tournament-join'),
+    path('tournament/<int:id>/start/', views.TournamentStartAPI.as_view(), name='tournament-start'),
+    path('tournament/<int:id>/start-final/', views.TournamentStartFinalAPI.as_view(), name='tournament-start-final'),
+    path('tournament/<int:id>/end/', views.TournamentEndAPI.as_view(), name='tournament-end'),
+    path('tournament/<int:id>/leave/', views.TournamentLeaveAPI.as_view(), name='tournament-leave'),
+    path('tournament/<int:id>/cancel/', views.TournamentCancelAPI.as_view(), name='tournament-cancel'),
 ]

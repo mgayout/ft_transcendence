@@ -56,17 +56,17 @@ all:
 					./srcs/requirements/service_game_pong/postgresql/conf/data/pg_logical/mappings \
 					./srcs/requirements/service_game_pong/postgresql/conf/data/pg_logical/snapshots \
 					./srcs/requirements/service_live_chat/postgresql/conf/data/pg_serial \
-					./srcs/requirements/service_live_chat/postgresql/conf/data/pg_stat_tmp \
-					./srcs/requirements/service_live_chat/postgresql/conf/data/pg_snapshots \
-					./srcs/requirements/service_live_chat/postgresql/conf/data/pg_twophase \
-					./srcs/requirements/service_live_chat/postgresql/conf/data/pg_replslot \
-					./srcs/requirements/service_live_chat/postgresql/conf/data/pg_wal/archive_status \
-					./srcs/requirements/service_live_chat/postgresql/conf/data/pg_dynshmem \
-					./srcs/requirements/service_live_chat/postgresql/conf/data/pg_tblspc \
-					./srcs/requirements/service_live_chat/postgresql/conf/data/pg_commit_ts \
-					./srcs/requirements/service_live_chat/postgresql/conf/data/pg_notify \
-					./srcs/requirements/service_live_chat/postgresql/conf/data/pg_logical/mappings \
-					./srcs/requirements/service_live_chat/postgresql/conf/data/pg_logical/snapshots
+                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_stat_tmp \
+                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_snapshots \
+                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_twophase \
+                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_replslot \
+                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_wal/archive_status \
+                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_dynshmem \
+                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_tblspc \
+                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_commit_ts \
+                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_notify \
+                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_logical/mappings \
+                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_logical/snapshots
 
 	@if [ ! -d "./volume/smart_contract" ]; then \
 		sudo mkdir -p "./volume/smart_contract"; \
@@ -101,18 +101,6 @@ all:
 	fi
 
 	@sudo docker compose -f ./srcs/docker-compose.yml up -d --build
-
-	@printf "\033[00;32mDebezium source connectors create\033[00m\n"
-
-	@while ! docker compose -f ./srcs/docker-compose.yml exec debezium /bin/bash /connectors/source.sh -eq 0; do \
-		sleep 1; \
-	done
-
-	@printf "\033[00;32mDebezium sink connectors create\033[00m\n"
-
-	@while ! docker compose -f ./srcs/docker-compose.yml exec debezium /bin/bash /connectors/sink.sh -eq 0; do \
-		sleep 1; \
-	done
 
 	@sudo docker compose -f ./srcs/docker-compose.yml exec vault_sealer vault operator unseal XSlqgv8XRbzSyytnbzck3V2nQHWdB/1/o4IIzJhdvVzQ
 	@sudo docker compose -f ./srcs/docker-compose.yml exec vault_sealer vault operator unseal x9Pcd9kSLALh4i7PgEW/6Kke2Swd8Ambyo/z12OgQIrA

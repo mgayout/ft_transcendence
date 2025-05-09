@@ -1,29 +1,31 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "react-bootstrap"
-import FriendModal from "../global/friend-modal.jsx"
+import FriendModal from "../friend/modal.jsx"
 import ChatModal from "../global/chat-modal.jsx"
 import QuitModal from "../global/quit-modal.jsx"
 
-function Header({}) {
+function Header({ user }) {
 
 	const navigate = useNavigate();
 	const [friend, setFriend] = useState(false)
 	const [chat, setChat] = useState(false)
 	const [quit, setQuit] = useState(false)
 
+	if (!user) return (<></>)
+
 	return (
 		<>
 			<header>
 				<nav className="navbar bg-dark opacity-75 fixed-top p-2">
 					<div className="container-fluid p-0 m-0">
-						<Button className="rounded-0 btn btn-dark fw-bolder">
+						<Button className="rounded-0 btn btn-dark fw-bolder" onClick={() => navigate("/settings")}>
 							<i className="bi bi-gear-fill" style={{fontSize: "40px"}}/>
 						</Button>
 						<Button className="rounded-0 btn btn-dark fw-bolder" onClick={() => navigate("/home")}>
 							<i className="bi bi-house-fill" style={{fontSize: "40px"}}/>
 						</Button>
-						<Button className="rounded-0 btn btn-dark fw-bolder" onClick={() => navigate(`/profile/${localStorage.getItem("playerName")}`)}>
+						<Button className="rounded-0 btn btn-dark fw-bolder" onClick={() => navigate(`/profile/${user.name}`)}>
 							<i className="bi bi-person-lines-fill" style={{fontSize: "40px"}}/>
 						</Button>
 						<h1 className="navbar-brand text-bg-dark fw-bolder fs-1 m-0 p-0 user-select-none"

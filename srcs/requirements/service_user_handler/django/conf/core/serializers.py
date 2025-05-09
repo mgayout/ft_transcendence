@@ -255,10 +255,6 @@ class PlayerLoginSerializer(serializers.Serializer):
         if user is None:
             raise serializers.ValidationError({"code": 1013}) # Nom ou mot de passe incorrect
 
-        player.online = True
-        player.last_seen = None
-        player.save()
-
         data['user'] = user
         data['player'] = player
         return data

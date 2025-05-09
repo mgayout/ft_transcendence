@@ -24,9 +24,6 @@ class GeneralMessageSerializer(serializers.ModelSerializer):
         data['sender'] = sender_player
         return data
 
-    def to_representation(self, instance):
-        # Retourner un code de succès après la création
-        return {"code": 1000}
 
 class PrivateMessageSerializer(serializers.ModelSerializer):
     sender = serializers.CharField(source='sender.id', read_only=True)  # Affiche l'ID du Player
@@ -82,7 +79,3 @@ class PrivateMessageSerializer(serializers.ModelSerializer):
         data['sender'] = sender_player
         data['receiver'] = receiver_player
         return data
-
-    def to_representation(self, instance):
-        # Retourner un code de succès après la création
-        return {"code": 1000}

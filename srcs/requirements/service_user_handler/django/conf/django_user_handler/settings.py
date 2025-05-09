@@ -26,10 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['transcendence.fr']
-CSRF_TRUSTED_ORIGINS = ['https://transcendence.fr']
 
 
 
@@ -64,6 +63,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	'core.middleware.UserActivityMiddleware',
 ]
 
 ROOT_URLCONF = 'django_user_handler.urls'
@@ -87,11 +87,15 @@ TEMPLATES = [
 WSGI_APPLICATION = 'django_user_handler.wsgi.application'
 
 CORS_ALLOWED_ORIGINS = [
-    'https://transcendence.fr:443',  # Adresse de ton frontend
+    'https://transcendence.fr:443', # Adresse de ton frontend
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://transcendence.fr:443',
+    'https://transcendence.fr',
 ]
 
 ALLOWED_HOSTS = ['transcendence.fr']
-CSRF_TRUSTED_ORIGINS = ['https://transcendence.fr']
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = False  # À désactiver en production

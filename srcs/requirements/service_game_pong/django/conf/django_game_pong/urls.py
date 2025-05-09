@@ -1,8 +1,7 @@
-"""
-URL configuration for django_game_pong project.
+"""django_game_pong URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
+    https://docs.djangoproject.com/en/4.1/topics/http/urls/
 Examples:
 Function views
     1. Add an import:  from my_app import views
@@ -16,20 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from core.views import home
-from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from rest_framework.authtoken.views import obtain_auth_token
-
-
 
 urlpatterns = [
-    path('pong/', home, name='home'),
-    path('pong/api-auth/', include('rest_framework.urls')),
     path('pong/admin/', admin.site.urls),
     path('pong/', include('core.urls')),
     path('pong/api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('pong/api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('pong/api-token-auth/', obtain_auth_token),
 ]
-

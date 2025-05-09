@@ -1,27 +1,13 @@
 import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Modal } from "react-bootstrap"
-import axios from 'axios'
 
 function ChatModal({ chat, setChat }) {
 
-	const navigate = useNavigate()
+	//const navigate = useNavigate()
 
 	const handleClose = () => setChat(false)
-
-	const Atoken = localStorage.getItem('accessToken')
-	const Rtoken = localStorage.getItem('refreshToken')
-	const PlayerName = localStorage.getItem('playerName')
-	const config = {headers: {Authorization: `Bearer ${Atoken}`}}
-	const params = { token: Rtoken }
-
-	const fonction = async () => {
-
-		try {}
-		catch(error) {
-			console.log(error)
-		}
-	}
+	
 
 	return (
 		<Modal show={chat} onHide={handleClose}>

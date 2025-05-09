@@ -25,7 +25,6 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = False
 
 ALLOWED_HOSTS = ['transcendence.fr']
-CSRF_TRUSTED_ORIGINS = ['https://transcendence.fr']
 
 # Application definition
 
@@ -183,6 +182,11 @@ CORS_ALLOWED_ORIGINS = [
     'https://transcendence.fr:443',
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://transcendence.fr:443',
+    'https://transcendence.fr',
+]
+
 # Autoriser les en-têtes spécifiques (nécessaire pour les tokens JWT et WebSocket)
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -192,7 +196,6 @@ CORS_ALLOW_HEADERS = [
     'dnt',
     'origin',
     'user-agent',
-    'x-csrftoken',
     'x-requested-with',
 ]
 

@@ -57,10 +57,6 @@
         service_user_handler_django:
           depends_on:
             - service_user_handler_postgresql
-            - debezium
-            - redpanda-0
-            - redpanda-1
-            - redpanda-2
             - vault
           build:
             context: ./requirements/service_user_handler/django
@@ -97,15 +93,15 @@
           env_file:
             - ./env/.env_service_user_handler_postgres
           volumes:
-            - "./requirements/service_user_handler/postgresql/conf/data:/var/lib/postgresql/data"
+                - "./requirements/service_user_handler/postgresql/conf/data:/var/lib/postgresql/data"
+                #- "./requirements/service_user_handler/postgresql/tools/user_handler_init.sql:/docker-entrypoint-initdb.d/01_init.sql"
+                - "./requirements/service_user_handler/postgresql/conf/postgresql.conf:/etc/postgresql/postgresql.conf"
+                - "./requirements/service_user_handler/postgresql/conf/pg_hba.conf:/etc/postgresql/pg_hba.conf"
+          command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf", "-c", "hba_file=/etc/postgresql/pg_hba.conf"]
 
         service_game_pong_django:
           depends_on:
             - service_game_pong_postgresql
-            - debezium
-            - redpanda-0
-            - redpanda-1
-            - redpanda-2
             - vault
           build:
             context: ./requirements/service_game_pong/django
@@ -141,15 +137,15 @@
           env_file:
             - ./env/.env_service_game_pong_postgres
           volumes:
-            - "./requirements/service_game_pong/postgresql/conf/data:/var/lib/postgresql/data"
+                - "./requirements/service_game_pong/postgresql/conf/data:/var/lib/postgresql/data"
+                #- "./requirements/service_game_pong/postgresql/tools/game_pong_init.sql:/docker-entrypoint-initdb.d/01_init.sql"
+                - "./requirements/service_game_pong/postgresql/conf/postgresql.conf:/etc/postgresql/postgresql.conf"
+                - "./requirements/service_game_pong/postgresql/conf/pg_hba.conf:/etc/postgresql/pg_hba.conf"
+          command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf", "-c", "hba_file=/etc/postgresql/pg_hba.conf"]
 
         service_live_chat_django:
           depends_on:
             - service_live_chat_postgresql
-            - debezium
-            - redpanda-0
-            - redpanda-1
-            - redpanda-2
             - vault
           build:
             context: ./requirements/service_live_chat/django
@@ -185,15 +181,15 @@
           env_file:
             - ./env/.env_service_live_chat_postgres
           volumes:
-            - "./requirements/service_live_chat/postgresql/conf/data:/var/lib/postgresql/data"
+                - "./requirements/service_live_chat/postgresql/conf/data:/var/lib/postgresql/data"
+                #- "./requirements/service_live_chat/postgresql/tools/live_chat_init.sql:/docker-entrypoint-initdb.d/01_init.sql"
+                - "./requirements/service_live_chat/postgresql/conf/postgresql.conf:/etc/postgresql/postgresql.conf"
+                - "./requirements/service_live_chat/postgresql/conf/pg_hba.conf:/etc/postgresql/pg_hba.conf"
+          command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf", "-c", "hba_file=/etc/postgresql/pg_hba.conf"]
 
         service_app_django:
           depends_on:
             - service_app_postgresql
-            - debezium
-            - redpanda-0
-            - redpanda-1
-            - redpanda-2
             - vault
           build:
             context: ./requirements/service_app/django
@@ -235,10 +231,6 @@
         service_chat_django:
           depends_on:
             - service_chat_postgresql
-            - debezium
-            - redpanda-0
-            - redpanda-1
-            - redpanda-2
             - vault
           build:
             context: ./requirements/service_chat/django
@@ -343,154 +335,6 @@
             - IPC_LOCK
           command: >
             sh -c "vault server -config=/vault/config/vault.hcl"
-
-#        redpanda-0:
-#          command:
-#            - redpanda
-#            - start
-#            - --kafka-addr internal://0.0.0.0:9092
-#            - --advertise-kafka-addr internal://redpanda-0:9092
-#            - --pandaproxy-addr internal://0.0.0.0:8082
-#            - --advertise-pandaproxy-addr internal://redpanda-0:8082
-#            - --schema-registry-addr internal://0.0.0.0:8081
-#            - --rpc-addr redpanda-0:33145
-#            - --advertise-rpc-addr redpanda-0:33145
-#            - --mode dev-container
-#            - --smp 1
-#            - --default-log-level=info
-#          image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
-##          build:
-##            context: ./requirements/eventbus
-##            dockerfile: Dockerfile
-##          image: red_panda_data:24.2.7
-#          container_name: redpanda-0
-##          init: true
-#          restart: always
-#          networks:
-#            network:
-#              ipv4_address: 172.20.0.8
-##          hostname: red_panda_data
-#          volumes:
-#              - "redpanda-0:/var/lib/redpanda/data"
-
-
-
-        redpanda-0:
-          image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
-          #image: redpandadata/redpanda@sha256:eca8188c285f65ee2edea3c76af7cec497dd60f58e93b67e1ab1be595b3debb5
-          container_name: redpanda-0
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.252
-          hostname: redpanda-0
-#          volumes:
-#            - redpanda-0:/var/lib/redpanda/data
-          command:
-            - redpanda start
-            - --mode dev-container
-            - --smp 1
-            - --kafka-addr internal://0.0.0.0:9092
-            - --advertise-kafka-addr internal://redpanda-0:9092
-            - --pandaproxy-addr internal://0.0.0.0:8082
-            - --advertise-pandaproxy-addr internal://redpanda-0:8082
-            - --schema-registry-addr internal://0.0.0.0:8081
-            - --rpc-addr redpanda-0:33145
-            - --advertise-rpc-addr redpanda-0:33145
-      
-        redpanda-1:
-          image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
-          #image: redpandadata/redpanda@sha256:eca8188c285f65ee2edea3c76af7cec497dd60f58e93b67e1ab1be595b3debb5
-          container_name: redpanda-1
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.253
-          hostname: redpanda-1
-#          volumes:
-#            - redpanda-1:/var/lib/redpanda/data
-          command:
-            - redpanda start
-            - --mode dev-container
-            - --smp 1
-            - --kafka-addr internal://0.0.0.0:9092
-            - --advertise-kafka-addr internal://redpanda-1:9092
-            - --pandaproxy-addr internal://0.0.0.0:8082
-            - --advertise-pandaproxy-addr internal://redpanda-1:8082
-            - --schema-registry-addr internal://0.0.0.0:8081
-            - --rpc-addr redpanda-1:33145
-            - --advertise-rpc-addr redpanda-1:33145
-            - --seeds redpanda-0:33145
-      
-        redpanda-2:
-          image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
-          #image: redpandadata/redpanda@sha256:eca8188c285f65ee2edea3c76af7cec497dd60f58e93b67e1ab1be595b3debb5
-          container_name: redpanda-2
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.254
-          hostname: redpanda-2
-#          volumes:
-#            - redpanda-2:/var/lib/redpanda/data
-          command:
-            - redpanda start
-            - --mode dev-container
-            - --smp 1
-            - --kafka-addr internal://0.0.0.0:9092
-            - --advertise-kafka-addr internal://redpanda-2:9092
-            - --pandaproxy-addr internal://0.0.0.0:8082
-            - --advertise-pandaproxy-addr internal://redpanda-2:8082
-            - --schema-registry-addr internal://0.0.0.0:8081
-            - --rpc-addr redpanda-2:33145
-            - --advertise-rpc-addr redpanda-2:33145
-            - --seeds redpanda-0:33145
-
-        debezium:
-          depends_on:
-            - service_app_postgresql
-            - service_chat_postgresql
-            - redpanda-0
-            - redpanda-1
-            - redpanda-2
-          image: debezium/connect@sha256:dace85f0627159fa62172d48f1defdfd25d057c42fc7d2ebfe14051fd295d93a
-          container_name: debezium
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.251
-          hostname: debezium
-          env_file:
-            - ./env/.env_debezium
-          volumes:
-            - "./requirements/debezium/tools/connectors:/connectors"
-
-                #        smart_contract:
-                #          depends_on:
-                #              - postgresql
-                #          build:
-                #            context: ./requirements/smart_contract
-                #            dockerfile: Dockerfile
-                #          image: solidity:10.11.6
-                #          container_name: smart_contract
-                #          env_file: .env
-                #          init: true
-                #          restart: always
-                #          hostname: smart_contract
-                #          volumes:
-                #              - "smart_contract:/projects"
-
-                #    volumes:
-                #      smart_contract:
-                #        driver: local
-                #        driver_opts:
-                #          type: 'none'
-                #          o: 'bind'
-                #          device: "../volume/smart_contract"
 
     networks:
       network:
