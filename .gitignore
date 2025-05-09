@@ -1,4 +1,0 @@
-*/conf/data/
-srcs/requirements/**/postgresql/conf/data/
-srcs/requirements/**/postgresql/conf/server.key
-srcs/requirements/hashicorp_vault_sealer/vault/conf/file/core/_keyring
