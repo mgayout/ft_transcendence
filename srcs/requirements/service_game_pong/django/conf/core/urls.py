@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path('invitations/', views.InvitationListAPI.as_view(), name='invitation-list'),
     path('invitations/create/', views.InvitationCreateAPI.as_view(), name='invitation-create'),
+    path('invitations/<int:id>/cancel/', views.InvitationCancelAPI.as_view(), name='invitation-cancel'),
     path('invitations/<int:id>/accept/', views.InvitationAcceptAPI.as_view(), name='invitation-accept'),
     path('invitations/<int:id>/decline/', views.InvitationDeclineAPI.as_view(), name='invitation-decline'),
     path('matches/', views.MatchListAPI.as_view(), name='match-list'),

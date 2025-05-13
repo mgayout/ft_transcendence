@@ -8,8 +8,8 @@ import HomePage from './home/page'
 import SettingsPage from './settings/page'
 import Profile from './profile/page'
 import ProfileEdit from './profile/edit/page'
-import Online from './game/online/page'
-import Tournament from './game/tournament/page'
+import Online from './online/page'
+import Tournament from './tournament/page'
 
 const App = () => {
 

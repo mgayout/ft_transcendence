@@ -117,13 +117,13 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny', #a changer en prod
+        'rest_framework.permissions.IsAuthenticated', #a changer en prod
     ],
     'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler',
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),  # Durée de vie de l’access token
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # Durée de vie de l’access token
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Durée de vie du refresh token
     'BLACKLIST_AFTER_ROTATION': True,               # Active le blacklisting après rotation
     'TOKEN_BACKEND': 'rest_framework_simplejwt.token_blacklist.backends.BlacklistBackend',  # Backend pour blacklist
@@ -190,6 +190,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = False  # Ne pas permettre à tous les origines par défaut
 CORS_ALLOWED_ORIGINS = [
     'https://transcendence.fr:443',
+	'https://transcendence.fr',
 ]
 
 CSRF_TRUSTED_ORIGINS = [

@@ -145,6 +145,52 @@ class PongInvitationSerializer(serializers.ModelSerializer):
             )
 
         return invitation
+    
+class InvitationCancelSerializer(serializers.Serializer):
+    def validate(self, attrs):
+        invitation = self.instance
+        user = self.context['request'].user
+
+        # Vérifier si l'utilisateur a un profil joueur
+        try:
+            player = Player.objects.get(user=user)
+        except Player.DoesNotExist:
+            raise serializers.ValidationError({"code": 4001})  # Pas de profil joueur
+
+        # Vérifier si le joueur est l'expéditeur de l'invitation
+        if invitation.from_player != player:
+            raise serializers.ValidationError({"code": 4029})  # Pas l'expéditeur
+
+        # Vérifier si l'invitation est en attente
+        if invitation.status != StatusChoices.EN_ATTENTE:
+            raise serializers.ValidationError({"code": 4011})  # Invitation non en attente
+
+        attrs['player'] = player
+        return attrs
+
+    def update(self, instance, validated_data):
+        # Mettre à jour l'invitation
+        instance.status = StatusChoices.ANNULEE
+        instance.save()
+
+        # Notifier le joueur destinataire via WebSocket
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"user_{instance.to_player.id}",
+            {
+                "type": "invitation_canceled",
+                "invitation_id": instance.id,
+                "from_player": instance.from_player.name
+            }
+        )
+
+        return instance
+
+    def to_representation(self, instance):
+        return {
+            "code": 1000,
+            "invitation_id": instance.id,
+        }
 
 class InvitationAcceptSerializer(serializers.Serializer):
     def validate(self, attrs):

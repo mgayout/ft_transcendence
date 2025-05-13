@@ -10,25 +10,28 @@ function Profile({ user, profile }) {
 	
 	const fonction = async () => {
 		try {
-			const response = await axiosInstance.get("/pong/matches/")
+			const a = await axiosInstance.get(`/pong/matches/?player_id=${profile.id}`)
+			//console.log(a)
+			const response = a.data.filter(a => a.status == "Terminée")
+			//console.log(response)
 			const matches = []
 			let tournament, state, other
-			for (let i = response.data.length - 1; i >= response.data.length - 5; i--) {
+			for (let i = response.length - 1; i >= response.length - 5; i--) {
 				if (i >= 0) {
-					tournament = response.data[i].tournament
-					if (response.data[i].winner && response.data[i].winner.name == profile.name)
+					tournament = response[i].tournament
+					if (response[i].winner && response[i].winner.name == profile.name)
 						state = "Victory"
 					else
 						state = "Defeat"
-					if (response.data[i].player_1 && response.data[i].player_1.name == profile.name) {
-						if (response.data[i].player_2)
-							other = response.data[i].player_2.name
+					if (response[i].player_1 && response[i].player_1.name == profile.name) {
+						if (response[i].player_2)
+							other = response[i].player_2.name
 						else
 							other = "..."
 					}
 					else {
-						if (response.data[i].player_1)
-							other = response.data[i].player_1.name
+						if (response[i].player_1)
+							other = response[i].player_1.name
 						else
 							other = "..."
 					}
@@ -66,15 +69,15 @@ function Profile({ user, profile }) {
 			cardColor = "bg-danger"
 
 		return (
-			<div className="d-flex" style={{ flex: "1 1 250px", maxWidth: "300px" }}>
-				<Card className={`d-flex flex-row align-items-center rounded-0 text-white ${cardColor} w-100`} style={{ maxWidth: "500px" }}>
+			<div className="w-100 d-flex justify-content-center">
+				<Card className={`d-flex flex-row align-items-center rounded-0 text-white ${cardColor}`} style={{ width: "100%", maxWidth: "1600px", minHeight: "50px"}}>
 					{card.state
 						? <>
 							<div className="p-2 d-flex align-items-center">
 								<Card.Img className="img-fluid" style={{ width: "40px", height: "40px", objectFit: "contain" }}
 									src={!card.tournament ? "Online.svg" : "Crown.svg"}/>
 							</div>
-							<Card.Body className="py-2 px-2">
+							<Card.Body className="py-2 px-2 justify-content-center">
 								<Card.Title className="m-0 text-start fs-6">
 								{card.state}<br />
 									<small>vs {card.other}</small>
@@ -87,6 +90,7 @@ function Profile({ user, profile }) {
 	if (!online) return (<></>)
 	
 	return (
+		<div style={{ width: "90vw", maxWidth: "600px" }}>
 		<div className="container">
 			{user.name == profile.name ?
 			<Button className="position-absolute top-0 end-0 m-2 rounded-0 btn btn-dark fw-bolder" onClick={() => navigate("edit")}>
@@ -99,18 +103,17 @@ function Profile({ user, profile }) {
 					style={{ width: "150px", height: "150px", objectFit: "cover" }}/>
 				<h1 className="mt-3 text-light text-center user-select-none">{profile.name}</h1>
 				{profile.description && (<h4 className="fst-italic text-light text-center mt-2 user-select-none">"{profile.description}"</h4>)}
-				<div className="container py-5">
+				<div className="container pt-5 pb-2">
 					<div className="d-flex flex-row justify-content-between align-items-start gap-3 flex-nowrap">
-						<div className="d-flex flex-row flex-wrap gap-3" style={{ maxWidth: "75%" }}>
+						<div className="d-flex flex-column gap-3 align-items-center w-100">
+						<h1 className="fs-4 text-white">Victory : {profile.victory} | Defeat : {profile.defeat}</h1>
 						{online.map((card, idx) => (<CardItem card={card} key={idx}/>))}
-						</div>
-						<div className="d-flex flex-column align-items-center text-light text-center">
-							<h1 className="fs-4">Victory : {profile.victory}<br/>Defeat : {profile.defeat}</h1>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
+	</div>
 	)
 }
 

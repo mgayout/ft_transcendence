@@ -25,7 +25,7 @@ class InvitationListAPI(generics.ListAPIView):
             player = Player.objects.get(user=self.request.user)
         except Player.DoesNotExist:
             raise serializers.ValidationError({"code": 4001})  # Aucun profil joueur associé à l'utilisateur
-        return Invitation.objects.filter(to_player=player, status=StatusChoices.EN_ATTENTE)
+        return Invitation.objects.filter(to_player=player, status=StatusChoices.EN_ATTENTE) | Invitation.objects.filter(from_player=player, status=StatusChoices.EN_ATTENTE)
     
 @method_decorator(csrf_exempt, name='dispatch')
 class InvitationCreateAPI(generics.CreateAPIView):
@@ -36,6 +36,17 @@ class InvitationCreateAPI(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.PongInvitationSerializer
 
+@method_decorator(csrf_exempt, name='dispatch')
+class InvitationCancelAPI(generics.UpdateAPIView):
+    """
+    Permet à from_player d'annuler une invitation qu'il a envoyée.
+    - POST /pong/api/invitations/<id>/cancel/
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.InvitationCancelSerializer
+    queryset = Invitation.objects.all()
+    lookup_field = 'id'
+    
 @method_decorator(csrf_exempt, name='dispatch')
 class InvitationAcceptAPI(generics.UpdateAPIView):
     """

@@ -26,7 +26,7 @@ const setAll = (scene, state) => {
 	return {floor, fog, line, /*pilar, border, bscreen,*/ light, paddle1, paddle2, /*wall1, wall2,*/ ball}
 }
 
-const createCanva = (canva, state, messages) => {
+const createCanva = (canva, state, lastPongMessage) => {
 	
 	const scene = new THREE.Scene()
 
@@ -48,9 +48,9 @@ const createCanva = (canva, state, messages) => {
 
 	const animate = () => {
 		
-		objects.paddle1.position.set(0, messages.type == "data_pong" ? messages.paddleL : 15, 1)
-		objects.paddle2.position.set(70, messages.type == "data_pong" ? messages.paddleR : 15, 1)
-		objects.ball.position.set(messages.type == "data_pong" ? messages.x : 35, messages.type == "data_pong" ? messages.y : 15, 1)
+		objects.paddle1.position.set(0, lastPongMessage ? lastPongMessage.paddleL : 15, 1)
+		objects.paddle2.position.set(70, lastPongMessage ? lastPongMessage.paddleR : 15, 1)
+		objects.ball.position.set(lastPongMessage ? lastPongMessage.x : 35, lastPongMessage ? lastPongMessage.y : 15, 1)
 
 		renderer.render(scene, camera)
 		animationFrameId = requestAnimationFrame(animate)

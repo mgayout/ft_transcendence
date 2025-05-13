@@ -12,8 +12,9 @@ export const Notification = ({ children }) => {
 
 	useEffect(() => {
 		if (!isAuth) return
+		const id = localStorage.getItem('id')
 		const Atoken = localStorage.getItem('Atoken')
-		const ws = new WebSocket(`ws://transcendence.fr/pong/ws/notifications/?token=${Atoken}`)
+		const ws = new WebSocket(`ws://${id}/pong/ws/notifications/?token=${Atoken}`)
 		socketRef.current = ws
 
 		ws.onopen = () => {
@@ -22,14 +23,15 @@ export const Notification = ({ children }) => {
 
 		ws.onmessage = (event) => {
 			const data = JSON.parse(event.data)
-			if (data.type == "invitation_declined")
+			if (data.type == "invitation_declined") {
 				console.log(`${data.to_player} declined your invitation.`)
+				setMessages(data)
+			}
 			else if (data.type == "invitation_received")
 				console.log(`${data.from_player} invited you.`)
 			else if (data.type == "match_created") {
 				console.log(`Match [${data.match_id}] has been created.`)
-				setMessages((prev) => [...prev, data])
-				localStorage.setItem("online", data.ws_url)
+				setMessages(data)
 			}
 			else
 				console.log(data)
@@ -49,7 +51,7 @@ export const Notification = ({ children }) => {
 	}, [isAuth])
 
 	return (
-		<NotificationContext.Provider value={{ socket: socketRef.current, messages }}>
+		<NotificationContext.Provider value={{ socket: socketRef.current, messages, setMessages }}>
 			{children}
 		</NotificationContext.Provider>
 	)

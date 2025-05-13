@@ -113,6 +113,12 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             "leaved_player": event["leaved_player"]
         }))
 
+    async def invitation_canceled(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "invitation_canceled",
+            "invitation_id": event["invitation_id"],
+            "from_player": event["from_player"]
+        }))
 
 
 class PongConsumer(AsyncWebsocketConsumer):
@@ -137,6 +143,15 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     FORFEIT_DELAY = 60
 
+    @database_sync_to_async
+    def get_player_info(self, player_id):
+        """Récupère l'id et le nom d'un joueur."""
+        try:
+            player = Player.objects.get(id=player_id)
+            return {"id": player.id, "name": player.name}
+        except Player.DoesNotExist:
+            return {"id": player_id, "name": "Joueur inconnu"}
+    
     @database_sync_to_async
     def get_active_game(self, match_id):
         """Récupère la partie active (EN_COURS) pour un match_id donné."""
@@ -186,16 +201,36 @@ class PongConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             print(f"Error saving game state for match {self.match_id}: {str(e)}")
 
+    def get_winner_info(self, winner_id):
+        """Récupère les informations du gagnant de manière synchrone."""
+        try:
+            player_winner = Player.objects.get(id=winner_id)
+            return {
+                'id': player_winner.id,
+                'name': player_winner.name
+            }
+        except Player.DoesNotExist:
+            return {'id': None, 'name': None}
 
     async def handle_game_end(self, game, winner_id):
         """Gère la fin d'un jeu et détermine si le match est terminé ou s'il faut lancer un nouveau jeu."""
+        winner_name = None
+        winner_playerid = None
+        if winner_id:
+            try:
+                winner_info = await database_sync_to_async(self.get_winner_info)(winner_id)
+                winner_name = winner_info.get('name')
+                winner_playerid = winner_info.get('id')
+            except Exception as e:
+                print(f"Error getting winner info: {str(e)}")
         # Envoyer l'événement de fin de jeu actuel
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 "type": "game_ended",
                 "game_id": game.id,
-                "winner": winner_id,
+                "winner_name": winner_name,
+                "winner_id": winner_playerid,
                 "scorePlayer1": self.c_scorep1[self.match_id],
                 "scorePlayer2": self.c_scorep2[self.match_id]
             }

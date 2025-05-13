@@ -3,11 +3,14 @@ import { useNavigate } from "react-router-dom"
 import { Modal, Button } from "react-bootstrap"
 import { useAuth } from "../auth/context"
 import axiosInstance from '../auth/instance'
+import { useGame } from "../websockets/game"
 
-function QuitModal({ quit, setQuit }) {
+function QuitModal({ quit, setQuit, state }) {
 
 	const { logout } = useAuth()
 	const navigate = useNavigate()
+	const { getSocket } = useGame()
+	const socket = getSocket()
 
 	const handleClose = () => setQuit(false)
 
@@ -19,6 +22,8 @@ function QuitModal({ quit, setQuit }) {
 			const config = {headers: {Authorization: `Bearer ${Atoken}`}}
 			const response = await axiosInstance.post('/users/api/logout/', {token: Rtoken}, config)
 			if (response.data.code == 1000) {
+				if (state && state == "play")
+					socket.close()
 				logout()
 				handleClose()
 				navigate("/")
@@ -26,7 +31,6 @@ function QuitModal({ quit, setQuit }) {
 		}
 		catch (error) {
 			console.log(error)
-			logout()
 			handleClose()
 		}
 	}

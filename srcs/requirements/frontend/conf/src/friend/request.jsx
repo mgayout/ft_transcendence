@@ -21,12 +21,13 @@ function RequestModal({ tab }) {
 				.filter(player => player.name == user.name && pendingFriends
 					.some(friend => friend.player_1 == player.name || friend.player_2 == player.name))
 				.map(player => ({
-					name: player.name,
 					id: pendingFriends
 						.find(friend => friend.player_1 == player.name || friend.player_2 == player.name)?.id,
 					avatar: player.avatar,
 					sender: pendingFriends
-						.find(friend => friend.player_1 == player.name || friend.player_2 == player.name)?.player_1}))
+						.find(friend => friend.player_1 == player.name || friend.player_2 == player.name)?.player_1,
+					receiver: pendingFriends
+						.find(friend => friend.player_1 == player.name || friend.player_2 == player.name)?.player_2}))
 
 			setData(temp)
 			setFilteredFriends(temp)
@@ -77,7 +78,7 @@ function RequestModal({ tab }) {
 					<li key={index} className="d-flex align-items-center justify-content-between bg-light rounded p-2 w-50 border-bottom">
 						<div className="d-flex align-items-center gap-2">
 							<img src={player.avatar} alt="Avatar" style={{ width: '40px', height: '40px', borderRadius: '50%' }}/>
-							<span className="fw-blod">{player.name}</span>
+							<span className="fw-bold">{player.sender == user.name ? player.receiver : player.sender}</span>
 						</div>
 						<div className="d-flex gap-3">
 						{player.sender == user.name

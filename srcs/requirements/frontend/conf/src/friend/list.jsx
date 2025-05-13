@@ -68,7 +68,7 @@ function ListModal({ tab }) {
 					<li key={index} className="d-flex align-items-center justify-content-between bg-light rounded p-2 w-50 border-bottom">
 						<div className="d-flex align-items-center gap-2">
 							<img src={player.avatar} alt="Avatar" style={{ width: '40px', height: '40px', borderRadius: '50%' }}/>
-							<span className="fw-blod">{player.name}</span>
+							<span className="fw-bold">{player.name}</span>
 						</div>
 						<div className="d-flex gap-3">
 							<i className="bi bi-person-square fs-4" onClick={() => viewProfile(player.name)} />

@@ -180,6 +180,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = False  # Ne pas permettre à tous les origines par défaut
 CORS_ALLOWED_ORIGINS = [
     'https://transcendence.fr:443',
+	'https://transcendence.fr',
 ]
 
 CSRF_TRUSTED_ORIGINS = [

@@ -5,7 +5,7 @@ import createCanva from "./canva";
 const BGprivate = ({ state, type }) => {
 
 	const canva = useRef(null)
-	const { getSocket, messages } = useGame()
+	const { getSocket, PongMessages } = useGame()
 
 	useEffect(() => {
 
@@ -45,8 +45,10 @@ const BGprivate = ({ state, type }) => {
 				camera.updateProjectionMatrix()
 			}
 		}
+
+		const lastPongMessage = PongMessages[PongMessages.length - 1]
 	
-		const { dispose, renderer, camera } = createCanva(canva.current, state, messages)
+		const { dispose, renderer, camera } = createCanva(canva.current, state, lastPongMessage)
 
 		window.addEventListener("resize", resizeCanva)
 		window.addEventListener('keydown', handleKeyDown)
@@ -60,7 +62,7 @@ const BGprivate = ({ state, type }) => {
 			window.removeEventListener('keyup', handleKeyUp)
 			dispose()
 		}
-	}, [canva, state, messages])
+	}, [canva, state, PongMessages])
 
 	return (
 			<div className="position-fixed top-0">
