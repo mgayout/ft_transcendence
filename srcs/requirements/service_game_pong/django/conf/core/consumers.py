@@ -352,7 +352,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
             # Retourner les données, pas un événement
             return {
-                "winner": match.winner.user.username if match.winner else None,
+                "winner": match.winner.name if match.winner else None,
                 "player_1_wins": player_1_wins,
                 "player_2_wins": player_2_wins
             }
@@ -517,8 +517,8 @@ class PongConsumer(AsyncWebsocketConsumer):
         if not winner_id:
             return None
         if winner_id == game.player_1_id:
-            return game.player_1.user.username
-        return game.player_2.user.username
+            return game.player_1.name
+        return game.player_2.name
 
     async def run_game_loop(self):
         """Exécute game_pong dans une tâche unique pour un match."""
@@ -759,7 +759,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             match.save()
 
             return {
-                "winner": match.winner.user.username if match.winner else None,
+                "winner": match.winner.name if match.winner else None,
                 "player_1_wins": player_1_wins,
                 "player_2_wins": player_2_wins
             }
