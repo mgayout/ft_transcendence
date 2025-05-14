@@ -751,8 +751,6 @@ class PongConsumer(AsyncWebsocketConsumer):
                     match.winner = match.player_2
                     player_1_wins = 0
                     player_2_wins = match.number_of_rounds
-                    
-            match.save()
             
             # Mettre à jour la raison de la fin (forfait)
             match.forfeit = True

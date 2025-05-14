@@ -15,7 +15,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 class PlayerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Player
-        fields = ['id', 'created_at', 'name', 'victory', 'defeat', 'avatar', 'online', 'last_seen', 'description']
+        fields = ['id', 'created_at', 'name', 'avatar', 'online', 'last_seen', 'description']
 
     def to_representation(self, instance):
         fields = super().to_representation(instance)

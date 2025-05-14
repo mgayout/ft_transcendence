@@ -1,4 +1,0 @@
--- Forcer la suppression complète
-ALTER SUBSCRIPTION chat_sub_auth_user DISABLE;
-ALTER SUBSCRIPTION chat_sub_auth_user SET (slot_name = NONE);
-DROP SUBSCRIPTION chat_sub_auth_user;
