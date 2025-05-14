@@ -27,8 +27,6 @@ class Player(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     name = models.CharField(max_length=255)
-    victory = models.PositiveIntegerField(default=0)
-    defeat = models.PositiveIntegerField(default=0)
     online = models.BooleanField(default=False)
     last_seen = models.DateTimeField(null=True, blank=True)
     description = models.TextField(max_length=500, blank=True, default="")

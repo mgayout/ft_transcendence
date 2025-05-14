@@ -1,6 +1,8 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from shared_models.models import Match, Tournament, TournamentStatusChoices, StatusChoices
+from shared_models.models import Match,TournamentStatusChoices, StatusChoices
+from .models import Winrate
+
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
@@ -46,3 +48,34 @@ def handle_final_match_completion(sender, instance, **kwargs):
                     )
     except Exception as e:
         print(f"Erreur dans handle_final_match_completion pour match {instance.id}: {str(e)}")
+
+
+@receiver(post_save, sender=Match)
+def update_winrate_player(sender, instance, **kwargs):
+    """
+    Signal déclenché lorsqu'un match est sauvegardé.
+    Met à jour le winrate des joueurs à chaque match.
+    """
+    try:
+        # Récupérer les joueurs directement du match
+        player_1 = instance.player_1
+        player_2 = instance.player_2
+        
+        if (not instance.player_1 or not instance.player_2 or not instance.winner or instance.status != StatusChoices.TERMINE):
+            return  # Ne rien faire si des joueurs sont manquants ou pas de gagnant
+        
+        winrate_1, _ = Winrate.objects.get_or_create(player=player_1)
+        winrate_2, _ = Winrate.objects.get_or_create(player=player_2)
+        
+        if instance.winner == player_1:
+            winrate_1.victory += 1
+            winrate_2.defeat += 1
+        elif instance.winner == player_2:
+            winrate_2.victory += 1
+            winrate_1.defeat += 1
+        
+        winrate_1.save()
+        winrate_2.save()
+        
+    except Exception as e:
+        print(f"Erreur dans update_winrate_player pour match {instance.id}: {str(e)}")

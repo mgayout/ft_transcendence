@@ -11,6 +11,8 @@ urlpatterns = [
     path('matches/<int:id>/', views.MatchDetailAPI.as_view(), name='match-detail'),
     path('matches/<int:match_id>/games/<int:id>/', views.GameDetailAPI.as_view(), name='game-detail'),
 
+    path('winrate/', views.WinrateAPI.as_view(), name='player-winrate'),
+
     path('tournament/create/', views.TournamentCreateAPI.as_view(), name='tournament-create'),
     path('tournament/list/', views.TournamentOpenListAPI.as_view(), name='tournament-list'),
     path('tournament/history/<int:id>/', views.TournamentHistoryListAPI.as_view(), name='tournament-history'),

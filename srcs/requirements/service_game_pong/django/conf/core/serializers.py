@@ -3,7 +3,7 @@ from channels.layers import get_channel_layer
 from django.db.models import Q
 from django.urls import reverse
 from rest_framework import generics, permissions, serializers
-from core.models import Game, Invitation, StatusChoices, TournamentStatusChoices, TypeChoices
+from core.models import Game, Invitation, StatusChoices, TournamentStatusChoices, TypeChoices, Winrate
 from shared_models.models import Player, Block, Match, Tournament
 
 class PongPlayerSerializer(serializers.ModelSerializer):
@@ -532,11 +532,17 @@ class TournamentStartSerializer(serializers.Serializer):
         return attrs
 
     def calculate_win_rate(self, player):
-        """Calcule le win rate d'un joueur (en pourcentage)."""
-        total_games = player.victory + player.defeat
-        if total_games == 0:
+        """Calcule le winrate d'un joueur."""
+        try:
+            # Récupérer ou créer le winrate si nécessaire
+            winrate, _ = Winrate.objects.get_or_create(player=player)
+            total_games = winrate.victory + winrate.defeat
+            if total_games == 0:
+                return 0.0
+            return (winrate.victory / total_games) * 100
+        except Exception:
+            # En cas d'erreur, retourner 0
             return 0.0
-        return (player.victory / total_games) * 100
 
     def pair_players(self, tournament):
         """Trie les joueurs par win rate et crée les paires pour les demi-finales."""
@@ -873,3 +879,10 @@ class TournamentCancelSerializer(serializers.Serializer):
             raise serializers.ValidationError({"code": 4028}) #Tournoi non supprimable (pas en statut ouvert)
 
         return attrs
+
+class WinrateSerializer(serializers.ModelSerializer):
+    player = PongPlayerSerializer(read_only=True)
+    
+    class Meta:
+        model = Winrate
+        fields = ['id', 'player', 'victory', 'defeat']

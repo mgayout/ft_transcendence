@@ -66,3 +66,12 @@ class Game(models.Model):
 
     def __str__(self):
         return f"Game {self.id} (Round {self.round_number}) in Match {self.match.id if self.match else 'N/A'}"
+
+
+class Winrate(models.Model):
+    player = models.OneToOneField(Player, on_delete=models.CASCADE, related_name='winrate')
+    victory = models.PositiveIntegerField(default=0)
+    defeat = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.player.name} - {self.victory}W/{self.defeat}L"
