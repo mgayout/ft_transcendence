@@ -99,7 +99,6 @@ class Match(models.Model):
     winner = models.ForeignKey(Player, on_delete=models.SET_NULL, related_name='won_matches', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    is_treated = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Match {self.id} - {self.status} - {self.type}"

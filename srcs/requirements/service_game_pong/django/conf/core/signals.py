@@ -63,30 +63,23 @@ def update_winrate_player(sender, instance, **kwargs):
         except Match.DoesNotExist:
             return
             
-        # Vérifier si le statut change de non-TERMINE à TERMINE
         if (old_instance.status != StatusChoices.TERMINE and 
             instance.status == StatusChoices.TERMINE and 
             instance.winner):
             
-            print(f"Match {instance.id} change de statut vers TERMINE - mise à jour des winrates")
-            
-            # Obtenir ou créer les winrates
             winrate_1, _ = Winrate.objects.get_or_create(player=instance.player_1)
             winrate_2, _ = Winrate.objects.get_or_create(player=instance.player_2)
             
-            # Mettre à jour les victoires/défaites en fonction du gagnant
             if instance.winner == instance.player_1:
                 winrate_1.victory += 1
                 winrate_2.defeat += 1
             elif instance.winner == instance.player_2:
                 winrate_2.victory += 1
                 winrate_1.defeat += 1
-            
-            # Sauvegarder les changements
+
             winrate_1.save()
             winrate_2.save()
             
-            # Pas besoin de définir is_treated car nous détectons le changement de statut
             
     except Exception as e:
         print(f"Erreur dans update_winrate_player pour match {instance.id}: {str(e)}")
