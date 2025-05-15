@@ -266,7 +266,7 @@ class BlockListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user.player_profile
-        return Block.objects.filter(blocker=user)
+        return Block.objects.filter(blocker=user) | Block.objects.filter(blocked=user)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UnblockPlayerView(generics.DestroyAPIView):

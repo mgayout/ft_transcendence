@@ -7,10 +7,13 @@ function Profile({ user, profile }) {
 
 	const navigate = useNavigate()
 	const [online, setOnline] = useState([])
+	const [winrate, setWinrate] = useState([])
 	
 	const fonction = async () => {
 		try {
 			const a = await axiosInstance.get(`/pong/matches/?player_id=${profile.id}`)
+			const b = await axiosInstance.get(`/pong/winrate/?player_id=${profile.id}`)
+			//console.log(b)
 			//console.log(a)
 			const response = a.data.filter(a => a.status == "Terminée")
 			//console.log(response)
@@ -47,6 +50,7 @@ function Profile({ user, profile }) {
 					other: other})
 			}
 			setOnline(matches)
+			setWinrate(b.data)
 		}
 		catch(error) {
 			console.log(error)
@@ -55,7 +59,7 @@ function Profile({ user, profile }) {
 
 	useEffect(() => {
 		fonction()
-		return() => setOnline([])
+		return() => setOnline([]), setWinrate([])
 	},[profile])
 	
 	function CardItem({ card }) {
@@ -106,7 +110,7 @@ function Profile({ user, profile }) {
 				<div className="container pt-5 pb-2">
 					<div className="d-flex flex-row justify-content-between align-items-start gap-3 flex-nowrap">
 						<div className="d-flex flex-column gap-3 align-items-center w-100">
-						<h1 className="fs-4 text-white">Victory : {profile.victory} | Defeat : {profile.defeat}</h1>
+						<h1 className="fs-4 text-white">Victory : {winrate.victory} | Defeat : {winrate.defeat}</h1>
 						{online.map((card, idx) => (<CardItem card={card} key={idx}/>))}
 						</div>
 					</div>
@@ -118,3 +122,4 @@ function Profile({ user, profile }) {
 }
 
 export default Profile
+

@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
-import { useNavigate } from "react-router-dom"
 import { useAuth } from '../auth/context'
 
 const ChatContext = createContext(null)
@@ -7,7 +6,7 @@ const ChatContext = createContext(null)
 export const useChat = () => useContext(ChatContext)
 
 export const Chat = ({ children }) => {
-	const navigate = useNavigate()
+
 	const socketRef = useRef(null)
 	const [messages, setMessages] = useState([])
 	const { isAuth } = useAuth()
@@ -17,7 +16,6 @@ export const Chat = ({ children }) => {
 		const Atoken = localStorage.getItem('Atoken')
 		const id = localStorage.getItem("id")
 		const ws = new WebSocket(`ws://${id}/live_chat/ws/chat/general/?token=${Atoken}`)
-		//const ws = new WebSocket(`wss://transcendence.fr/live_chat/ws/chat/general/?token=${Atoken}`)
 		socketRef.current = ws
 
 		ws.onopen = () => {
@@ -26,7 +24,10 @@ export const Chat = ({ children }) => {
 
 		ws.onmessage = (event) => {
 			const data = JSON.parse(event.data)
-			console.log(data)
+			if (data && data.code != "1000") {
+				console.log("Chat notif => ", data)
+				setMessages(data)
+			}
 		}
 
 		ws.onclose = () => {

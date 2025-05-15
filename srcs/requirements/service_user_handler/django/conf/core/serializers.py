@@ -73,13 +73,13 @@ class FriendshipSerializer(serializers.ModelSerializer):
         fields = ['player_1_name', 'player_2_name', 'status', 'created_at']
 
 
-class BlockSerializer(serializers.ModelSerializer):
-    blocker_name = serializers.CharField(source='blocker.name')
-    blocked_name = serializers.CharField(source='blocked.name')
+class BlockListSerializer(serializers.ModelSerializer):
+    blocker = serializers.CharField(source='blocker.name', read_only=True)
+    blocked = serializers.CharField(source='blocked.name', read_only=True)
 
     class Meta:
         model = Block
-        fields = ['blocker_name', 'blocked_name', 'created_at']
+        fields = ['id', 'blocked', 'blocker','created_at']
 
 #===CRUD PLAYER====
 

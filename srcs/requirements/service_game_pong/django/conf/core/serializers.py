@@ -38,7 +38,12 @@ class PongMatchSerializer(serializers.ModelSerializer):
 
     def get_url(self, obj):
         request = self.context.get('request')
-        return reverse('match-detail', args=[obj.id])
+        response = {
+            'url': reverse('match-detail', args=[obj.id]),
+        }
+        if request and request.user and (request.user == obj.player_1.user or request.user == obj.player_2.user):
+            response['ws_url'] = f"wss://transcendence.fr/pong/ws/match/{obj.id}/"
+        return response
 
 class PongInvitationSerializer(serializers.ModelSerializer):
     from_player = PongPlayerSerializer(read_only=True)

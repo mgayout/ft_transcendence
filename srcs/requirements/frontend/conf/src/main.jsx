@@ -8,7 +8,6 @@ import { WebSocketProvider } from './websockets/provider.jsx'
 import App from './App'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
-localStorage.setItem("id", "transcendence.fr")
 root.render(
 	<BrowserRouter>
 		<AuthProvider>

@@ -3,10 +3,11 @@ import axiosInstance from './instance'
 const refreshData = async () => {
 	try {
 		const rawData = localStorage.getItem("data")
+		if (!rawData) return
 		const data = JSON.parse(rawData)
-		const config = {headers: {Authorization: `Bearer ${localStorage.getItem("Atoken")}`}}
+		if (!data?.id) return
 		const params = { token: localStorage.getItem("Rtoken") }
-		const response = await axiosInstance.get(`/users/api/player/${data.id}`, {headers: config.headers, param: params})
+		const response = await axiosInstance.get(`/users/api/player/${data.id}`, { params: params })
 		if (response.data)
 			localStorage.setItem("data", JSON.stringify(response.data))
 	}
@@ -16,12 +17,17 @@ const refreshData = async () => {
 }
 
 const getData = () => {
-	const rawData = localStorage.getItem("data")
-	const data = JSON.parse(rawData)
-	return (data)
+	try {
+		const rawData = localStorage.getItem("data")
+		return rawData ? JSON.parse(rawData) : null
+	}
+	catch(error) {
+		console.log(error)
+		return null
+	}
 }
 
-const removeData = async () => {
+const removeData = () => {
 	localStorage.removeItem("data")
 	localStorage.removeItem("Atoken")
 	localStorage.removeItem("Rtoken")

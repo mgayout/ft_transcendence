@@ -22,11 +22,9 @@ function WaitMatch({ setState }) {
 
 	const cancel = async () => {
 		try {
-			const invitations = await axiosInstance.get("pong/invitations/")
+			const invitations = await axiosInstance.get("/pong/invitations/")
 			const a = invitations.data.find(invite => invite.from_player.name == user.name)
-			console.log(a.id)
-			const response = await axiosInstance.delete(`/invitations/${a.id}/cancel/`)
-			console.log(response)
+			await axiosInstance.put(`/pong/invitations/${a.id}/cancel/`)
 			setState("")
 		}
 		catch(error) {

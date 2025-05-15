@@ -74,7 +74,7 @@ function Settings() {
 						<Form.Label className="mb-2 text-light">Password</Form.Label>
 						<div className="d-flex">
 							<Form.Control type={passShow1 ? "text" : "password"} onChange={(e) => setPassword1(e.target.value)}
-								id="password1" autoComplete="password" className="rounded-0 rounded-start"
+								id="password1" className="rounded-0 rounded-start"
 								value={password1} placeholder="Insert password" name="password"/>
 							<Button type="button" className="rounded-0 rounded-end btn btn-light"
 								aria-label="show" onClick={() => setPassShow1(!passShow1)}>
@@ -98,7 +98,7 @@ function Settings() {
 						<Form.Label className="mb-2 text-light">Password</Form.Label>
 						<div className="d-flex">
 							<Form.Control type={passShow2 ? "text" : "password"} onChange={(e) => setPassword2(e.target.value)}
-								id="password2" autoComplete="password" className="rounded-0 rounded-start"
+								id="password2" className="rounded-0 rounded-start"
 								value={password2} placeholder="Insert password" name="password"/>
 							<Button type="button" className="rounded-0 rounded-end btn btn-light"
 									aria-label="show" onClick={() => setPassShow2(!passShow2)}>

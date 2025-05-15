@@ -19,22 +19,16 @@ function Online({ user }) {
 		try {
 			const matchData = await axiosInstance(`/pong/matches/?player_id=${user.id}`)
 			const inviteData = await axiosInstance.get("/pong/invitations/")
-			let details
-
 			const a = matchData.data
 				.filter(match => match.status == "En cours" && (match.player_1.name == user.name || match.player_2.name == user.name))
-				.map(match => ({ id: match.id }))
-			if (a.length)
-				details = await axiosInstance(`/pong/matches/${a[0].id}`)
-			if (details) {
-				console.log(details)
+			if (a.length) {
 				setMessages({
 					type: "match_created",
-					player_1: details.data.player_1.name,
-					player_2: details.data.player_2.name,
-					ws_url: details.data.url.ws_url})
-				if (details.data.player_1.name == user.name) setType("paddle_l")
-				else if (details.data.player_2.name == user.name) setType("paddle_r")
+					player_1: a[0].player_1.name,
+					player_2: a[0].player_2.name,
+					ws_url: a[0].url.ws_url})
+				if (a[0].player_1.name == user.name) setType("paddle_l")
+				else if (a[0].player_2.name == user.name) setType("paddle_r")
 				setState("wait")
 			}
 			const b = inviteData.data.find(invite => invite.status == "En attente" && invite.from_player.name == user.name)

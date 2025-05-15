@@ -13,6 +13,7 @@ function BlockModal({ tab }) {
 		try {
 			const playerData = await axiosInstance.get('/users/api/player/')
 			const blockData = await axiosInstance.get('/users/api/block/list/')
+			console.log(blockData)
 			let temp
 
 			const blocked = blockData.data.filter(block => block.blocker == user.name)
@@ -43,13 +44,14 @@ function BlockModal({ tab }) {
 	}
 		
 	useEffect(() => {
-		list()
+		if (tab == "blocklist")
+			list()
 	}, [tab])
 
 	return (
 		<>
 			<div className="d-flex justify-content-center mb-3">
-    			<input type="text" className="form-control w-50" placeholder="Search for a friend..." value={search} onChange={filterList}/>
+    			<input type="text" className="form-control w-50" placeholder="Search for a friend..." value={search} onChange={filterList} id="searchfriendBlock"/>
   			</div>
 			<div className="d-flex flex-column align-items-center">
 				<ul className="list-unstyled w-100 d-flex flex-column align-items-center gap-3">

@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "react-bootstrap"
 import FriendModal from "../friend/modal.jsx"
-import ChatModal from "../chat/chat-modal.jsx"
+import ChatModal from "../chat/modal.jsx"
 import QuitModal from "../global/quit-modal.jsx"
 import { useGame } from "../websockets/game.jsx"
 

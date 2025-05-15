@@ -55,7 +55,6 @@ function PlayMatch() {
 			setWinner(lastMessage.winner)
 			setPaused(false)
 			setEnd(true)
-			console.log("socket.close")
 		}
 		if (lastMessage.type == "game_paused") {
 			setPaused(true)

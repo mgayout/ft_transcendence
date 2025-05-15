@@ -16,7 +16,8 @@ const App = () => {
 	const { loading, user } = useAuth()
 
 	if (loading)
-		return(<></>)
+		return(<div className="text-center mt-5">Loading...</div>)
+
 
 	return (
 		<AuthRedirect>

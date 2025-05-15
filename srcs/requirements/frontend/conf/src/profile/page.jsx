@@ -21,7 +21,6 @@ function ProfilePage({ user }) {
 				const config = {headers: {Authorization: `Bearer ${Atoken}`}}
 				const params = { token: Rtoken }
 				const playerData = await axiosInstance.get('/users/api/player/', {headers: config.headers, param: params})
-				console.log(playerData.data)
 				const data = playerData.data.filter(player => player.name == username)
 				if (data.length == 1)
 					setProfile(data[0])

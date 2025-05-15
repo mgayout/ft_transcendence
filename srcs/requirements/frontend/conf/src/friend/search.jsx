@@ -50,13 +50,14 @@ function SearchModal({ tab }) {
 	}
 	
 	useEffect(() => {
-		list()
+		if (tab == "addfriend")
+			list()
 	}, [tab])
 
 	return (
 		<>
 			<div className="d-flex justify-content-center mb-3">
-				<input type="text" className="form-control w-50" placeholder="Search for a friend..." value={search} onChange={filterList}/>
+				<input type="text" className="form-control w-50" placeholder="Search for a friend..." value={search} onChange={filterList} id="searchfriendSearch"/>
 			</div>
 			<div className="d-flex flex-column align-items-center">
 				<ul className="list-unstyled w-100 d-flex flex-column align-items-center gap-3">
