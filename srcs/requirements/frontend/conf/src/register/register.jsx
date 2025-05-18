@@ -32,10 +32,8 @@ function Register() {
 				password: password1,
 				password2: password2
 			})
-			//console.log(response.data)
-			if (response.data.code == 1000) {
-				navigate("/")
-			}
+			console.log(response.data)
+			if (response.data.code == 1000) navigate("/")
 		}
 		catch (error) {
 			console.log(error)
@@ -51,7 +49,7 @@ function Register() {
 	}
 
 	return (
-        <Form>
+        <Form onSubmit={sendAuth}>
             <Form.Group className="fs-5 fs-lg-4 mb-2 mb-lg-4">
                 <Form.Label className="mb-2 text-light" htmlFor="username">Username</Form.Label>
                 <Form.Control
@@ -113,7 +111,6 @@ function Register() {
 				<Button
 					type="submit"
 					className="btn btn-secondary rounded fw-bolder"
-					onClick={sendAuth}
 				>
 					REGISTER
 				</Button>

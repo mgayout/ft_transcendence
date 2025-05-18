@@ -3,16 +3,9 @@ import { removeData } from './data.js'
 
 const id = localStorage.getItem('id')
 
-const axiosInstance = axios.create({
-	baseURL: `https://${id}`,
-	withCredentials: true,
-})
+const axiosInstance = axios.create({baseURL: `https://${id}`})
 
-const rawAxios = axios.create({
-	baseURL: `https://${id}`,
-	withCredentials: true,
-})
-
+const rawAxios = axios.create({baseURL: `https://${id}`})
 
 let isRefreshing = false
 let refreshPromise = null
@@ -46,7 +39,7 @@ axiosInstance.interceptors.request.use(async (config) => {
 
 	let Atoken = localStorage.getItem('Atoken')
 	const Rtoken = localStorage.getItem('Rtoken')
-	const isAuthAPI = config.url && config.url.includes("/users/api/login/")
+	const isAuthAPI = config.url && config.url.includes("/users/api/login/") || config.url.includes("/users/api/register/")
 
 	if (isAuthAPI)
 		return config

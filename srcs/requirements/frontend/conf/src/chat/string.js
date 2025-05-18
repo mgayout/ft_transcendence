@@ -8,15 +8,17 @@ export function updateTime(time) {
 }
 
 export function updateSender(sender) {
-	if (!sender) return ""
-	if (sender.length < 10)
+	if (!sender) return "".padEnd(10, ' ')
+	if (sender.length <= 10)
 		return sender.padEnd(10, ' ')
-	else if (sender.length > 10)
-		return sender.slice(0, 9) + '.'
-	return sender
+	return sender.slice(0, 9) + '.'
 }
+
 
 export function updateContent(content) {
 	if (!content) return ""
-	return content.match(new RegExp(`.{1,100}`, 'g')).join('\n                               : ')
+	const lines = content.match(/.{1,70}/g) || [content]
+	return lines.map((line, index) =>
+		index === 0 ? line : ' '.repeat(24) + ': ' + line
+	).join('\n')
 }

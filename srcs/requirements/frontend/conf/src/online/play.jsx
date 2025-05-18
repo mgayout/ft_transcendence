@@ -43,7 +43,7 @@ function PlayMatch() {
 	const [end, setEnd] = useState(false)
 	const closeEnd = () => setEnd(false)
 	const [winner, setWinner] = useState("")
-	const [timer, setTimer] = useState(0)
+	const [timer, setTimer] = useState(60)
 	const socket = getSocket()
 
 	useEffect(() => {

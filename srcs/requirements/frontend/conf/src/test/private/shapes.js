@@ -3,11 +3,10 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
 import { AmbientLight, DirectionalLight } from 'three'
 
 export const setFloor = (scene) => {
-	const geometry = new THREE.PlaneGeometry(300, 300)
+	const geometry = new THREE.PlaneGeometry(1000, 1000)
 	const material = new THREE.MeshStandardMaterial({color: 0x7fdce2})
 	const floor = new THREE.Mesh(geometry, material)
-	floor.position.set(0, 0, -1.5) //
-	//floor.rotateX(-Math.PI * 0.5) //////////
+	floor.position.set(0, 0, -1.5)
 	floor.receiveShadow = true
 	scene.add(floor)
 	return floor
@@ -27,91 +26,86 @@ export const setLine = () => {
 		geometry = new THREE.PlaneGeometry(0.8, 0.5)
 		material = new THREE.MeshBasicMaterial({color: 0x2a484a})
 		cube = new THREE.Mesh(geometry, material)
-		cube.position.set(17 - (i * ((17 * 2) / n)), 0, -1.4) //
-		cube.rotateX(-Math.PI * 0.5) //////////////////
+		cube.position.set(17 - (i * ((17 * 2) / n)), 0, -1.4)
+		cube.rotateX(-Math.PI * 0.5)
 		cubes.push(cube)
 	}
 	return {cubes, n}
 }
 
-export const setPilar = () => {
-	const geometry = new THREE.TubeGeometry( new THREE.CatmullRomCurve3([
-		new THREE.Vector3(0, 0, 0),
-		new THREE.Vector3(0, 15, 0),
-		new THREE.Vector3(-11, 18, 0),
-	], false), 64, 0.5, 16, false)
-	const material = new THREE.MeshStandardMaterial({color: 0xDDDDDD})
-	const pilarL = new THREE.Mesh(geometry, material)
-	//pilarL.castShadow = true
-	//pilarL.receiveShadow = true
-	const pilarR = pilarL.clone()
-	pilarL.position.set(17, 0, 0)
-	pilarR.position.set(-17, 0, 0)
-	pilarR.rotateY(-Math.PI)
-	return {pilarL, pilarR}
-}
-
 export const setBorder = () => {
 	const geometry = new THREE.TubeGeometry( new THREE.CatmullRomCurve3([
-		new THREE.Vector3(0, 0, 0),
-		new THREE.Vector3(5, 0, 0),
-		new THREE.Vector3(5, 5, 0),
-		new THREE.Vector3(-5, 5, 0),
-		new THREE.Vector3(-5, 0, 0),
-	], true), 64, 0.5, 16, true)
+		new THREE.Vector3(-15, 0, 0),
+		new THREE.Vector3(-15, 0, 20),
+		new THREE.Vector3(15, 0, 20),
+		new THREE.Vector3(15, 0, 0),
+	], true), 64, 1, 16, false)
 	const material = new THREE.MeshStandardMaterial({color: 0xDDDDDD})
 	const border = new THREE.Mesh(geometry, material)
-	border.castShadow = true
-	border.receiveShadow = true
-	border.position.set(0, 15, 0)
+	border.position.set(35, 31, -5)
 	return border
 }
 
 export const setBScreen = () => {
-	const geometry = new RoundedBoxGeometry(10.4, 6, 0.1, 5, 0.5)
-	const material = new THREE.MeshStandardMaterial({color: 0x000000})
-	const bscreen = new THREE.Mesh(geometry, material)
-	bscreen.castShadow = true
-	bscreen.receiveShadow = true
-	bscreen.position.set(0, 17.6, 0)
-	bscreen.rotateY(Math.PI)
-	return bscreen
+	const geometry1 = new THREE.PlaneGeometry(34, 12)
+	const geometry2 = new THREE.PlaneGeometry(32, 2)
+	const geometry3 = new THREE.PlaneGeometry(26, 2.5)
+	const material = new THREE.MeshStandardMaterial({color: 0x000000, side: THREE.DoubleSide})
+	const bscreen1 = new THREE.Mesh(geometry1, material)
+	const bscreen2 = new THREE.Mesh(geometry2, material)
+	const bscreen3 = new THREE.Mesh(geometry3, material)
+	bscreen1.position.set(35, 32, 7)
+	bscreen2.position.set(35, 32, 14)
+	bscreen3.position.set(35, 32, 16)
+	bscreen1.rotateX(-Math.PI / 2)
+	bscreen2.rotateX(-Math.PI / 2)
+	bscreen3.rotateX(-Math.PI / 2)
+	return {bscreen1, bscreen2, bscreen3}
 }
 
 export const setLight = (scene) => {
-	const ambientLight = new AmbientLight(0xffffff, 0.6)
-	const dirLight = new DirectionalLight(0xffffff, 0.7)
-
-	dirLight.position.set(0, 0, 20) //
+	const ambientLight = new AmbientLight(0xffffff, 0.5)
+	const dirLight = new DirectionalLight(0xffffff, 1)
+	dirLight.position.set(50, 30, 20)
+	dirLight.target.position.set(35, 15, 0)
 	dirLight.castShadow = true
-	dirLight.shadow.mapSize.set(1024, 1024)
-	dirLight.shadow.camera.top = 50
-	dirLight.shadow.camera.bottom = -50
-	dirLight.shadow.camera.left = -50
-	dirLight.shadow.camera.right = 50
-	dirLight.shadow.radius = 10
-	dirLight.shadow.blurSamples = 20
-	scene.add(ambientLight, dirLight)
+	dirLight.shadow.bias = -0.0005
+	dirLight.shadow.mapSize.width = 1024
+	dirLight.shadow.mapSize.height = 1024
+
+
+	const d = 60
+	dirLight.shadow.camera.left = -d
+	dirLight.shadow.camera.right = d
+	dirLight.shadow.camera.top = d
+	dirLight.shadow.camera.bottom = -d
+	dirLight.shadow.camera.near = 1
+	dirLight.shadow.camera.far = 150
+
+	scene.add(ambientLight, dirLight, dirLight.target)
 	return {ambientLight, dirLight}
 }
 
-export const setPaddle = (type) => {
-	const geometry = new RoundedBoxGeometry(1, 5, 1, 5, 0.5)
+export const setPaddle = () => {
+	const geometry = new THREE.BoxGeometry(1, 5, 1)
 	const material = new THREE.MeshStandardMaterial({color: 0x2a484a})
-	const paddle = new THREE.Mesh(geometry, material)
-	paddle.castShadow = true
-	paddle.receiveShadow = true
-	return paddle
+	const paddleL = new THREE.Mesh(geometry, material)
+	paddleL.castShadow = true
+	paddleL.receiveShadow = true
+	const paddleR = paddleL.clone()
+	return {paddleL, paddleR}
 }
 
-export const setWall = (type) => {
-	const geometry = new RoundedBoxGeometry(1, 2, 62, 5, 0.5)
+export const setWall = () => {
+	const geometry = new RoundedBoxGeometry(75, 1, 3, 5, 0.5)
 	const material = new THREE.MeshStandardMaterial({color: 0xDDDDDD})
-	const wall = new THREE.Mesh(geometry, material)
-	wall.castShadow = true
-	wall.receiveShadow = true
-	wall.position.set((type == "left" ? 17 : -17), 0, 0)
-	return wall
+	const wallL = new THREE.Mesh(geometry, material)
+	wallL.castShadow = true
+	wallL.receiveShadow = true
+	const wallR = wallL.clone()
+	wallL.position.set(35, -0.5, 0)
+	wallR.position.set(35, 30.5, 0)
+	return {wallL, wallR}
 }
 
 export const setBall = () => {
@@ -121,4 +115,8 @@ export const setBall = () => {
 	ball.castShadow = true
 	ball.receiveShadow = true
 	return ball
+}
+
+export const setScore = () => {
+	
 }

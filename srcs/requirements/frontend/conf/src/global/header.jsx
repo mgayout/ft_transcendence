@@ -6,7 +6,7 @@ import ChatModal from "../chat/modal.jsx"
 import QuitModal from "../global/quit-modal.jsx"
 import { useGame } from "../websockets/game.jsx"
 
-function Header({ user, state }) {
+function Header({ user, state, setState}) {
 
 	const navigate = useNavigate()
 	const [friend, setFriend] = useState(false)
@@ -21,6 +21,19 @@ function Header({ user, state }) {
 		if (state && state == "play")
 			socket.close()
 		navigate(string)
+	}
+
+	const setTo = (string) => {
+		if (state && state == "play") {
+			socket.close()
+			setState("")
+		}
+		if (string == "friend")
+			setFriend(true)
+		else if (string == "chat")
+			setChat(true)
+		else if (string == "quit")
+			setQuit(true)
 	}
 
 	return (
@@ -39,13 +52,13 @@ function Header({ user, state }) {
 						</Button>
 						<h1 className="navbar-brand text-bg-dark fw-bolder fs-1 m-0 p-0 user-select-none"
 							style={{textShadow: "3px 3px 5px rgba(0, 0, 0, 0.7)"}}>Pong.</h1>
-						<Button className="rounded-0 btn btn-dark fw-bolder" onClick={() => setFriend(true)}>
+						<Button className="rounded-0 btn btn-dark fw-bolder" onClick={() => setTo("friend")}>
 							<i className="bi bi-people-fill" style={{fontSize: "40px"}}/>
 						</Button>
-						<Button className="rounded-0 btn btn-dark fw-bolder" onClick={() => setChat(true)}>
+						<Button className="rounded-0 btn btn-dark fw-bolder" onClick={() => setTo("chat")}>
 							<i className="bi bi-chat-dots-fill" style={{fontSize: "40px"}}/>
 						</Button>
-						<Button className="rounded-0 btn btn-dark fw-bolder" onClick={() => setQuit(true)}>
+						<Button className="rounded-0 btn btn-dark fw-bolder" onClick={() => setTo("quit")}>
 							<i className="bi bi-power" style={{fontSize: "40px"}}/>
 						</Button>
 					</div>

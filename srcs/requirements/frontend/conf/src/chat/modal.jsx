@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react"
+import { useNavigate } from "react-router-dom"
 import { Modal } from "react-bootstrap"
 import axiosInstance from '../auth/instance'
 import { useChat } from "../websockets/chat"
@@ -8,6 +9,7 @@ import { updateTime, updateSender, updateContent} from "./string.js"
 
 function ChatModal({ chat, setChat }) {
 
+	const navigate = useNavigate()
 	const handleClose = () => setChat(false)
 	const [chats, setChats] = useState([])
 	const [message, setMessage] = useState("")
@@ -62,6 +64,23 @@ function ChatModal({ chat, setChat }) {
 		}
 	}
 
+	const invite = async (id, name) => {
+		try {
+			const matchData = await axiosInstance(`/pong/matches/?player_id=${user.id}`)
+			if (matchData.data.find(match => match.status == "En cours")) return
+			const inviteData = await axiosInstance.get("/pong/invitations/")
+			if (inviteData.data.find(invite => invite.status == "En attente" && invite.from_player.name == user.name)) return
+			await axiosInstance.post("pong/invitations/create/", {
+				player_2_id: id,
+				number_of_rounds: 1,
+				max_score_per_round: 3,
+				match_type: "Normal"
+			})
+			await axiosInstance.post(`/live_chat/private/send/${id}/`, {content: `*${user.name} invited ${name} to an online game.*`})
+		}
+		catch(error) {console.log(error)}
+	}
+
 	const send = async (id) => {
 		if (!message) return
 		try {
@@ -71,6 +90,11 @@ function ChatModal({ chat, setChat }) {
 				await axiosInstance.post("/live_chat/general/send/", {content: message})}
 		catch(error) {console.log(error)}
 		finally {setMessage("")}
+	}
+
+	const navigateTo = (string) => {
+		navigate(string)
+		handleClose()
 	}
 
 	useEffect(() => {
@@ -87,7 +111,7 @@ function ChatModal({ chat, setChat }) {
 		}
 	}, [chats])
 
-	const renderChatTab = (lower, active, groupID, id, data) => {
+	const renderChatTab = (lower, active, groupID, groupNAME, id, data) => {
 		
 		if (!bottomRefs.current[id])
 			bottomRefs.current[id] = React.createRef()
@@ -99,8 +123,11 @@ function ChatModal({ chat, setChat }) {
 					<div style={{ border: '1px solid #ddd', borderRadius: '4px', padding: '10px', backgroundColor: '#f8f9fa' }}
 						className="flex-grow-1 overflow-auto mb-3">
    						{[...data].reverse().map((chatItem) => (
-							<p style={{ whiteSpace: "pre-wrap" }}>
-								{"["}{updateTime(chatItem.timestamp)}{"]"} | {updateSender(chatItem.sender_name)} | {updateContent(chatItem.content)}
+							<p style={{ whiteSpace: "pre-wrap", fontFamily: "monospace", margin: 0 }} key={chatItem.timestamp + chatItem.sender_name}>
+								{"["}{updateTime(chatItem.timestamp)}{"] | "}
+								<a style={{ cursor: 'pointer' }}
+									onClick={() => navigateTo(`/profile/${chatItem.sender_name}`)}>{updateSender(chatItem.sender_name)}
+								</a>{" : "}{updateContent(chatItem.content)}
 							</p>
 						))}
 						<div ref={bottomRefs.current[id]} />
@@ -110,6 +137,7 @@ function ChatModal({ chat, setChat }) {
 							onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => {if (e.key === "Enter") {
 								e.preventDefault()
 								send(groupID)}}}/>
+						{id ? <button className="btn btn-primary" type="button" onClick={() => invite(groupID, groupNAME)}>Play</button> : <></>}
 						<button className="btn btn-primary" type="button" onClick={() => send(groupID)}>Send</button>
 					</div>
 				</div>
@@ -137,7 +165,7 @@ function ChatModal({ chat, setChat }) {
 					</div>
 					<div className="tab-content flex-grow-1 w-100">
 					{chats.map((chatItem) => (
-						renderChatTab(chatItem.lower, chatItem.active, chatItem.groupID, chatItem.id, chatItem.data)))}
+						renderChatTab(chatItem.lower, chatItem.active, chatItem.groupID, chatItem.groupNAME, chatItem.id, chatItem.data)))}
 					</div>
 				</div>
 			</Modal.Body>

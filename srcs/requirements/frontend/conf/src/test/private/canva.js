@@ -1,29 +1,25 @@
-import { useEffect } from 'react'
 import * as THREE from 'three'
-import { setFloor, setFog, setLine, setPilar, setBorder, setBScreen, setLight, setPaddle, setWall, setBall } from './shapes'
+import { setFloor, setFog, setLine, setBorder, setBScreen, setLight, setPaddle, setWall, setBall, setScore } from './shapes'
 
 const setAll = (scene, state) => {
 
 	const floor = setFloor(scene)
 	const fog = setFog(scene)
-	const line = setLine()
-	//const pilar = setPilar()
-	//const border = setBorder()
-	//const bscreen = setBScreen()
+	//const line = setLine()
+	const border = setBorder()
+	const bscreen = setBScreen()
 	const light = setLight(scene)
-	const paddle1 = setPaddle("left")
-	const paddle2 = setPaddle("right")
-	//const wall1 = setWall("left")
-	//const wall2 = setWall("right")
+	const paddle = setPaddle()
+	const wall = setWall()
 	const ball = setBall()
+	const score = setScore()
 
 	if (state == "play") {
-		/*for (let i = 0; i < line.n; i++)
-			scene.add(line.cubes[i])*/
-		//scene.add(pilar.pilarL, pilar.pilarR, border, bscreen)
-		scene.add(paddle1, paddle2/*, wall1, wall2*/, ball)
+		//line.cubes.forEach(cube => scene.add(cube))
+		scene.add(paddle.paddleL, paddle.paddleR, wall.wallL, wall.wallR, ball)
+		scene.add(border, bscreen.bscreen1, bscreen.bscreen2, bscreen.bscreen3)
 	}
-	return {floor, fog, line, /*pilar, border, bscreen,*/ light, paddle1, paddle2, /*wall1, wall2,*/ ball}
+	return {floor, fog, light, paddle, wall, ball, border, bscreen}
 }
 
 const createCanva = (canva, state, lastPongMessage) => {
@@ -31,15 +27,14 @@ const createCanva = (canva, state, lastPongMessage) => {
 	const scene = new THREE.Scene()
 
 	const camera = new THREE.PerspectiveCamera(60, canva.width / canva.height, 0.1)
-	camera.position.set(35, 55, 20) //
-	camera.lookAt(35, 0, 0) //
-	camera.rotation.z = Math.PI
+	camera.position.set(35, -30, 30)
+	camera.lookAt(35, 15, 5)
 	
 	const renderer = new THREE.WebGLRenderer({ canvas: canva, antialias: true })
 	renderer.shadowMap.enabled = true
 	renderer.shadowMap.type = THREE.VSMShadowMap
 	renderer.toneMapping = THREE.ACESFilmicToneMapping
-	renderer.toneMappingExposure = 1.2
+	renderer.toneMappingExposure = 2.0
 	renderer.setSize(canva.width, canva.height)
 
 	const objects = setAll(scene, state)
@@ -48,9 +43,9 @@ const createCanva = (canva, state, lastPongMessage) => {
 
 	const animate = () => {
 		
-		objects.paddle1.position.set(0, lastPongMessage ? lastPongMessage.paddleL : 15, 1)
-		objects.paddle2.position.set(70, lastPongMessage ? lastPongMessage.paddleR : 15, 1)
-		objects.ball.position.set(lastPongMessage ? lastPongMessage.x : 35, lastPongMessage ? lastPongMessage.y : 15, 1)
+		objects.paddle.paddleL.position.set(0.5, lastPongMessage ? (lastPongMessage.paddleL + 2.5) : 17.5, 1)
+		objects.paddle.paddleR.position.set(70.5, lastPongMessage ? (lastPongMessage.paddleR + 2.5) : 17.5, 1)
+		objects.ball.position.set(lastPongMessage ? (lastPongMessage.x + 0.5) : 35.5, lastPongMessage ? (lastPongMessage.y + 0.5) : 15.5, 1)
 
 		renderer.render(scene, camera)
 		animationFrameId = requestAnimationFrame(animate)
@@ -60,71 +55,69 @@ const createCanva = (canva, state, lastPongMessage) => {
 
 	const dispose = () => {
 		cancelAnimationFrame(animationFrameId);
-		if (objects.floor.current) {
-			objects.floor.current.geometry.dispose()
-			objects.floor.current.material.dispose()
-			scene.remove(objects.floor.current)
+		if (objects.floor) {
+			objects.floor.geometry.dispose()
+			objects.floor.material.dispose()
+			scene.remove(objects.floor)
 		}
-		if (objects.fog.current) {
-			objects.fog.current.geometry.dispose()
-			objects.fog.current.material.dispose()
-			scene.remove(objects.fog.current)
+		if (objects.line && Array.isArray(objects.line.cubes)) {
+			objects.line.cubes.forEach(cube => {
+				cube.geometry.dispose()
+				cube.material.dispose()
+				scene.remove(cube)})
 		}
-		if (objects.line.current) {
-			for (let i = 0; i < objects.line.current.n; i++) {
-				objects.line.current.cubes[i].geometry.dispose()
-				objects.line.current.cubes[i].material.dispose()
-				scene.remove(objects.line.current.cubes[i])
+
+		if (objects.light) {
+			if (objects.light.ambientLight)
+				scene.remove(objects.light.ambientLight)
+			if (objects.light.dirLight) {
+				scene.remove(objects.light.dirLight)
+				if (objects.light.dirLight.target)
+					scene.remove(objects.light.dirLight.target)
+			}
+			if (objects.light.cornerLights && Array.isArray(objects.light.cornerLights))
+				objects.light.cornerLights.forEach(light => {scene.remove(light)})
+		}
+		if (objects.border) {
+			objects.border.geometry.dispose()
+			objects.border.material.dispose()
+			scene.remove(objects.border)
+		}
+		if (objects.paddle) {
+			if (objects.paddle.paddleL) {
+				objects.paddle.paddleL.geometry.dispose()
+				objects.paddle.paddleL.material.dispose()
+				scene.remove(objects.paddle.paddleL)
+			}
+			if (objects.paddle.paddleR) {
+				objects.paddle.paddleR.geometry.dispose()
+				objects.paddle.paddleR.material.dispose()
+				scene.remove(objects.paddle.paddleL)
 			}
 		}
-		/*if (objects.pilar.current) {
-			objects.pilar.current.pilarL.geometry.dispose()
-			objects.pilar.current.pilarR.geometry.dispose()
-			objects.pilar.current.pilarL.material.dispose()
-			objects.pilar.current.pilarR.material.dispose()
-			scene.remove(objects.pilar.current.pilarL)
-			scene.remove(objects.pilar.current.pilarR)
+		if (objects.wall) {
+			if (objects.wall.wallL) {
+				objects.wall.wallL.geometry.dispose()
+				objects.wall.wallL.material.dispose()
+				scene.remove(objects.wall.wallL)
+			}
+			if (objects.wall.wallR) {
+				objects.wall.wallR.geometry.dispose()
+				objects.wall.wallR.material.dispose()
+				scene.remove(objects.wall.wallR)
+			}
 		}
-		if (objects.border.current) {
-			objects.border.current.geometry.dispose()
-			objects.border.current.material.dispose()
-			scene.remove(objects.border.current)
+		if (objects.ball) {
+			objects.ball.geometry.dispose()
+			objects.ball.material.dispose()
+			scene.remove(objects.ball)
 		}
-		if (objects.bscreen.current) {
-			objects.bscreen.current.geometry.dispose()
-			objects.bscreen.current.material.dispose()
-			scene.remove(objects.bscreen.current)
-		}*/
-		if (objects.light.current) {
-			scene.remove(objects.light.ambientLight)
-			objects.light.ambientLight.dispose()
-			objects.light.current.material.dispose()
-			scene.remove(objects.light.current)
-			objects.light.cornerLights.forEach(light => {
-				scene.remove(objects.light)
-				objects.light.dispose()
-			})
-		}
-		if (objects.paddle1.current) {
-			objects.paddle1.current.geometry.dispose()
-			objects.paddle1.current.material.dispose()
-			scene.remove(objects.paddle1.current)
-		}
-		if (objects.paddle2.current) {
-			objects.paddle2.current.geometry.dispose()
-			objects.paddle2.current.material.dispose()
-			scene.remove(objects.paddle2.current)
-		}
-		if (objects.ball.current) {
-			objects.ball.current.geometry.dispose()
-			objects.ball.current.material.dispose()
-			scene.remove(objects.ball.current)
-		}
+		scene.fog = null
+		scene.background = null
 		renderer.dispose()
-		//ajouter les walls
 	}
 
-	return {dispose, renderer, camera};
-};
+	return {dispose, renderer, camera}
+}
 
 export default createCanva

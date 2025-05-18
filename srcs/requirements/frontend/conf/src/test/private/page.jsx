@@ -16,8 +16,8 @@ const BGprivate = ({ state, type }) => {
 		const handleKeyDown = (e) => {
 			const socket = getSocket()
 			let action = ""
-			if (e.key == "ArrowUp") action = "move_up"
-			if (e.key == "ArrowDown") action = "move_down"
+			if (e.key == "ArrowUp") action = "move_down"
+			if (e.key == "ArrowDown") action = "move_up"
 			if (action && type && socket.readyState === WebSocket.OPEN) {
 				socket.send(JSON.stringify({ action: action, type: type}))
 			}
@@ -26,8 +26,8 @@ const BGprivate = ({ state, type }) => {
 		const handleKeyUp = (e) => {
 			const socket = getSocket()
 			let action = ""
-			if (e.key == "ArrowUp") action = "up"
-			if (e.key == "ArrowDown") action = "down"
+			if (e.key == "ArrowUp") action = "down"
+			if (e.key == "ArrowDown") action = "up"
 			if (action && type && socket.readyState === WebSocket.OPEN) {
 				socket.send(JSON.stringify({ action: "key_up", type: action}))
 			}

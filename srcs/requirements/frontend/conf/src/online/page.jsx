@@ -43,12 +43,13 @@ function Online({ user }) {
 	}
 
 	useEffect(() => {
-		fonction()
-	}, [])
+		if (state != "play")
+			fonction()
+	}, [state])
 
 	return (
 		<>
-			<Header user={ user } state={ state }/>
+			<Header user={ user } state={ state } setState={ setState }/>
 			<main>
 				<BGprivate state={ state } type={ type }/>
 				{state == "" || state == "invite" || state == "join" ?
@@ -59,6 +60,7 @@ function Online({ user }) {
 						<div className="d-flex flex-column gap-3">
 							<Button type="button" className="btn btn-secondary rounded fw-bolder" onClick={() => setState("invite")}>Invite</Button>
 							<Button type="button" className="btn btn-secondary rounded fw-bolder" onClick={() => setState("join")}>Join</Button>
+							<Button type="button" className="btn btn-secondary rounded fw-bolder" onClick={() => setState("play")}>Play</Button>
 						</div>
 					</div>
 				</div> : <></>}
