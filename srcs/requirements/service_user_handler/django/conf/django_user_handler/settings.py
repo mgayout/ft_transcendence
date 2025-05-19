@@ -28,10 +28,6 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['transcendence.fr']
-
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -47,6 +43,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'django_otp',
+    'django_otp.plugins.otp_totp',
 
     # App locale
     'core',
@@ -63,7 +61,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-	'core.middleware.UserActivityMiddleware',
 ]
 
 ROOT_URLCONF = 'django_user_handler.urls'
@@ -87,18 +84,30 @@ TEMPLATES = [
 WSGI_APPLICATION = 'django_user_handler.wsgi.application'
 
 CORS_ALLOWED_ORIGINS = [
-    'https://transcendence.fr:443', # Adresse de ton frontend
+    'https://localhost:4343', # Adresse de ton frontend
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://transcendence.fr:443',
-    'https://transcendence.fr',
+    'https://localhost:4343',
+    'https://localhost',
 ]
 
-ALLOWED_HOSTS = ['transcendence.fr']
+ALLOWED_HOSTS = ['localhost']
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = False  # À désactiver en production
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-requested-with',
+]
+
+# Autoriser les méthodes HTTP
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -110,13 +119,11 @@ CORS_ALLOW_METHODS = [
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',   
+    'DEFAULT_AUTHENTICATION_CLASSES': [ 
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated', #a changer en prod
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler',
 }
@@ -186,7 +193,7 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/users/admin/'
 LOGIN_URL = '/login'
 
-MEDIA_URL = '/media/'
+MEDIA_URL = 'https://localhost:4343/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type

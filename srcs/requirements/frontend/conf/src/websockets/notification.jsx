@@ -8,13 +8,11 @@ export const useNotification = () => useContext(NotificationContext)
 export const Notification = ({ children }) => {
 	const socketRef = useRef(null)
 	const [messages, setMessages] = useState([])
-	const { isAuth } = useAuth()
+	const { url, isAuth } = useAuth()
 
 	useEffect(() => {
 		if (!isAuth) return
-		const id = localStorage.getItem('id')
-		const Atoken = localStorage.getItem('Atoken')
-		const ws = new WebSocket(`wss://${id}/pong/ws/notifications/?token=${Atoken}`)
+		const ws = new WebSocket(`wss://${url}/pong/ws/notifications/?token=${Atoken}`)
 		socketRef.current = ws
 
 		ws.onopen = () => {

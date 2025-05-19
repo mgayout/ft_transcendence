@@ -3,11 +3,10 @@ import { Button, Spinner } from "react-bootstrap"
 import { useAuth } from "../auth/context"
 import { useNotification } from "../websockets/notification"
 import { useGame } from "../websockets/game"
-import axiosInstance from "../auth/instance"
 
 function WaitMatch({ setState }) {
 
-	const { user } = useAuth()
+	const { axios, user } = useAuth()
 	const [friendName, setFriendName] = useState("")
 	const [friend, setFriend] = useState(null)
 	const { messages, setMessages } = useNotification()
@@ -22,9 +21,9 @@ function WaitMatch({ setState }) {
 
 	const cancel = async () => {
 		try {
-			const invitations = await axiosInstance.get("/pong/invitations/")
+			const invitations = await axios.get("/pong/invitations/")
 			const a = invitations.data.find(invite => invite.from_player.name == user.name)
-			await axiosInstance.put(`/pong/invitations/${a.id}/cancel/`)
+			await axios.put(`/pong/invitations/${a.id}/cancel/`)
 			setState("")
 		}
 		catch(error) {
@@ -34,7 +33,7 @@ function WaitMatch({ setState }) {
 
 	const getFriend = async () => {
 		try {
-			const playerData = await axiosInstance.get('/users/api/player/')
+			const playerData = await axios.get('/users/api/player/')
 			const a = playerData.data
 				.find(player => player.name == friendName)
 			setFriend({name: a.name, avatar: a.avatar})

@@ -290,3 +290,40 @@ class UnblockPlayerView(generics.DestroyAPIView):
         self.perform_destroy(instance)
         return Response({"code": 1000}, status=status.HTTP_200_OK)
 
+# ============2FA================
+
+@method_decorator(csrf_exempt, name='dispatch')
+class Enable2FAView(generics.UpdateAPIView):
+    serializer_class = serializers.Enable2FASerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        try:
+            return self.request.user.player_profile
+        except AttributeError:
+            return Response({"code": 1043, "message": "Aucun profil joueur associé"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        result = serializer.save()
+        return Response(serializer.to_representation(result), status=status.HTTP_200_OK)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class Disable2FAView(generics.DestroyAPIView):
+    serializer_class = serializers.Disable2FASerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        try:
+            return self.request.user.player_profile
+        except AttributeError:
+            return Response({"code": 1043, "message": "Aucun profil joueur associé"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.update(instance, serializer.validated_data)
+        return Response({"code": 1000}, status=status.HTTP_204_NO_CONTENT)

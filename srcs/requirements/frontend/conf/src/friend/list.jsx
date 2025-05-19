@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../auth/context"
-import axiosInstance from '../auth/instance'
 
 function ListModal({ tab }) {
 
 	const navigate = useNavigate()
 
-	const { user } = useAuth()
+	const { user, axios } = useAuth()
 	const [data, setData] = useState()
 	const [search, setSearch] = useState('')
 	const [filteredFriends, setFilteredFriends] = useState()
 
 	const list = async () => {
 		try {
-			const playerData = await axiosInstance.get('/users/api/player/')
-			const friendData = await axiosInstance.get('/users/api/friend/list/')
+			const playerData = await axios.get('/users/api/player/')
+			const friendData = await axios.get('/users/api/friend/list/')
 			let temp
 
 			const getID = (name) => {
@@ -40,7 +39,7 @@ function ListModal({ tab }) {
 	}
 
 	const removeFriend = async (playerID) => {
-		try {await axiosInstance.delete(`/users/api/friend/remove/${playerID}/`)}
+		try {await axios.delete(`/users/api/friend/remove/${playerID}/`)}
 		catch(error) {console.log(error)}
 		finally {list()}
 	}

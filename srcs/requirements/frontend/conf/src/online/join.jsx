@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from "react"
 import { Modal, Button } from "react-bootstrap"
-import axiosInstance from '../auth/instance'
 import { useAuth } from "../auth/context"
 
 function JoinMatch({ state, setState, setType }) {
 
 	const [data, setData] = useState(null)
-	const { user } = useAuth()
+	const { axios, user } = useAuth()
 
 	const fonction = async () => {
 		try {
-			const playerData = await axiosInstance.get('/users/api/player/')
-			const invitations = await axiosInstance.get("pong/invitations/")
+			const playerData = await axios.get('/users/api/player/')
+			const invitations = await axios.get("pong/invitations/")
 			const getAvatar = (name) => {
 				const Avatar = playerData.data.find(player => player.name === name)
 				return Avatar.avatar
@@ -28,7 +27,7 @@ function JoinMatch({ state, setState, setType }) {
 
 	const accept = async (id) => {
 		try {
-			await axiosInstance.put(`pong/invitations/${id}/accept/`)
+			await axios.put(`pong/invitations/${id}/accept/`)
 			setType("paddle_r")
 			setState("wait")
 		}
@@ -39,7 +38,7 @@ function JoinMatch({ state, setState, setType }) {
 
 	const decline = async (id) => {
 		try {
-			await axiosInstance.put(`pong/invitations/${id}/decline/`)
+			await axios.put(`pong/invitations/${id}/decline/`)
 			setState("")
 		}
 		catch(error) {

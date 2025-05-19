@@ -4,18 +4,19 @@ import Header from "../global/header"
 import BGprivate from "../test/private/page.jsx"
 import JoinMatch from "./join.jsx"
 import WaitMatch from "./wait.jsx"
-import axiosInstance from "../auth/instance.jsx"
 import { useNotification } from "../websockets/notification.jsx"
+import { useAuth } from "../auth/context.jsx"
 
 function Tournament({ user }) {
 
 	const [state, setState] = useState("")
 	const [type, setType] = useState("")
 	const { setMessages } = useNotification()
+	const { axios } = useAuth()
 
 	const fonction = async () => {
 		try {
-			const tournamentData = await axiosInstance("/pong/tournament/list/")
+			const tournamentData = await axios("/pong/tournament/list/")
 			const a = tournamentData.data
 				.find(match => match.status == "Ouvert" &&
 				(match.player_1 == user.id || match.player_2 == user.id ||
@@ -34,7 +35,7 @@ function Tournament({ user }) {
 
 	const create = async () => {
 		try {
-			await axiosInstance.post("pong/tournament/create/", {
+			await axios.post("pong/tournament/create/", {
 				name: `${user.name}'s tournament`,
 				max_score_per_round: 3,
 				number_of_rounds: 1,

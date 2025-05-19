@@ -50,7 +50,6 @@ urlpatterns = [
     path('api/block/list/', views.BlockListView.as_view(), name='block-list'),
     path('api/block/remove/<int:pk>/', views.UnblockPlayerView.as_view(), name='unblock-player'),
 
-    # JWT Token Endpoints
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/2fa-enable/', views.Enable2FAView.as_view(), name='enable_2fa'),  # PUT
+    path('api/2fa-disable/', views.Disable2FAView.as_view(), name='disable_2fa'),  # DELETE
 ]

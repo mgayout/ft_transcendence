@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from "react"
 import { useAuth } from "../auth/context"
-import axiosInstance from '../auth/instance'
 
 function BlockModal({ tab }) {
 
-	const { user } = useAuth()
+	const { user, axios } = useAuth()
 	const [data, setData] = useState([])
 	const [search, setSearch] = useState('')
 	const [filteredFriends, setFilteredFriends] = useState([])
 
 	const list = async () => {
 		try {
-			const playerData = await axiosInstance.get('/users/api/player/')
-			const blockData = await axiosInstance.get('/users/api/block/list/')
+			const playerData = await axios.get('/users/api/player/')
+			const blockData = await axios.get('/users/api/block/list/')
 			let temp
 
 			const getID = (name) => {
@@ -35,7 +34,7 @@ function BlockModal({ tab }) {
 	}
 
 	const removeBlock = async (playerID) => {
-		try {await axiosInstance.delete(`/users/api/block/remove/${playerID}/`)}
+		try {await axios.delete(`/users/api/block/remove/${playerID}/`)}
 		catch(error) {console.log(error)}
 		finally {list()}
 	}

@@ -24,8 +24,6 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['transcendence.fr']
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -46,7 +44,6 @@ INSTALLED_APPS = [
     # App locale
     'shared_models',
     'core',
-
 
 ]
 
@@ -109,9 +106,7 @@ DATABASES = {
 }
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',   
+    'DEFAULT_AUTHENTICATION_CLASSES': [  
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
@@ -176,17 +171,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
-# CORS settings
+# Autoriser les credentials (cookies, tokens, etc.)
+CORS_ALLOW_CREDENTIALS = True
+
 CORS_ALLOW_ALL_ORIGINS = False  # Ne pas permettre à tous les origines par défaut
 CORS_ALLOWED_ORIGINS = [
-    'https://transcendence.fr:443',
-	'https://transcendence.fr',
+    'https://localhost:4343',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://transcendence.fr:443',
-    'https://transcendence.fr',
+    'https://localhost:4343',
+    'https://localhost',
 ]
+
+ALLOWED_HOSTS = ['localhost']
 
 # Autoriser les en-têtes spécifiques (nécessaire pour les tokens JWT et WebSocket)
 CORS_ALLOW_HEADERS = [
@@ -209,8 +207,5 @@ CORS_ALLOW_METHODS = [
     'POST',
     'PUT',
 ]
-
-# Autoriser les credentials (cookies, tokens, etc.)
-CORS_ALLOW_CREDENTIALS = True
 
 LOGOUT_REDIRECT_URL = '/live_chat/admin/'

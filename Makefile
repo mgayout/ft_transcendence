@@ -2,126 +2,57 @@
 
 all:
 
-	@sudo chmod 600 ./srcs/requirements/hashicorp_vault/postgresql/conf/server.key
-	@sudo chown 70:root ./srcs/requirements/hashicorp_vault/postgresql/conf/root.crt \
-						./srcs/requirements/hashicorp_vault/postgresql/conf/server.crt \
-						./srcs/requirements/hashicorp_vault/postgresql/conf/server.key
+	@docker compose -f ./srcs/docker-compose.yml up -d vault_postgresql > /dev/null
 
-	@sudo mkdir -p ./srcs/requirements/service_user_handler/postgresql/conf/data/pg_serial \
-					./srcs/requirements/service_user_handler/postgresql/conf/data/pg_stat_tmp \
-					./srcs/requirements/service_user_handler/postgresql/conf/data/pg_snapshots \
-					./srcs/requirements/service_user_handler/postgresql/conf/data/pg_twophase \
-					./srcs/requirements/service_user_handler/postgresql/conf/data/pg_replslot \
-					./srcs/requirements/service_user_handler/postgresql/conf/data/pg_wal/archive_status \
-					./srcs/requirements/service_user_handler/postgresql/conf/data/pg_dynshmem \
-					./srcs/requirements/service_user_handler/postgresql/conf/data/pg_tblspc \
-					./srcs/requirements/service_user_handler/postgresql/conf/data/pg_commit_ts \
-					./srcs/requirements/service_user_handler/postgresql/conf/data/pg_notify \
-					./srcs/requirements/service_user_handler/postgresql/conf/data/pg_logical/mappings \
-					./srcs/requirements/service_user_handler/postgresql/conf/data/pg_logical/snapshots \
-					./srcs/requirements/hashicorp_vault_sealer/postgresql/conf/data/pg_serial \
-					./srcs/requirements/hashicorp_vault_sealer/postgresql/conf/data/pg_stat_tmp \
-					./srcs/requirements/hashicorp_vault_sealer/postgresql/conf/data/pg_snapshots \
-					./srcs/requirements/hashicorp_vault_sealer/postgresql/conf/data/pg_twophase \
-					./srcs/requirements/hashicorp_vault_sealer/postgresql/conf/data/pg_replslot \
-					./srcs/requirements/hashicorp_vault_sealer/postgresql/conf/data/pg_wal/archive_status \
-					./srcs/requirements/hashicorp_vault_sealer/postgresql/conf/data/pg_dynshmem \
-					./srcs/requirements/hashicorp_vault_sealer/postgresql/conf/data/pg_tblspc \
-					./srcs/requirements/hashicorp_vault_sealer/postgresql/conf/data/pg_commit_ts \
-					./srcs/requirements/hashicorp_vault_sealer/postgresql/conf/data/pg_notify \
-					./srcs/requirements/hashicorp_vault_sealer/postgresql/conf/data/pg_logical/mappings \
-					./srcs/requirements/hashicorp_vault_sealer/postgresql/conf/data/pg_logical/snapshots \
-					./srcs/requirements/hashicorp_vault/postgresql/conf/data/pg_serial \
-					./srcs/requirements/hashicorp_vault/postgresql/conf/data/pg_stat_tmp \
-					./srcs/requirements/hashicorp_vault/postgresql/conf/data/pg_snapshots \
-					./srcs/requirements/hashicorp_vault/postgresql/conf/data/pg_twophase \
-					./srcs/requirements/hashicorp_vault/postgresql/conf/data/pg_replslot \
-					./srcs/requirements/hashicorp_vault/postgresql/conf/data/pg_wal/archive_status \
-					./srcs/requirements/hashicorp_vault/postgresql/conf/data/pg_dynshmem \
-					./srcs/requirements/hashicorp_vault/postgresql/conf/data/pg_tblspc \
-					./srcs/requirements/hashicorp_vault/postgresql/conf/data/pg_commit_ts \
-					./srcs/requirements/hashicorp_vault/postgresql/conf/data/pg_notify \
-					./srcs/requirements/hashicorp_vault/postgresql/conf/data/pg_logical/mappings \
-					./srcs/requirements/hashicorp_vault/postgresql/conf/data/pg_logical/snapshots \
-					./srcs/requirements/service_game_pong/postgresql/conf/data/pg_serial \
-					./srcs/requirements/service_game_pong/postgresql/conf/data/pg_stat_tmp \
-					./srcs/requirements/service_game_pong/postgresql/conf/data/pg_snapshots \
-					./srcs/requirements/service_game_pong/postgresql/conf/data/pg_twophase \
-					./srcs/requirements/service_game_pong/postgresql/conf/data/pg_replslot \
-					./srcs/requirements/service_game_pong/postgresql/conf/data/pg_wal/archive_status \
-					./srcs/requirements/service_game_pong/postgresql/conf/data/pg_dynshmem \
-					./srcs/requirements/service_game_pong/postgresql/conf/data/pg_tblspc \
-					./srcs/requirements/service_game_pong/postgresql/conf/data/pg_commit_ts \
-					./srcs/requirements/service_game_pong/postgresql/conf/data/pg_notify \
-					./srcs/requirements/service_game_pong/postgresql/conf/data/pg_logical/mappings \
-					./srcs/requirements/service_game_pong/postgresql/conf/data/pg_logical/snapshots \
-					./srcs/requirements/service_live_chat/postgresql/conf/data/pg_serial \
-                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_stat_tmp \
-                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_snapshots \
-                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_twophase \
-                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_replslot \
-                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_wal/archive_status \
-                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_dynshmem \
-                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_tblspc \
-                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_commit_ts \
-                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_notify \
-                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_logical/mappings \
-                    ./srcs/requirements/service_live_chat/postgresql/conf/data/pg_logical/snapshots
+	@docker compose -f ./srcs/docker-compose.yml up -d vault > /dev/null
 
-	@if [ ! -d "./volume/smart_contract" ]; then \
-		sudo mkdir -p "./volume/smart_contract"; \
-	fi
+	@until docker exec vault_secrets curl --silent --fail http://172.20.0.9:8200/v1/sys/seal-status > /dev/null; do \
+		sleep 1; \
+	done
 
-	@if [ ! -d "./volume/static/static_service_app" ]; then \
-		sudo mkdir -p "./volume/static/static_service_app"; \
-	fi
+#	@while true; do \
+#		SEALED=$$(docker exec -it vault_secrets vault status | grep Initialized | tr -s ' ' | cut -d ' ' -f 2 | tr -d '\r'); \
+#		if [ "$$SEALED" = "false" ]; then \
+#			break; \
+#		fi; \
+#		sleep 1; \
+#	done
 
-	@if [ ! -d "./volume/service_app/django" ]; then \
-		sudo mkdir -p "./volume/service_app/django"; \
-	fi
+	@docker exec -it vault_secrets vault operator init | grep -e "Unseal Key [0-9]:" -e "Initial Root Token:" \
+		| sed -e "s/Unseal\ Key\ /UNSEAL_KEY_/" -e "s/: /='/" -e "s/Initial Root Token/INITIAL_ROOT_TOKEN/" -e "s/[^[:print:]\t]//g" \
+		| sed -r "s/\x1B\[[0-9;]*[mK]//g" | sed -e "s/^\[0m//" -e "s/\[0m\$$//" \
+		| sed -e "s/\'\$$/\'/" > ./srcs/env/.env_vault_secrets_key;
 
-	@if [ ! -d "./volume/service_app/postgresql" ]; then \
-		sudo mkdir -p "./volume/service_app/postgresql"; \
-	fi
+#	@docker exec -it vault_secrets vault operator unseal $$(cat ./srcs/env/.env_vault_secrets_key | grep UNSEAL_KEY_1 | sed -e "s/'/ /g" | cut -d ' ' -f 2)
+#	@docker exec -it vault_secrets vault operator unseal $$(cat ./srcs/env/.env_vault_secrets_key | grep UNSEAL_KEY_2 | sed -e "s/'/ /g" | cut -d ' ' -f 2)
+#	@docker exec -it vault_secrets vault operator unseal $$(cat ./srcs/env/.env_vault_secrets_key | grep UNSEAL_KEY_3 | sed -e "s/'/ /g" | cut -d ' ' -f 2)
+#	@docker exec -it vault_secrets vault login $$(cat ./srcs/env/.env_vault_secrets_key | grep INITIAL_ROOT_TOKEN | sed -e "s/'/ /g" | cut -d ' ' -f 2)
 
-	@if [ ! -d "./volume/static/static_service_chat" ]; then \
-		sudo mkdir -p "./volume/static/static_service_chat"; \
-	fi
+	docker compose -f ./srcs/docker-compose.yml up -d
 
-	@if [ ! -d "./volume/service_chat/django" ]; then \
-		sudo mkdir -p "./volume/service_chat/django"; \
-	fi
-
-	@if [ ! -d "./volume/service_chat/postgresql" ]; then \
-		sudo mkdir -p "./volume/service_chat/postgresql"; \
-	fi
-
-	@if [ ! -d "./volume/eventbus" ]; then \
-		sudo mkdir -p "./volume/eventbus"; \
-	fi
-
-	@sudo docker compose -f ./srcs/docker-compose.yml up -d --build
-
-	@sudo docker compose -f ./srcs/docker-compose.yml exec vault_sealer vault operator unseal XSlqgv8XRbzSyytnbzck3V2nQHWdB/1/o4IIzJhdvVzQ
-	@sudo docker compose -f ./srcs/docker-compose.yml exec vault_sealer vault operator unseal x9Pcd9kSLALh4i7PgEW/6Kke2Swd8Ambyo/z12OgQIrA
-	@sudo docker compose -f ./srcs/docker-compose.yml exec vault_sealer vault operator unseal +CveHjrkub3mRvRItUMni2zhx5Z3zuuUk+ccUypr+kDX
+	@docker exec service_user_handler_postgresql sh /home/init/02_replicat_init.sh > /dev/null
+	@docker exec service_game_pong_postgresql sh /home/init/02_replicat_init.sh > /dev/null
+	@docker exec service_live_chat_postgresql sh /home/init/02_replicat_init.sh > /dev/null
+	@docker exec service_user_handler_postgresql sh /home/init/03_replicat_init.sh > /dev/null
 
 clean:
 
-	@sudo docker compose -f ./srcs/docker-compose.yml down
+	@docker compose -f ./srcs/docker-compose.yml down > /dev/null
 
 fclean: clean
 
-	@if [ $$(sudo docker images -qa | wc -l) -ne 0 ]; then \
-		sudo docker rmi -f $(shell sudo docker images -qa); \
+	@if [ $$(docker images -qa | wc -l) -ne 0 ]; then \
+		docker rmi -f $(shell docker images -qa) > /dev/null; \
 	fi
 
-	@if [ $$(sudo docker network ls -q | wc -l) -ne 0 ]; then \
-		sudo docker network prune -f; \
+	@if [ $$(docker network ls -q | wc -l) -ne 0 ]; then \
+		docker network prune -f > /dev/null; \
 	fi
 
-	@if [ $$(sudo docker volume ls -q | wc -l) -ne 0 ]; then \
-		sudo docker volume rm -f $(shell sudo docker volume ls -q); \
+	@if [ $$(docker volume ls -q | wc -l) -ne 0 ]; then \
+		docker volume rm -f $(shell docker volume ls -q) > /dev/null; \
 	fi
+
+	@rm -f ./srcs/env/.env_vault_secrets_key
 
 re: fclean all

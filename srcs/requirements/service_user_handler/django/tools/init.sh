@@ -7,6 +7,7 @@ source /django_web_app/.env/bin/activate \
     && python3 manage.py migrate --fake-initial --no-input \
 	&& python3 manage.py makemigrations core --no-input \
     && python3 manage.py migrate --fake-initial --no-input \
+	&& python3 manage.py collectstatic --no-input \
 	&& (
         python3 -c "import os; os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_user_handler.settings'); import django; django.setup(); from django.contrib.auth.models import User; exit(0 if User.objects.filter(username='$SUPER_USER_NAME').exists() else 1)" \
         || \

@@ -2,11 +2,13 @@ import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button, Form } from "react-bootstrap"
 import ErrorModal from "../global/error-modal"
-import axiosInstance from '../auth/instance'
+import { useAuth } from "../auth/context"
 
 function Register() {
 
 	const navigate = useNavigate()
+
+	const { axios } =useAuth()
 
 	const [username, setUsername] = useState('')
 	const [password1, setPassword1] = useState('')
@@ -27,7 +29,7 @@ function Register() {
 	const sendAuth = async (e) => {
 		e.preventDefault()
 		try {
-			const response = await axiosInstance.post('/users/api/register/', {
+			const response = await axios.post('/users/api/register/', {
 				username: username,
 				password: password1,
 				password2: password2

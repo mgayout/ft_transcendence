@@ -25,8 +25,6 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['transcendence.fr']
-
 
 # Application definition
 
@@ -109,21 +107,18 @@ DATABASES = {
     }
 }
 
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',   
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated', #a changer en prod
+        'rest_framework.permissions.AllowAny', #a changer en prod
     ],
     'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler',
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # Durée de vie de l’access token
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),  # Durée de vie de l’access token
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Durée de vie du refresh token
     'BLACKLIST_AFTER_ROTATION': True,               # Active le blacklisting après rotation
     'TOKEN_BACKEND': 'rest_framework_simplejwt.token_blacklist.backends.BlacklistBackend',  # Backend pour blacklist
@@ -159,20 +154,18 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
-
-STATIC_URL = 'static/'
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = '/static/live_chat/'
+STATIC_URL = '/static/pong/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+
 
 # Configuration de WhiteNoise (optionnel, mais recommandé)
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -185,17 +178,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
+# Autoriser les credentials (cookies, tokens, etc.)
+CORS_ALLOW_CREDENTIALS = True
 
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = False  # Ne pas permettre à tous les origines par défaut
+ALLOWED_HOSTS = ['localhost']
 CORS_ALLOWED_ORIGINS = [
-    'https://transcendence.fr:443',
-	'https://transcendence.fr',
+    'https://localhost:4343',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://transcendence.fr:443',
-    'https://transcendence.fr',
+    'https://localhost:4343',
+    'https://localhost',
 ]
 
 # Autoriser les en-têtes spécifiques (nécessaire pour les tokens JWT et WebSocket)
@@ -220,7 +215,5 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
-# Autoriser les credentials (cookies, tokens, etc.)
-CORS_ALLOW_CREDENTIALS = True
 
 LOGOUT_REDIRECT_URL = '/pong/admin/'

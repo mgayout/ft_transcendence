@@ -11,22 +11,28 @@ from django.contrib.auth import authenticate
 from PIL import Image
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django_otp.plugins.otp_totp.models import TOTPDevice
 
 class PlayerSerializer(serializers.ModelSerializer):
+    two_factor_enabled = serializers.BooleanField(read_only=True)
+
     class Meta:
         model = Player
-        fields = ['id', 'created_at', 'name', 'avatar', 'online', 'last_seen', 'description']
+        fields = [
+            'id', 'created_at', 'name', 'avatar', 'online', 'last_seen',
+            'description', 'two_factor_enabled'
+        ]
 
     def to_representation(self, instance):
         fields = super().to_representation(instance)
         request = self.context.get('request')
         user = request.user if request and hasattr(request, 'user') else None
 
-
         if not user or not user.is_authenticated:
             del fields['online']
             del fields['last_seen']
             del fields['description']
+            del fields['two_factor_enabled']
             return fields
 
         try:
@@ -35,9 +41,9 @@ class PlayerSerializer(serializers.ModelSerializer):
             del fields['online']
             del fields['last_seen']
             del fields['description']
+            del fields['two_factor_enabled']
             return fields
 
-        # Vérifier si c’est le joueur lui-même ou un ami
         is_self = current_player.id == instance.id
         friendship = Friendship.objects.filter(
             models.Q(player_1=current_player, player_2=instance, status='accepted') |
@@ -49,6 +55,9 @@ class PlayerSerializer(serializers.ModelSerializer):
             del fields['online']
             del fields['last_seen']
             del fields['description']
+
+        if not is_self:
+            del fields['two_factor_enabled']
 
         return fields
 
@@ -234,16 +243,17 @@ class PlayerDeleteSerializer(serializers.Serializer):
 class PlayerLoginSerializer(serializers.Serializer):
     username = serializers.CharField(write_only=True, allow_blank=True, allow_null=True)
     password = serializers.CharField(write_only=True, allow_blank=True, allow_null=True)
+    otp_code = serializers.CharField(write_only=True, required=False, allow_blank=True, allow_null=True)
 
     def validate(self, data):
         player_name = data.get('username')
         password = data.get('password')
+        otp_code = data.get('otp_code')
 
         if not player_name:
             raise serializers.ValidationError({"code": 1009}) # Nom requis
         if not password:
             raise serializers.ValidationError({"code": 1010}) # Mot de passe requis
-
 
         try:
             player = Player.objects.get(name=player_name)
@@ -254,6 +264,14 @@ class PlayerLoginSerializer(serializers.Serializer):
         user = authenticate(username=username, password=password)
         if user is None:
             raise serializers.ValidationError({"code": 1013}) # Nom ou mot de passe incorrect
+        
+        # Vérifier 2FA si activé
+        if player.two_factor_enabled and player.two_factor_method == 'TOTP':
+            if not otp_code:
+                raise serializers.ValidationError({"code": 1037})  # Code 2FA requis
+            device = TOTPDevice.objects.filter(user=user).first()
+            if not device or not device.verify_token(otp_code):
+                raise serializers.ValidationError({"code": 1036})  # Code TOTP invalide
 
         data['user'] = user
         data['player'] = player
@@ -455,6 +473,15 @@ class BlockPlayerSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         return {"code": 1000}
 
+
+class BlockListSerializer(serializers.ModelSerializer):
+    blocked = serializers.CharField(source='blocked.name', read_only=True)
+
+    class Meta:
+        model = Block
+        fields = ['id', 'blocked', 'created_at']
+
+
 class UnblockPlayerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Block
@@ -462,3 +489,70 @@ class UnblockPlayerSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return {"code": 1000}
+
+
+#===2FA====
+
+class Enable2FASerializer(serializers.Serializer):
+    otp_code = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
+    def validate(self, data):
+        user = self.context['request'].user
+        if not user.is_authenticated:
+            raise serializers.ValidationError({"code": 1030})  # Utilisateur non authentifié
+
+        otp_code = data.get('otp_code')
+        player = user.player_profile
+        device, created = TOTPDevice.objects.get_or_create(user=user, name=f"{player.name}_totp")
+        if otp_code and not device.verify_token(otp_code):
+            raise serializers.ValidationError({"code": 1036})  # Code TOTP invalide
+
+        return data
+
+    def update(self, instance, validated_data):
+        user = self.context['request'].user
+        player = instance
+        otp_code = validated_data.get('otp_code')
+
+        if otp_code:  # Deuxième étape : valider le code
+            player.two_factor_enabled = True
+            player.two_factor_method = 'TOTP'
+            player.save()
+            device, _ = TOTPDevice.objects.get_or_create(user=user, name=f"{player.name}_totp")
+            return device
+
+        # Première étape : générer le QR code
+        device, _ = TOTPDevice.objects.get_or_create(user=user, name=f"{player.name}_totp")
+        return device
+
+    def to_representation(self, instance):
+        return {
+            "code": 1000,
+            "method": "TOTP",
+            "qr_code_url": instance.config_url
+        }
+
+class Disable2FASerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        user = self.context['request'].user
+        if not user.is_authenticated:
+            raise serializers.ValidationError({"code": 1030})  # Utilisateur non authentifié
+        if not user.check_password(data['password']):
+            raise serializers.ValidationError({"code": 1008})  # Mot de passe incorrect
+        return data
+
+    def update(self, instance, validated_data):
+        user = self.context['request'].user
+        player = instance
+        player.two_factor_enabled = False
+        TOTPDevice.objects.filter(user=user).delete()
+        player.save()
+        return player
+
+    def to_representation(self, instance):
+        return {
+            "code": 1000,
+            "message": "2FA désactivé"
+        }

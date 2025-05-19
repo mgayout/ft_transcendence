@@ -9,13 +9,12 @@ export const Chat = ({ children }) => {
 
 	const socketRef = useRef(null)
 	const [messages, setMessages] = useState([])
-	const { isAuth } = useAuth()
+	const { isAuth, url } = useAuth()
 
 	useEffect(() => {
 		if (!isAuth) return
 		const Atoken = localStorage.getItem('Atoken')
-		const id = localStorage.getItem("id")
-		const ws = new WebSocket(`wss://${id}/live_chat/ws/chat/general/?token=${Atoken}`)
+		const ws = new WebSocket(`wss://${url}/live_chat/ws/chat/general/?token=${Atoken}`)
 		socketRef.current = ws
 
 		ws.onopen = () => {

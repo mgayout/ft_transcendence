@@ -1,388 +1,204 @@
-    services:
-        nginx:
-          depends_on:
-            - frontend
-          build:
-            context: ./requirements/nginx
-            dockerfile: Dockerfile
-          ports:
-            - "443:443/tcp"
-          image: nginx:1.27.1
-          container_name: nginx
-          env_file: ./env/.env_nginx
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.2
-          hostname: nginx
-          volumes:
-            - "static_service_app:/static/api"
-            - "static_service_chat:/static/chat"
-            - "./requirements/service_user_handler/django/conf/static:/static/users"
-            - "./requirements/service_user_handler/django/conf/media:/static/media"
-            - "./requirements/service_game_pong/django/conf/static:/static/pong"
-            - "./requirements/service_live_chat/django/conf/static:/static/live_chat"
-
-        frontend:
-          depends_on:
-            - service_app_django
-            - service_chat_django
-            - service_user_handler_django
-            - service_game_pong_django
-            - service_live_chat_django
-          image: node:23.9.0-alpine3.20a@sha256:d328a006af9cd556fec56d3fb325ce8fdee988b511dfdfe90d3182bed900aecd
-          container_name: frontend
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.3
-          hostname: frontend
-          volumes:
-            - "./requirements/frontend/conf/index.html:/home/frontend/index.html"
-            - "./requirements/frontend/conf/package-lock.json:/home/frontend/package-lock.json"
-            - "./requirements/frontend/conf/package.json:/home/frontend/package.json"
-            - "./requirements/frontend/conf/public:/home/frontend/public"
-            - "./requirements/frontend/conf/src:/home/frontend/src"
-            - "./requirements/frontend/conf/vite.config.js:/home/frontend/vite.config.js"
-          command: >
-            sh -c "apk update \
-            && apk upgrade \
-            && apk add vim \
-            && npm install --prefix /home/frontend \
-            && npm run build --prefix /home/frontend \
-            && npx serve /home/frontend/dist"
-
-        service_user_handler_django:
-          depends_on:
-            - service_user_handler_postgresql
-            - vault
-          build:
-            context: ./requirements/service_user_handler/django
-            dockerfile: Dockerfile
-          image: python:3.13.0rc1_2
-          container_name: service_user_handler_django
-          env_file:
-            - ./env/.env_nginx
-            - ./env/.env_service_user_handler_django
-            - ./env/.env_service_user_handler_postgres
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.40
-          hostname: service_user_handler_django
-          volumes:
-            - "./requirements/service_user_handler/django/conf/core:/django_web_app/core"
-            - "./requirements/service_user_handler/django/conf/django_user_handler:/django_web_app/django_user_handler"
-            - "./requirements/service_user_handler/django/conf/static:/django_web_app/transcendence/staticfiles"
-            - "./requirements/service_user_handler/django/conf/media:/django_web_app/media"
-            - "./requirements/service_user_handler/django/conf/shared_models:/django_web_app/shared_models"
-              #- "./requirements/service_user_handler/django/conf/utils/vault_utils.py:/django_web_app/transcendence/utils/vault_utils.py"
-
-        service_user_handler_postgresql:
-          image: postgres@sha256:7b86711ac72674c8f2cf0fad7fd55cb07ae709c62fa0cddfa78e28e985fffe09
-          container_name: service_user_handler_postgresql
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.41
-          hostname: service_user_handler_postgresql
-          env_file:
-            - ./env/.env_service_user_handler_postgres
-          volumes:
-                - "./requirements/service_user_handler/postgresql/conf/data:/var/lib/postgresql/data"
-                #- "./requirements/service_user_handler/postgresql/tools/user_handler_init.sql:/docker-entrypoint-initdb.d/01_init.sql"
-                - "./requirements/service_user_handler/postgresql/conf/postgresql.conf:/etc/postgresql/postgresql.conf"
-                - "./requirements/service_user_handler/postgresql/conf/pg_hba.conf:/etc/postgresql/pg_hba.conf"
-          command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf", "-c", "hba_file=/etc/postgresql/pg_hba.conf"]
-
-        service_game_pong_django:
-          depends_on:
-            - service_game_pong_postgresql
-            - vault
-          build:
-            context: ./requirements/service_game_pong/django
-            dockerfile: Dockerfile
-          image: python:3.13.0rc1_game_pong
-          container_name: service_game_pong_django
-          env_file:
-            - ./env/.env_nginx
-            - ./env/.env_service_game_pong_django
-            - ./env/.env_service_game_pong_postgres
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.42
-          hostname: service_game_pong_django
-          volumes:
-            - "./requirements/service_game_pong/django/conf/core:/django_web_app/core"
-            - "./requirements/service_game_pong/django/conf/django_game_pong:/django_web_app/django_game_pong"
-            - "./requirements/service_game_pong/django/conf/static:/django_web_app/transcendence/staticfiles"
-            - "./requirements/service_game_pong/django/conf/shared_models:/django_web_app/shared_models"
-              #- "./requirements/service_game_pong/django/conf/utils/vault_utils.py:/django_web_app/transcendence/utils/vault_utils.py"
-
-        service_game_pong_postgresql:
-          image: postgres@sha256:7b86711ac72674c8f2cf0fad7fd55cb07ae709c62fa0cddfa78e28e985fffe09
-          container_name: service_game_pong_postgresql
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.43
-          hostname: service_game_pong_postgresql
-          env_file:
-            - ./env/.env_service_game_pong_postgres
-          volumes:
-                - "./requirements/service_game_pong/postgresql/conf/data:/var/lib/postgresql/data"
-                #- "./requirements/service_game_pong/postgresql/tools/game_pong_init.sql:/docker-entrypoint-initdb.d/01_init.sql"
-                - "./requirements/service_game_pong/postgresql/conf/postgresql.conf:/etc/postgresql/postgresql.conf"
-                - "./requirements/service_game_pong/postgresql/conf/pg_hba.conf:/etc/postgresql/pg_hba.conf"
-          command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf", "-c", "hba_file=/etc/postgresql/pg_hba.conf"]
-
-        service_live_chat_django:
-          depends_on:
-            - service_live_chat_postgresql
-            - vault
-          build:
-            context: ./requirements/service_live_chat/django
-            dockerfile: Dockerfile
-          image: python:3.13.0rc1_live_chat
-          container_name: service_live_chat_django
-          env_file:
-            - ./env/.env_nginx
-            - ./env/.env_service_live_chat_django
-            - ./env/.env_service_live_chat_postgres
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.44
-          hostname: service_live_chat_django
-          volumes:
-            - "./requirements/service_live_chat/django/conf/core:/django_web_app/core"
-            - "./requirements/service_live_chat/django/conf/django_live_chat:/django_web_app/django_live_chat"
-            - "./requirements/service_live_chat/django/conf/static:/django_web_app/transcendence/staticfiles"
-            - "./requirements/service_live_chat/django/conf/shared_models:/django_web_app/shared_models"
-            #- "./requirements/service_live_chat/django/conf/utils/vault_utils.py:/django_web_app/transcendence/utils/vault_utils.py"
-
-        service_live_chat_postgresql:
-          image: postgres@sha256:7b86711ac72674c8f2cf0fad7fd55cb07ae709c62fa0cddfa78e28e985fffe09
-          container_name: service_live_chat_postgresql
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.45
-          hostname: service_live_chat_postgresql
-          env_file:
-            - ./env/.env_service_live_chat_postgres
-          volumes:
-                - "./requirements/service_live_chat/postgresql/conf/data:/var/lib/postgresql/data"
-                #- "./requirements/service_live_chat/postgresql/tools/live_chat_init.sql:/docker-entrypoint-initdb.d/01_init.sql"
-                - "./requirements/service_live_chat/postgresql/conf/postgresql.conf:/etc/postgresql/postgresql.conf"
-                - "./requirements/service_live_chat/postgresql/conf/pg_hba.conf:/etc/postgresql/pg_hba.conf"
-          command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf", "-c", "hba_file=/etc/postgresql/pg_hba.conf"]
-
-        service_app_django:
-          depends_on:
-            - service_app_postgresql
-            - vault
-          build:
-            context: ./requirements/service_app/django
-            dockerfile: Dockerfile
-          image: python:3.13.0rc1
-          container_name: service_app_django
-          env_file:
-            - ./env/.env_nginx
-            - ./env/.env_service_app_django
-            - ./env/.env_service_app_postgres
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.4
-          hostname: service_app_django
-          volumes:
-            - "service_app_django:/django_web_app"
-            - "static_service_app:/static"
-            - "./requirements/service_app/django/conf/vault_utils.py:/django_web_app/game/utils/vault_utils.py"
-
-        service_app_postgresql:
-          image: postgres@sha256:7b86711ac72674c8f2cf0fad7fd55cb07ae709c62fa0cddfa78e28e985fffe09
-          container_name: service_app_postgresql
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.5
-          hostname: service_app_postgresql
-          env_file:
-            - ./env/.env_service_app_postgres
-          volumes:
-            - "./requirements/service_app/postgresql/conf/pg_hba.conf:/etc/postgresql/pg_hba.conf"
-            - "./requirements/service_app/postgresql/conf/postgresql.conf:/etc/postgresql/postgresql.conf"
-            - "./requirements/service_app/postgresql/tools/data:/docker-entrypoint-initdb.d"
-          command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf", "-c", "hba_file=/etc/postgresql/pg_hba.conf",]
-
-        service_chat_django:
-          depends_on:
-            - service_chat_postgresql
-            - vault
-          build:
-            context: ./requirements/service_chat/django
-            dockerfile: Dockerfile
-          image: python:3.13.0rc1_1
-          container_name: service_chat_django
-          env_file:
-            - ./env/.env_nginx
-            - ./env/.env_service_chat_django
-            - ./env/.env_service_chat_postgres
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.6
-          hostname: service_chat_django
-          volumes:
-            - "service_chat_django:/django_web_chat"
-            - "static_service_chat:/static"
-
-        service_chat_postgresql:
-          image: postgres@sha256:7b86711ac72674c8f2cf0fad7fd55cb07ae709c62fa0cddfa78e28e985fffe09
-          container_name: service_chat_postgresql
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.7
-          hostname: service_chat_postgresql
-          env_file:
-            - ./env/.env_service_chat_postgres
-          volumes:
-            - "./requirements/service_chat/postgresql/conf/pg_hba.conf:/etc/postgresql/pg_hba.conf"
-            - "./requirements/service_chat/postgresql/conf/postgresql.conf:/etc/postgresql/postgresql.conf"
-            - "./requirements/service_chat/postgresql/tools/data:/docker-entrypoint-initdb.d"
-          command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf", "-c", "hba_file=/etc/postgresql/pg_hba.conf",]
-
-        vault:
-          depends_on:
-            - vault_postgresql
-            - vault_sealer
-          image: hashicorp/vault@sha256:c51bb287709b74daefab32d1246cac767c32b8c73cb86509957634dffcd66a0e
-          container_name: vault
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.9
-          env_file: ./env/.env_vault
-          hostname: vault
-          volumes:
-            - "./requirements/hashicorp_vault/vault/conf/config:/vault/config/:rw"
-            - "./requirements/hashicorp_vault/vault/conf/file:/vault/file/:rw"
-            - "./requirements/hashicorp_vault/vault/conf/logs:/vault/logs/:rw"
-            - "./requirements/hashicorp_vault/vault/conf/server.crt:/vault/certs/server.crt"
-            - "./requirements/hashicorp_vault/vault/conf/server.key:/vault/certs/server.key"
-            - "./requirements/hashicorp_vault/vault/conf/root.crt:/vault/certs/root.crt"
-          cap_add:
-            - IPC_LOCK
-          command: >
-            sh -c "mkdir -p /vault/certs \
-            && apk update \
-            && apk add openssl vim postgresql-client \
-            && openssl req -x509 -nodes -out /vault/certs/vault-cert.pem -keyout /vault/certs/vault-key.pem -subj '/C=FR/ST=Alpes-Maritimes/L=Nice/O=Ecole\ 42/OU=Ecole/CN=transcendence.fr/emailAddress=mcordes@student.42nice.fr' \
-            && vault server -config=/vault/config/vault.hcl"
-
-        vault_postgresql:
-          image: postgres@sha256:7b86711ac72674c8f2cf0fad7fd55cb07ae709c62fa0cddfa78e28e985fffe09
-          container_name: vault_postgresql
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.10
-          hostname: vault_postgresql
-          env_file:
-            - ./env/.env_vault_postgres
-          volumes:
-            - "./requirements/hashicorp_vault/postgresql/conf/server.crt:/etc/postgresql/server.crt"
-            - "./requirements/hashicorp_vault/postgresql/conf/server.key:/etc/postgresql/server.key"
-            - "./requirements/hashicorp_vault/postgresql/conf/root.crt:/etc/postgresql/root.crt"
-            - "./requirements/hashicorp_vault/postgresql/conf/data:/var/lib/postgresql/data"
-
-        vault_sealer:
-          image: hashicorp/vault@sha256:c51bb287709b74daefab32d1246cac767c32b8c73cb86509957634dffcd66a0e
-          container_name: vault_sealer
-          init: true
-          restart: always
-          networks:
-            network:
-              ipv4_address: 172.20.0.11
-          env_file: ./env/.env_vault_sealer
-          hostname: vault_sealer
-          volumes:
-            - "./requirements/hashicorp_vault_sealer/vault/conf/config:/vault/config/:rw"
-            - "./requirements/hashicorp_vault_sealer/vault/conf/file:/vault/file/:rw"
-          #  - "./requirements/hashicorp_vault/vault/conf/logs:/vault/logs/:rw"
-          #  - "./requirements/hashicorp_vault/vault/conf/server.crt:/vault/certs/server.crt"
-          #  - "./requirements/hashicorp_vault/vault/conf/server.key:/vault/certs/server.key"
-          #  - "./requirements/hashicorp_vault/vault/conf/root.crt:/vault/certs/root.crt"
-          cap_add:
-            - IPC_LOCK
-          command: >
-            sh -c "vault server -config=/vault/config/vault.hcl"
-
+services:
+  nginx:
+    depends_on:
+      - frontend
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
+    ports:
+      - "4343:443"
+    container_name: nginx
+    env_file: ./env/.env_nginx
+    init: true
+    restart: always
     networks:
       network:
-        driver: bridge
-        ipam:
-          config:
-            - subnet: 172.20.0.0/24
-
+        ipv4_address: 172.20.0.2
+    hostname: nginx
     volumes:
-      static_service_app:
-        driver: local
-        driver_opts:
-          type: 'none'
-          o: 'bind'
-          device: "../volume/static/static_service_app"
-      service_app_django:
-        driver: local
-        driver_opts:
-          type: 'none'
-          o: 'bind'
-          device: "../volume/service_app/django"
-      service_app_postgresql:
-        driver: local
-        driver_opts:
-          type: 'none'
-          o: 'bind'
-          device: "../volume/service_app/postgresql"
-      static_service_chat:
-        driver: local
-        driver_opts:
-          type: 'none'
-          o: 'bind'
-          device: "../volume/static/static_service_chat"
-      service_chat_django:
-        driver: local
-        driver_opts:
-          type: 'none'
-          o: 'bind'
-          device: "../volume/service_chat/django"
-      service_chat_postgresql:
-        driver: local
-        driver_opts:
-          type: 'none'
-          o: 'bind'
-          device: "../volume/service_chat/postgresql"
-      redpanda-0:
-        driver: local
-        driver_opts:
-          type: 'none'
-          o: 'bind'
-          device: "../volume/eventbus"
+      - static_media:/static/media
+      - static_live_chat:/static/live_chat
+      - static_pong:/static/pong
+      - static_users:/static/users
+
+  frontend:
+    depends_on:
+      - service_user_handler_django
+      - service_game_pong_django
+      - service_live_chat_django
+    build:
+      context: ./requirements/frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    init: true
+    restart: always
+    networks:
+      network:
+        ipv4_address: 172.20.0.3
+    hostname: frontend
+
+  service_user_handler_django:
+    depends_on:
+      - service_user_handler_postgresql
+      - vault
+    build:
+      context: ./requirements/service_user_handler/django
+      dockerfile: Dockerfile
+    container_name: service_user_handler_django
+    env_file:
+      - ./env/.env_nginx
+      - ./env/.env_service_user_handler_django
+      - ./env/.env_service_user_handler_postgres
+    init: true
+    restart: always
+    networks:
+      network:
+        ipv4_address: 172.20.0.40
+    hostname: service_user_handler_django
+    volumes:
+      - static_media:/django_web_app/media
+      - static_users:/django_web_app/staticfiles
+
+  service_user_handler_postgresql:
+    build:
+      context: ./requirements/service_user_handler/postgresql
+      dockerfile: Dockerfile
+    container_name: service_user_handler_postgresql
+    init: true
+    restart: always
+    networks:
+      network:
+        ipv4_address: 172.20.0.41
+    hostname: service_user_handler_postgresql
+    env_file:
+      - ./env/.env_service_user_handler_postgres
+    volumes:
+      - user_handler_postgres_data:/var/lib/postgresql/data
+
+  service_game_pong_django:
+    depends_on:
+      - service_game_pong_postgresql
+      - vault
+    build:
+      context: ./requirements/service_game_pong/django
+      dockerfile: Dockerfile
+    container_name: service_game_pong_django
+    env_file:
+      - ./env/.env_nginx
+      - ./env/.env_service_game_pong_django
+      - ./env/.env_service_game_pong_postgres
+    init: true
+    restart: always
+    networks:
+      network:
+        ipv4_address: 172.20.0.42
+    hostname: service_game_pong_django
+    volumes:
+      - static_pong:/django_web_app/staticfiles
+
+  service_game_pong_postgresql:
+    build:
+      context: ./requirements/service_game_pong/postgresql
+      dockerfile: Dockerfile
+    container_name: service_game_pong_postgresql
+    init: true
+    restart: always
+    networks:
+      network:
+        ipv4_address: 172.20.0.43
+    hostname: service_game_pong_postgresql
+    env_file:
+      - ./env/.env_service_game_pong_postgres
+    volumes:
+      - game_pong_postgres_data:/var/lib/postgresql/data
+
+  service_live_chat_django:
+    depends_on:
+      - service_live_chat_postgresql
+      - vault
+    build:
+      context: ./requirements/service_live_chat/django
+      dockerfile: Dockerfile
+    container_name: service_live_chat_django
+    env_file:
+      - ./env/.env_nginx
+      - ./env/.env_service_live_chat_django
+      - ./env/.env_service_live_chat_postgres
+    init: true
+    restart: always
+    networks:
+      network:
+        ipv4_address: 172.20.0.44
+    hostname: service_live_chat_django
+    volumes:
+      - static_live_chat:/django_web_app/staticfiles
+
+  service_live_chat_postgresql:
+    build:
+      context: ./requirements/service_live_chat/postgresql
+      dockerfile: Dockerfile
+    container_name: service_live_chat_postgresql
+    init: true
+    restart: always
+    networks:
+      network:
+        ipv4_address: 172.20.0.45
+    hostname: service_live_chat_postgresql
+    env_file:
+      - ./env/.env_service_live_chat_postgres
+    volumes:
+      - live_chat_postgres_data:/var/lib/postgresql/data
+
+  vault:
+    depends_on:
+      - vault_postgresql
+    build:
+      context: ./requirements/hashicorp_vault/vault
+      dockerfile: Dockerfile
+    container_name: vault_secrets
+    secrets:
+      - chababalegrand
+    init: true
+    restart: always
+    networks:
+      network:
+        ipv4_address: 172.20.0.9
+    env_file:
+      - ./env/.env_vault
+    hostname: vault
+    cap_add:
+      - IPC_LOCK
+
+  vault_postgresql:
+    build:
+      context: ./requirements/hashicorp_vault/postgresql
+      dockerfile: Dockerfile
+    container_name: vault_postgresql
+    init: true
+    restart: always
+    networks:
+      network:
+        ipv4_address: 172.20.0.10
+    hostname: vault_postgresql
+    env_file:
+      - ./env/.env_vault_postgres
+
+secrets:
+  chababalegrand:
+    file: sec.txt
+
+networks:
+  network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+volumes:
+  static_users:
+  static_media:
+  static_pong:
+  static_live_chat:
+  user_handler_postgres_data:
+  game_pong_postgres_data:
+  live_chat_postgres_data:

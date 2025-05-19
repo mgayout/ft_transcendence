@@ -15,8 +15,8 @@ RUN apk update \
 RUN mkdir $APP_DIR /static
 WORKDIR $APP_DIR
 
-COPY ./conf/requirements.txt .
-COPY ./conf/manage.py .
+COPY --chown=root:root ./conf/requirements.txt .
+COPY --chown=root:root ./conf/manage.py .
 
 RUN	python3 -m venv .env \
 	&& source $ENV_DIR \
@@ -26,7 +26,12 @@ RUN	python3 -m venv .env \
 RUN source $ENV_DIR \
 	&& python3 manage.py startapp core
 
-COPY ./tools/init.sh ./init.sh
+COPY --chown=root:root ./conf/core ./core
+COPY --chown=root:root ./conf/django_live_chat ./django_live_chat
+COPY --chown=root:root ./conf/shared_models ./shared_models
+COPY --chown=root:root ./conf/utils ./utils
+
+COPY --chown=root:root ./tools/init.sh ./init.sh
 RUN chmod +x init.sh
 
 EXPOSE 8000

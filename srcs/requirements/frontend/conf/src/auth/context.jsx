@@ -1,17 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { refreshData, getData, removeData } from './data.js'
-import { refreshAtoken } from './instance'
+import { refreshAtoken, createAxiosInstance } from './instance'
 import { useLocation } from "react-router-dom"
 
 export const AuthContext = createContext()
 
-localStorage.setItem("id", "transcendence.fr")
-
 export const AuthProvider = ({ children }) => {
 
+	const [url, setURL] = useState("")
 	const [user, setUser] = useState(null)
 	const [loading, setLoading] = useState(true)
 	const [isAuth, setIsAuth] = useState(false)
+	const axios = useMemo(() => createAxiosInstance(url), [url])
 	const location = useLocation()
 
 	const isTokenExpired = (Atoken) => {
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
 		const Atoken = localStorage.getItem('Atoken')
 		const Rtoken = localStorage.getItem('Rtoken')
 		if (!Atoken || !Rtoken) return false
-		if (isTokenExpired(Atoken)) return await refreshAtoken(Rtoken)
+		if (isTokenExpired(Atoken)) return await refreshAtoken(Rtoken, url)
 		return true
 	}
 
@@ -63,6 +63,7 @@ export const AuthProvider = ({ children }) => {
 
 	useEffect(() => {
 		const init = async () => {
+			setURL("localhost:4343")
 			try {
 				await refreshUser()
 			}
@@ -77,7 +78,7 @@ export const AuthProvider = ({ children }) => {
 	}, [])
 
 	return (
-		<AuthContext.Provider value={ { user, isAuth, loading, refreshUser, logout } }>
+		<AuthContext.Provider value={ { url, user, isAuth, loading, axios, refreshUser, logout } }>
 			{children}
 		</AuthContext.Provider>
 	)

@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Card, Image, Button } from "react-bootstrap"
-import axiosInstance from "../auth/instance"
+import { useAuth } from "../auth/context"
 
 function Profile({ user, profile }) {
 
 	const navigate = useNavigate()
 	const [online, setOnline] = useState([])
 	const [winrate, setWinrate] = useState([])
+	const { axios } = useAuth()
 	
 	const fonction = async () => {
 		try {
-			const a = await axiosInstance.get(`/pong/matches/?player_id=${profile.id}`)
-			const b = await axiosInstance.get(`/pong/winrate/?player_id=${profile.id}`)
+			const a = await axios.get(`/pong/matches/?player_id=${profile.id}`)
+			const b = await axios.get(`/pong/winrate/?player_id=${profile.id}`)
 			//console.log(b)
 			//console.log(a)
 			const response = a.data.filter(a => a.status == "Terminée")

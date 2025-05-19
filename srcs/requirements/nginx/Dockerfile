@@ -12,7 +12,7 @@ RUN mkdir -p /etc/nginx/ssl /static/api /static/chat
 RUN openssl req -x509 -nodes \
 	-out /etc/nginx/ssl/transcendence.pem \
 	-keyout /etc/nginx/ssl/transcendence.key \
-	-subj "/C=FR/ST=Alpes-Maritimes/L=Nice/O=Ecole\ 42/OU=Ecole/CN=transcendence.fr/emailAddress=mcordes@student.42nice.fr"
+	-subj "/C=FR/ST=Alpes-Maritimes/L=Nice/O=Ecole\ 42/OU=Ecole/CN=localhost/emailAddress=mcordes@student.42nice.fr"
 
 WORKDIR /home
 RUN git clone https://github.com/owasp-modsecurity/ModSecurity.git \
@@ -45,16 +45,16 @@ RUN git clone https://github.com/owasp-modsecurity/ModSecurity.git \
 	&& sed -i "s/SecAuditEngine RelevantOnly/SecAuditEngine off/" modsecurity.conf
 
 WORKDIR /etc/nginx/modsec
-COPY ./conf/main.conf ./main.conf
+COPY --chown=root:root ./conf/main.conf ./main.conf
 
 WORKDIR /etc/nginx
-COPY ./conf/nginx.conf ./nginx.conf
+COPY --chown=root:root ./conf/nginx.conf ./nginx.conf
 
 WORKDIR /etc/nginx/conf.d
 RUN rm default.conf
-COPY ./conf/transcendence_fr.conf ./transcendence_fr.conf
+COPY --chown=root:root ./conf/transcendence_fr.conf ./transcendence_fr.conf
 
-COPY ./tools/init_nginx.sh /tmp/init_nginx.sh
+COPY --chown=root:root ./tools/init_nginx.sh /tmp/init_nginx.sh
 RUN chmod +x /tmp/init_nginx.sh
 
 EXPOSE 443

@@ -42,7 +42,7 @@ class PongMatchSerializer(serializers.ModelSerializer):
             'url': reverse('match-detail', args=[obj.id]),
         }
         if request and request.user and (request.user == obj.player_1.user or request.user == obj.player_2.user):
-            response['ws_url'] = f"wss://transcendence.fr/pong/ws/match/{obj.id}/"
+            response['ws_url'] = f"wss://localhost:3434/pong/ws/match/{obj.id}/"
         return response
 
 class PongInvitationSerializer(serializers.ModelSerializer):
@@ -630,7 +630,7 @@ class TournamentStartSerializer(serializers.Serializer):
                         "number_of_rounds": instance.number_of_rounds,
                         "max_score_per_round": instance.max_score_per_round,
                         "match_type": "tournament_semi_final",
-                        "ws_url": f"wss://transcendence.fr/pong/ws/match/{match.id}/",
+                        "ws_url": f"wss://localhost4343/pong/ws/match/{match.id}/",
                         "tournament_id": instance.id,
                         "tournament_name": instance.name
                     }
@@ -725,7 +725,7 @@ class TournamentStartFinalSerializer(serializers.Serializer):
                     "number_of_rounds": instance.number_of_rounds,
                     "max_score_per_round": instance.max_score_per_round,
                     "match_type": "tournament_final",
-                    "ws_url": f"wss://transcendence.fr/pong/ws/match/{final_match.id}/"
+                    "ws_url": f"wss://localhost:3434/pong/ws/match/{final_match.id}/"
                 }
             )
 

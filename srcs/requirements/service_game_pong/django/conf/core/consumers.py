@@ -45,7 +45,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             "player_2": event["player_2"],
             "number_of_rounds": event["number_of_rounds"],
             "match_type": event["match_type"],
-            "ws_url": f"wss://transcendence.fr/pong/ws/match/{event['match_id']}/"
+            "ws_url": f"wss://localhost:4343/pong/ws/match/{event['match_id']}/"
         }))
 
     async def invitation_declined(self, event):
