@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react"
 import { useAuth } from "../auth/context"
+import axiosInstance from '../auth/instance'
 
 function RequestModal({ tab }) {
 
-	const { user, axios } = useAuth()
+	const { user } = useAuth()
 	const [data, setData] = useState([])
 	const [search, setSearch] = useState('')
 	const [filteredFriends, setFilteredFriends] = useState([])
 
 	const list = async () => {
 		try {
-			const playerData = await axios.get('/users/api/player/')
-			const friendData = await axios.get('/users/api/friend/list/')
+			const playerData = await axiosInstance.get('/users/api/player/')
+			const friendData = await axiosInstance.get('/users/api/friend/list/')
 			let temp
 
 			const pendingFriends = friendData.data.filter(friend => friend.status == "pending")
@@ -37,19 +38,19 @@ function RequestModal({ tab }) {
 	}
 
 	const cancelRequest = async (playerID) => {
-		try {await axios.delete(`/users/api/friend-request/cancel/${playerID}/`)}
+		try {await axiosInstance.delete(`/users/api/friend-request/cancel/${playerID}/`)}
 		catch(error) {console.log(error)}
 		finally {list()}
 	}
 
 	const acceptRequest = async (playerID) => {
-		try {await axios.put(`/users/api/friend-request/accept/${playerID}/`, { player_2: playerID })}
+		try {await axiosInstance.put(`/users/api/friend-request/accept/${playerID}/`, { player_2: playerID })}
 		catch(error) {console.log(error)}
 		finally {list()}
 	}
 
 	const rejectRequest = async (playerID) => {
-		try {await axios.delete(`/users/api/friend-request/reject/${playerID}/`)}
+		try {await axiosInstance.delete(`/users/api/friend-request/reject/${playerID}/`)}
 		catch(error) {console.log(error)}
 		finally {list()}
 	}

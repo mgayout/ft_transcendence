@@ -21,6 +21,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
+DOMAIN_NAME = os.getenv('DOMAIN_NAME', 'localhost')
+PORT_NUM = os.getenv('PORT_NUM', '4343')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -183,15 +185,16 @@ CORS_ALLOW_CREDENTIALS = True
 
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = False  # Ne pas permettre à tous les origines par défaut
-ALLOWED_HOSTS = ['localhost']
 CORS_ALLOWED_ORIGINS = [
-    'https://localhost:4343',
+    f"https://{DOMAIN_NAME}:{PORT_NUM}",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://localhost:4343',
-    'https://localhost',
+    f"https://{DOMAIN_NAME}:{PORT_NUM}",
+    f"https://{DOMAIN_NAME}",
 ]
+
+ALLOWED_HOSTS = [DOMAIN_NAME]
 
 # Autoriser les en-têtes spécifiques (nécessaire pour les tokens JWT et WebSocket)
 CORS_ALLOW_HEADERS = [

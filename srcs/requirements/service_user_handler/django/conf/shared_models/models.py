@@ -38,7 +38,6 @@ class Player(models.Model):
         default='TOTP',
         blank=True
     )  # Méthode de 2FA
-    phone_number = models.CharField(max_length=15, null=True, blank=True)
 
     friends = models.ManyToManyField('self', symmetrical=False, through='Friendship', related_name='friends_of')
 

@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react"
 import { useAuth } from "../auth/context"
+import axiosInstance from '../auth/instance'
 
 function SearchModal({ tab }) {
 
-	const { user, axios } = useAuth()
+	const { user } = useAuth()
 	const [data, setData] = useState()
 	const [search, setSearch] = useState('')
 	const [filteredFriends, setFilteredFriends] = useState()
 
 	const list = async () => {
 		try {
-			const playerData = await axios.get('/users/api/player/')
-			const friendData = await axios.get('/users/api/friend/list/')
-			const blockData = await axios.get('/users/api/block/list/')
+			const playerData = await axiosInstance.get('/users/api/player/')
+			const friendData = await axiosInstance.get('/users/api/friend/list/')
+			const blockData = await axiosInstance.get('/users/api/block/list/')
 			let temp
 
 			temp = playerData.data
@@ -30,13 +31,13 @@ function SearchModal({ tab }) {
 	}
 
 	const addFriend = async (playerID) => {
-		try {await axios.post('/users/api/friend-request/send/', { player_2: playerID })}
+		try {await axiosInstance.post('/users/api/friend-request/send/', { player_2: playerID })}
 		catch(error) {console.log(error)}
 		finally {list()}
 	}
 
 	const addBlock = async (playerID) => {
-		try {await axios.post('/users/api/block/add', { blocked_id: playerID })} //manque un /
+		try {await axiosInstance.post('/users/api/block/add', { blocked_id: playerID })} //manque un /
 		catch(error) {console.log(error)}
 		finally {list()}
 	}

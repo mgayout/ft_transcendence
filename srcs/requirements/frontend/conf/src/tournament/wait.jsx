@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react"
 import { Button, Spinner } from "react-bootstrap"
-import { useAuth } from "../auth/context"
 import { useNotification } from "../websockets/notification"
 import { useGame } from "../websockets/game"
+import axiosInstance from "../auth/instance"
 
 function WaitMatch({ setState, type, setType }) {
 
@@ -10,12 +10,11 @@ function WaitMatch({ setState, type, setType }) {
 	const { setUrl } = useGame()
 	const [ready, setReady] = useState(false)
 	const [data, setData] = useState({})
-	const { axios } = useAuth()
 
 	const fonction = async () => {
 		try {
-			const playerData = await axios.get('/users/api/player/')
-			const tournamentData = await axios.get("/pong/tournament/list/")
+			const playerData = await axiosInstance.get('/users/api/player/')
+			const tournamentData = await axiosInstance.get("/pong/tournament/list/")
 			//console.log(tournamentData)
 			const getName = (id) => {
 				if (!id || id == null) return "..."
@@ -53,7 +52,7 @@ function WaitMatch({ setState, type, setType }) {
 	const play = async (id) => {
 		if (ready == false) return
 		try {
-			const response = await axios.put(`/pong/tournament/${id}/start/`)
+			const response = await axiosInstance.put(`/pong/tournament/${id}/start/`)
 			console.log(response)
 		}
 		catch(error) {console.log(error)}
@@ -61,13 +60,13 @@ function WaitMatch({ setState, type, setType }) {
 
 
 	const cancel = async (id) => {
-		try {await axios.delete(`/pong/tournament/${id}/cancel/`)}
+		try {await axiosInstance.delete(`/pong/tournament/${id}/cancel/`)}
 		catch(error) {console.log(error)}
 	}
 
 	const leave = async (id) => {
 		try {
-			await axios.put(`/pong/tournament/${id}/leave/`)
+			await axiosInstance.put(`/pong/tournament/${id}/leave/`)
 			setType("")
 			setState("")
 		}

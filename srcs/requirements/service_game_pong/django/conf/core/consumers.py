@@ -2,12 +2,16 @@ import asyncio
 import json
 import time
 from datetime import datetime, timedelta
+import os
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from core.pong import game_pong
 from shared_models.models import Player, Match
 from .models import Match, Player, StatusChoices, Game
+
+DOMAIN_NAME = os.getenv('DOMAIN_NAME', 'localhost')
+PORT_NUM = os.getenv('PORT_NUM', '4343')
 
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -45,7 +49,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             "player_2": event["player_2"],
             "number_of_rounds": event["number_of_rounds"],
             "match_type": event["match_type"],
-            "ws_url": f"wss://localhost:4343/pong/ws/match/{event['match_id']}/"
+            "ws_url": f"wss://{DOMAIN_NAME}:{PORT_NUM}/pong/ws/match/{event['match_id']}/"
         }))
 
     async def invitation_declined(self, event):

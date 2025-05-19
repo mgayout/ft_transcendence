@@ -9,12 +9,12 @@ export const PrivateChat = ({ children }) => {
 
 	const socketRef = useRef(null)
 	const [privMessages, setMessages] = useState([])
-	const { url, isAuth, user } = useAuth()
+	const { user } = useAuth()
 
 	useEffect(() => {
 		if (!user) return
 		const Atoken = localStorage.getItem('Atoken')
-		const ws = new WebSocket(`wss://${url}/live_chat/ws/chat/private/${user.id}/?token=${Atoken}`)
+		const ws = new WebSocket(`wss://${location.host}/live_chat/ws/chat/private/${user.id}/?token=${Atoken}`)
 		socketRef.current = ws
 
 		ws.onopen = () => {

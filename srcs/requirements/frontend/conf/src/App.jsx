@@ -5,7 +5,6 @@ import AuthRedirect from './auth/redirect'
 import LoginPage from './login/page'
 import RegisterPage from './register/page'
 import HomePage from './home/page'
-import SettingsPage from './settings/page'
 import Profile from './profile/page'
 import ProfileEdit from './profile/edit/page'
 import Online from './online/page'
@@ -25,7 +24,6 @@ const App = () => {
 				<Route path="/" element={ <LoginPage/> }/>
 				<Route path="/register" element={ <RegisterPage/> }/>
 				<Route path="/home" element={ <HomePage user={ user }/> }/>
-				<Route path="/settings" element={ <SettingsPage user={ user }/> }/>
 				<Route path="/profile/:userID" element={ <Profile user={ user }/> }/>
 				<Route path="/profile/:userID/edit" element={ <ProfileEdit user={ user }/> }/>
 				<Route path="/online" element={ <Online user={ user }/>}/>

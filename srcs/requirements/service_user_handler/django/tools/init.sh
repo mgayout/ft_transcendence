@@ -1,7 +1,5 @@
 #!/bin/sh
 
-sed -i "s/\${DOMAIN_NAME}/$DOMAIN_NAME/g" /django_web_app/django_user_handler/settings.py
-
 source /django_web_app/.env/bin/activate \
 	&& python3 manage.py makemigrations shared_models --no-input \
     && python3 manage.py migrate --fake-initial --no-input \

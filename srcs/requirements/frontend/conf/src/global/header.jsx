@@ -1,14 +1,16 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "react-bootstrap"
+import SettingsModal from "./settings-modal.jsx"
 import FriendModal from "../friend/modal.jsx"
 import ChatModal from "../chat/modal.jsx"
 import QuitModal from "../global/quit-modal.jsx"
 import { useGame } from "../websockets/game.jsx"
 
-function Header({ user, state, setState}) {
+function Header({ user, state, setState }) {
 
 	const navigate = useNavigate()
+	const [settings, setSettings] = useState(false)
 	const [friend, setFriend] = useState(false)
 	const [chat, setChat] = useState(false)
 	const [quit, setQuit] = useState(false)
@@ -28,7 +30,9 @@ function Header({ user, state, setState}) {
 			socket.close()
 			setState("")
 		}
-		if (string == "friend")
+		if (string == "settings")
+			setSettings(true)
+		else if (string == "friend")
 			setFriend(true)
 		else if (string == "chat")
 			setChat(true)
@@ -41,7 +45,7 @@ function Header({ user, state, setState}) {
 			<header>
 				<nav className="navbar bg-dark opacity-75 fixed-top p-2">
 					<div className="container-fluid p-0 m-0">
-						<Button className="rounded-0 btn btn-dark fw-bolder" onClick={() => goTo("/settings")}>
+						<Button className="rounded-0 btn btn-dark fw-bolder" onClick={() => setTo("settings")}>
 							<i className="bi bi-gear-fill" style={{fontSize: "40px"}}/>
 						</Button>
 						<Button className="rounded-0 btn btn-dark fw-bolder" onClick={() => goTo("/home")}>
@@ -64,9 +68,10 @@ function Header({ user, state, setState}) {
 					</div>
 				</nav>
 			</header>
+			<SettingsModal settings={ settings } setSettings={ setSettings }/>
 			<FriendModal friend={ friend } setFriend={ setFriend }/>
 			<ChatModal chat={ chat } setChat={ setChat }/>
-			<QuitModal quit={ quit } setQuit={ setQuit } state={ state }/>
+			<QuitModal quit={ quit } setQuit={ setQuit }/>
 		</>
 	)
 }

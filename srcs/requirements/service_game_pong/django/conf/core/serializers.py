@@ -5,6 +5,10 @@ from django.urls import reverse
 from rest_framework import generics, permissions, serializers
 from core.models import Game, Invitation, StatusChoices, TournamentStatusChoices, TypeChoices, Winrate
 from shared_models.models import Player, Block, Match, Tournament
+import os
+
+DOMAIN_NAME = os.getenv('DOMAIN_NAME', 'localhost')
+PORT_NUM = os.getenv('PORT_NUM', '4343')
 
 class PongPlayerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,7 +46,7 @@ class PongMatchSerializer(serializers.ModelSerializer):
             'url': reverse('match-detail', args=[obj.id]),
         }
         if request and request.user and (request.user == obj.player_1.user or request.user == obj.player_2.user):
-            response['ws_url'] = f"wss://localhost:3434/pong/ws/match/{obj.id}/"
+            response['ws_url'] = f"wss://{DOMAIN_NAME}:{PORT_NUM}/pong/ws/match/{obj.id}/"
         return response
 
 class PongInvitationSerializer(serializers.ModelSerializer):
@@ -630,7 +634,7 @@ class TournamentStartSerializer(serializers.Serializer):
                         "number_of_rounds": instance.number_of_rounds,
                         "max_score_per_round": instance.max_score_per_round,
                         "match_type": "tournament_semi_final",
-                        "ws_url": f"wss://localhost4343/pong/ws/match/{match.id}/",
+                        "ws_url": f"wss://{DOMAIN_NAME}:{PORT_NUM}/pong/ws/match/{match.id}/",
                         "tournament_id": instance.id,
                         "tournament_name": instance.name
                     }
@@ -725,7 +729,7 @@ class TournamentStartFinalSerializer(serializers.Serializer):
                     "number_of_rounds": instance.number_of_rounds,
                     "max_score_per_round": instance.max_score_per_round,
                     "match_type": "tournament_final",
-                    "ws_url": f"wss://localhost:3434/pong/ws/match/{final_match.id}/"
+                    "ws_url": f"wss://{DOMAIN_NAME}:{PORT_NUM}/pong/ws/match/{final_match.id}/"
                 }
             )
 

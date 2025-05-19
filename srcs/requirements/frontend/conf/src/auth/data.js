@@ -1,14 +1,13 @@
-import { useAuth } from './context'
+import axiosInstance from './instance'
 
 const refreshData = async () => {
-	const { axios } = useAuth()
 	try {
 		const rawData = localStorage.getItem("data")
 		if (!rawData) return
 		const data = JSON.parse(rawData)
 		if (!data?.id) return
 		const params = { token: localStorage.getItem("Rtoken") }
-		const response = await axios.get(`/users/api/player/${data.id}`, { params: params })
+		const response = await axiosInstance.get(`/users/api/player/${data.id}`, { params: params })
 		if (response.data)
 			localStorage.setItem("data", JSON.stringify(response.data))
 	}

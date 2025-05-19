@@ -44,3 +44,29 @@ class UserActivityMiddleware:
             Player.objects.filter(online=True, last_seen__lt=inactive_time).update(online=False)
         except Exception as e:
             print(f"Erreur lors du nettoyage des utilisateurs inactifs: {e}")
+
+class SetUserOnlineMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.jwt_auth = JWTAuthentication()
+
+    def __call__(self, request):
+        # Mettre l'utilisateur en ligne si un token valide est utilisé
+        try:
+            auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+            if auth_header.startswith('Bearer '):
+                validated_token = self.jwt_auth.get_validated_token(auth_header.split(' ')[1])
+                user = self.jwt_auth.get_user(validated_token)
+                
+                # Mettre à jour le statut en ligne
+                try:
+                    player = user.player_profile
+                    player.online = True
+                    player.last_seen = timezone.now()
+                    player.save(update_fields=['online', 'last_seen'])
+                except AttributeError:  # Si player_profile n'existe pas
+                    pass
+        except Exception:
+            pass
+
+        return self.get_response(request)

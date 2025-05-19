@@ -119,6 +119,11 @@ class PlayerLogin_api(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         player = serializer.save()
+        try:
+            player.online = True
+            player.save()
+        except (AttributeError, Player.DoesNotExist):
+            pass
         return Response(serializer.to_representation(player), status=status.HTTP_200_OK)
 
 @method_decorator(csrf_exempt, name='dispatch')

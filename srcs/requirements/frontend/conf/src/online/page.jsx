@@ -7,19 +7,18 @@ import JoinMatch from "./join.jsx"
 import WaitMatch from "./wait.jsx"
 import PlayMatch from "./play.jsx"
 import { useNotification } from "../websockets/notification.jsx"
-import { useAuth } from "../auth/context.jsx"
+import axiosInstance from "../auth/instance.jsx"
 
 function Online({ user }) {
 
 	const [state, setState] = useState("")
 	const [type, setType] = useState("")
 	const { setMessages } = useNotification()
-	const { axios } = useAuth()
 
 	const fonction = async () => {
 		try {
-			const matchData = await axios(`/pong/matches/?player_id=${user.id}`)
-			const inviteData = await axios.get("/pong/invitations/")
+			const matchData = await axiosInstance.get(`/pong/matches/?player_id=${user.id}`)
+			const inviteData = await axiosInstance.get("/pong/invitations/")
 			const a = matchData.data
 				.filter(match => match.status == "En cours" && (match.player_1.name == user.name || match.player_2.name == user.name))
 			if (a.length) {

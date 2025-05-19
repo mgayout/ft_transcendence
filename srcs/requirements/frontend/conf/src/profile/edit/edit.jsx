@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom"
 import { Image, Form, Button } from "react-bootstrap"
 import { useAuth } from "../../auth/context"
 import ErrorModal from "../../global/error-modal"
+import axiosInstance from '../../auth/instance'
 
 function ProfileEdit({user, show, setShow, code, setCode}) {
 
 	const navigate = useNavigate()
-	const { refreshUser, axios } = useAuth()
+	const { refreshUser } = useAuth()
 
 	const [file, setFile] = useState(null)
 	const [preview, setPreview] = useState(null)
@@ -25,7 +26,7 @@ function ProfileEdit({user, show, setShow, code, setCode}) {
 				formData.append('description', text)
 			if (file)
 				formData.append('avatar', file)
-			const response = await axios.put('/users/api/player/update-info/', formData)
+			const response = await axiosInstance.put('/users/api/player/update-info/', formData)
 			if (response.data.code == 1000) {
 				await refreshUser()
 				navigate(`/profile/${user.name}`)

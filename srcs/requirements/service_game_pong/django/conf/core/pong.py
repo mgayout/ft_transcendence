@@ -81,7 +81,6 @@ async def game_pong(game_id, consumer):
 
     # Balle sort du terrain (point marqué)
     if ball_x < 0 or ball_x > CANVAS_WIDTH:
-        ball_speed = 0.2
         if ball_x > CANVAS_WIDTH:
             score_player_1 += 1
         elif ball_x < 0:

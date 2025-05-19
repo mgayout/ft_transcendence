@@ -1,7 +1,9 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button, Form } from "react-bootstrap"
+import axiosInstance from '../auth/instance'
 import { useAuth } from "../auth/context"
+import DFAModal from "../global/dfa-modal"
 
 function Settings() {
 
@@ -19,47 +21,10 @@ function Settings() {
 	const [nPassShow2, setNPassShow2] = useState(false)
 
 	const [show, setShow] = useState(false)
-
 	const [dfaShow, setdfaShow] = useState(false)
 	const hideDFA = () => setdfaShow(false)
 
-	const { axios, user, logout } = useAuth()
-
-	const changeUsername = async () => {
-		try {
-			const response = await axios.put(`/users/api/player/update-name/`,
-				{name: nUsername, current_password: password1},
-				{headers: {Authorization: `Bearer ${localStorage.getItem("Atoken")}`}})
-			navigate("/home")
-		}
-		catch(error) {
-			console.log(error)
-		}
-	}
-
-	const changePassword = async () => {
-		try {
-			const response = await axios.put(`/users/api/player/update-PWD/`,
-				{current_password: password2, password1: nPassword1, password2: nPassword2},
-				{headers: {Authorization: `Bearer ${localStorage.getItem("Atoken")}`}})
-			navigate("/home")
-		}
-		catch(error) {
-			console.log(error)
-		}
-	}
-
-	const removeProfile = async () => {
-		try {
-			const response = await axios.delete(`/users/api/player/delete/`,
-				{headers: {Authorization: `Bearer ${localStorage.getItem("Atoken")}`}})
-			logout()
-		}
-		catch(error) {
-			console.log(error)
-		}
-		
-	}
+	const { user, logout } = useAuth()
 
 	return (
 		<>
@@ -149,17 +114,17 @@ function Settings() {
 						className="btn btn-secondary rounded fw-bolder">DELETE</Button>
 				</div>
 			</div>
-		</>
-	)
-}
-
-export default Settings
-
-/*<div className="rounded border border-black border-2 px-3 px-lg-5 pt-2 pt-lg-4 pb-3 pb-lg-4 mx-4"
+			<div className="rounded border border-black border-2 px-3 px-lg-5 pt-2 pt-lg-4 pb-3 pb-lg-4 mx-4"
 				style={{background: "rgba(0, 0, 0, 0.7)"}}>
 				<h1 className="mb-2 text-light">{user.e ? "Remove 2FA" : "Add 2FA"}</h1>
 				<div className="d-flex justify-content-center mt-4">
 					<Button type="button" onClick={() => setdfaShow(true)}
 						className="btn btn-secondary rounded fw-bolder">{user.e ? "Remove" : "Add"}</Button>
 				</div>
-			</div>*/
+			</div>
+			<DFAModal show={ dfaShow } hide={ hideDFA }/>
+		</>
+	)
+}
+
+export default Settings

@@ -31,6 +31,13 @@ class Player(models.Model):
     last_seen = models.DateTimeField(null=True, blank=True)
     description = models.TextField(max_length=500, blank=True, default="")
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, default='avatars/default.jpg')
+    two_factor_enabled = models.BooleanField(default=False)
+    two_factor_method = models.CharField(
+        max_length=10,
+        choices=[('TOTP', 'TOTP')],
+        default='TOTP',
+        blank=True
+    )  # Méthode de 2FA
 
     friends = models.ManyToManyField('self', symmetrical=False, through='Friendship', related_name='friends_of')
 

@@ -29,6 +29,9 @@ services:
     build:
       context: ./requirements/frontend
       dockerfile: Dockerfile
+      args:
+        VITE_DOMAIN_NAME: 'localhost'
+        VITE_PORT_NUM: 4343
     container_name: frontend
     init: true
     restart: always

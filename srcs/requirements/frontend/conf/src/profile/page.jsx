@@ -3,13 +3,12 @@ import { useLocation } from "react-router-dom"
 import Header from "../global/header.jsx"
 import Background from '../background/background.jsx'
 import Profile from "./profile.jsx"
-import { useAuth } from "../auth/context.jsx"
+import axiosInstance from '../auth/instance'
 
 function ProfilePage({ user }) {
 
 	const location = useLocation()
 	const [profile, setProfile] = useState(null)
-	const { axios } = useAuth()
 
 	useEffect(() => {
 		const checkURL = async () => {
@@ -21,7 +20,7 @@ function ProfilePage({ user }) {
 				const Rtoken = localStorage.getItem('Rtoken')
 				const config = {headers: {Authorization: `Bearer ${Atoken}`}}
 				const params = { token: Rtoken }
-				const playerData = await axios.get('/users/api/player/', {headers: config.headers, param: params})
+				const playerData = await axiosInstance.get('/users/api/player/', {headers: config.headers, param: params})
 				const data = playerData.data.filter(player => player.name == username)
 				if (data.length == 1)
 					setProfile(data[0])

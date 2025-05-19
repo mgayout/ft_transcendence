@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom"
 import { Button, Form } from "react-bootstrap"
 import { useAuth } from "../auth/context"
 import ErrorModal from "../global/error-modal"
+import axiosInstance from "../auth/instance"
 
 function Login() {
 
-	const { axios, refreshUser } = useAuth()
+	const { refreshUser } = useAuth()
 
 	const navigate = useNavigate()
 
@@ -27,7 +28,7 @@ function Login() {
 	const sendAuth = async (e) => {
 		e.preventDefault()
 		try {
-			const response = await axios.post('/users/api/login/', {
+			const response = await axiosInstance.post('/users/api/login/', {
 				username: username,
 				password: password})
 			if (response.data.code == 1000) {

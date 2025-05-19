@@ -1,6 +1,7 @@
 .PHONY: all clean fclean re
 
 all:
+#	@sh set_dom.sh
 
 	@docker compose -f ./srcs/docker-compose.yml up -d vault_postgresql > /dev/null
 

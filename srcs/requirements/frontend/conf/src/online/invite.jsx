@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react"
 import { Modal, Button } from "react-bootstrap"
 import { useAuth } from "../auth/context"
+import axiosInstance from "../auth/instance"
 
 function InviteMatch({ state, setState, setType }) {
 
 	const [data, setData] = useState(null)
-	const { axios, user } = useAuth()
+	const { user } = useAuth()
 
 	const fonction = async () => {
 		try {
-			const playerData = await axios.get('users/api/player/')
-			const friendData = await axios.get('users/api/friend/list/')
+			const playerData = await axiosInstance.get('users/api/player/')
+			const friendData = await axiosInstance.get('users/api/friend/list/')
 			const a = playerData.data
 				.filter(player => friendData.data
 					.some(friend => friend.status == "accepted" && friend.player_1 == player.name) && player.name != user.name && player.online == true)
@@ -24,7 +25,7 @@ function InviteMatch({ state, setState, setType }) {
 
 	const invite = async (id) => {
 		try {
-			await axios.post("pong/invitations/create/", {
+			await axiosInstance.post("pong/invitations/create/", {
 				player_2_id: id,
 				number_of_rounds: 1,
 				max_score_per_round: 3,
