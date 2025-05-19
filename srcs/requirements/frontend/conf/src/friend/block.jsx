@@ -16,11 +16,16 @@ function BlockModal({ tab }) {
 			console.log(blockData)
 			let temp
 
+			const getID = (name) => {
+				const ID = blockData.data.find(block => block.blocked === name && block.blocker === user.name)
+				return ID.id
+			}
+
 			const blocked = blockData.data.filter(block => block.blocker == user.name)
 
 			temp = playerData.data
 				.filter(player => blocked.some(block => block.blocked == player.name))
-				.map(player => ({name: player.name, id: player.id, avatar: player.avatar}))
+				.map(player => ({name: player.name, id: getID(player.name), avatar: player.avatar}))
 
 			setData(temp)
 			setFilteredFriends(temp)
