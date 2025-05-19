@@ -6,17 +6,24 @@ import { useAuth } from "../auth/context"
 function JoinMatch({ state, setState, setType }) {
 
 	const [data, setData] = useState(null)
-	const { user } = useAuth()
+	const [full, setFull] = useState(false)
 
 	const fonction = async () => {
 		try {
 			const playerData = await axiosInstance.get('/users/api/player/')
 			const tournamentData = await axiosInstance.get("/pong/tournament/list/")
-			console.log(tournamentData)
 			const getAvatar = (id) => {
 				if (!id || id == null) return null
 				const Avatar = playerData.data.find(player => player.id === id)
 				return Avatar.avatar
+			}
+			const getPlayers = (p1, p2, p3, p4) => {
+				let players = 0
+				if (p1) players++
+				if (p2)	players++
+				if (p3) players++
+				if (p4) players++
+				return players
 			}
 			const a = tournamentData.data
 				.map(tourn => ({
@@ -25,25 +32,37 @@ function JoinMatch({ state, setState, setType }) {
 					p1: getAvatar(tourn.player_1),
 					p2: getAvatar(tourn.player_2),
 					p3: getAvatar(tourn.player_3),
-					p4: getAvatar(tourn.player_4)}))
+					p4: getAvatar(tourn.player_4),
+					players: getPlayers(tourn.player_1, tourn.player_2, tourn.player_3, tourn.player_4)}))
 			setData(a)
 		}
 		catch(error) {console.log(error)}
 	}
 
 	const join = async (id) => {
+		if (full == true) return
 		try {
 			await axiosInstance.put(`pong/tournament/${id}/join/`)
 			setType("invited")
 			setState("wait")
 		}
-		catch(error) {console.log(error)}
+		catch(error) {
+			console.log(error)
+			fonction()
+		}
 	}
 
 	useEffect(() => {
 		if (state == "join")
 			fonction()
 	}, [state])
+
+	useEffect(() => {
+		if (data && data.players == 4)
+			setFull(true)
+		else
+			setFull(false)
+	}, [data])
 
 	return (
 		<Modal show={state == "join"}>
@@ -71,8 +90,8 @@ function JoinMatch({ state, setState, setType }) {
 									<img src={tourn.p4} alt="Avatar" style={{ width: '40px', height: '40px', borderRadius: '50%' }} /> :
 									<Spinner animation="border" style={{ width: '1rem', height: '1rem' }} className="mb-2"/>}
 								</div>
-								<div className="d-flex gap-3">
-									<Button variant="success" onClick={() => join(tourn.id)}>Join</Button>
+								<div className="ms-3">
+									<Button variant={!full ? "success" : "danger"} onClick={() => join(tourn.id)}>Join</Button>
 								</div>
 							</div>
 						</li>)))

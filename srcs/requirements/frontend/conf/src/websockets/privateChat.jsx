@@ -15,7 +15,7 @@ export const PrivateChat = ({ children }) => {
 		if (!user) return
 		const Atoken = localStorage.getItem('Atoken')
 		const id = localStorage.getItem("id")
-		const ws = new WebSocket(`ws://${id}/live_chat/ws/chat/private/${user.id}/?token=${Atoken}`)
+		const ws = new WebSocket(`wss://${id}/live_chat/ws/chat/private/${user.id}/?token=${Atoken}`)
 		socketRef.current = ws
 
 		ws.onopen = () => {

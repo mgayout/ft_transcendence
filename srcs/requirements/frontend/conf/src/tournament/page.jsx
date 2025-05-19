@@ -13,37 +13,24 @@ function Tournament({ user }) {
 	const [type, setType] = useState("")
 	const { setMessages } = useNotification()
 
-	/*const fonction = async () => {
+	const fonction = async () => {
 		try {
-			const matchData = await axiosInstance(`/pong/matches/?player_id=${user.id}`)
-			const inviteData = await axiosInstance.get("/pong/invitations/")
-			const a = matchData.data
-				.filter(match => match.status == "En cours" && (match.player_1.name == user.name || match.player_2.name == user.name))
-			if (a.length) {
-				setMessages({
-					type: "match_created",
-					player_1: a[0].player_1.name,
-					player_2: a[0].player_2.name,
-					ws_url: a[0].url.ws_url})
-				if (a[0].player_1.name == user.name) setType("paddle_l")
-				else if (a[0].player_2.name == user.name) setType("paddle_r")
+			const tournamentData = await axiosInstance("/pong/tournament/list/")
+			const a = tournamentData.data
+				.find(match => match.status == "Ouvert" &&
+				(match.player_1 == user.id || match.player_2 == user.id ||
+				match.player_3 == user.id || match.player_4 == user.id))
+			if (a) {
+				if (a.player_1 == user.id) setType("host")
+				else setType("invited")
 				setState("wait")
-			}
-			const b = inviteData.data.find(invite => invite.status == "En attente" && invite.from_player.name == user.name)
-			if (b) {
-				setType("paddle_l")
-				setState("wait")
+				setMessages({type: "tournament_created"})
 			}
 		}
 		catch(error) {
 			console.log(error)
 		}
-	}*/
-
-	/*useEffect(() => {
-		if (state != "play")
-			fonction()
-	}, [state])*/
+	}
 
 	const create = async () => {
 		try {
@@ -58,6 +45,11 @@ function Tournament({ user }) {
 		}
 		catch(error) {console.log(error)}
 	}
+
+	useEffect(() => {
+		if (state != "play")
+			fonction()
+	}, [state])
 
 	return (
 		<>
@@ -77,7 +69,7 @@ function Tournament({ user }) {
 				</div> : <></>}
 				<JoinMatch state={ state } setState={ setState } setType={ setType }/>
 				{state == "wait" ?
-				<WaitMatch setState={ setState } type={ type }/> : <></>}
+				<WaitMatch setState={ setState } type={ type } setType={ setType }/> : <></>}
 			</main>
 		</>
 	)

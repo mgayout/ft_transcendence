@@ -13,7 +13,6 @@ function BlockModal({ tab }) {
 		try {
 			const playerData = await axiosInstance.get('/users/api/player/')
 			const blockData = await axiosInstance.get('/users/api/block/list/')
-			console.log(blockData)
 			let temp
 
 			const getID = (name) => {

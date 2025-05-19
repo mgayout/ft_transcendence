@@ -14,7 +14,7 @@ export const Notification = ({ children }) => {
 		if (!isAuth) return
 		const id = localStorage.getItem('id')
 		const Atoken = localStorage.getItem('Atoken')
-		const ws = new WebSocket(`ws://${id}/pong/ws/notifications/?token=${Atoken}`)
+		const ws = new WebSocket(`wss://${id}/pong/ws/notifications/?token=${Atoken}`)
 		socketRef.current = ws
 
 		ws.onopen = () => {
@@ -33,6 +33,14 @@ export const Notification = ({ children }) => {
 				console.log(`Match [${data.match_id}] has been created.`)
 				setMessages(data)
 			}
+			else if (data.type == "tournament_created")
+				setMessages(data)
+			else if (data.type == "player_joined")
+				setMessages(data)
+			else if (data.type == "player_leave")
+				setMessages(data)
+			else if (data.type == "tournament_cancelled")
+				setMessages(data)
 			else
 				console.log(data)
 		}
