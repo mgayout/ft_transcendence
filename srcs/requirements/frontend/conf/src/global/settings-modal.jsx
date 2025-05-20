@@ -63,10 +63,9 @@ function SettingsModal({ settings, setSettings }) {
 		}	
 	}
 
-	const remove2FA = async (password) => {
+	const remove2FA = async (password2FA) => {
 		try {
-			console.log(password)
-			const response = await axiosInstance.delete("/users/api/2fa-disable/", {password: password})
+			const response = await axiosInstance.delete("/users/api/2fa-disable/", {password: password2FA})
 			if (response.data.code == 1000) {
 				refreshUser()
 				handleClose()

@@ -97,8 +97,8 @@ async def game_pong(game_id, consumer):
             consumer.room_group_name,
             {
                 "type": "score_update",
-                "scorePlayer1": score_player_1,
-                "scorePlayer2": score_player_2,
+                "score_Player_1": score_player_1,
+                "score_Player_1": score_player_2,
             }
         )
 
