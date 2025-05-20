@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { AmbientLight, DirectionalLight } from 'three'
 
@@ -117,6 +117,58 @@ export const setBall = () => {
 	return ball
 }
 
-export const setScore = () => {
-	
+export const setScore = (groupScore) => {
+	const canvas = document.createElement('canvas')
+	canvas.width = 512
+	canvas.height = 512
+	const ctx = canvas.getContext('2d')
+	ctx.translate(0, canvas.height)
+    ctx.scale(1, -1)
+	ctx.font = 'bold 40px "Courier New", monospace'
+	ctx.fillStyle = 'white'
+	ctx.textAlign = 'center'
+	ctx.textBaseline = 'middle'
+	const text = (groupScore && groupScore.score1 && groupScore.score2
+		? `${groupScore.score1} - ${groupScore.score2}`
+		: "0 - 0")
+	ctx.fillText(text, canvas.width / 2, canvas.height / 2)
+	const texture = new THREE.Texture(canvas)
+	texture.flipY = false
+	texture.premultiplyAlpha = false
+	texture.needsUpdate = true
+	const material = new THREE.MeshBasicMaterial({
+		map: texture, transparent: true, side: THREE.DoubleSide})
+	const geometry = new THREE.PlaneGeometry(80, 80)
+	const textMesh = new THREE.Mesh(geometry, material)
+	textMesh.position.set(35, 30, 6)
+	textMesh.rotateX(Math.PI / 2)
+	return (textMesh)
+}
+
+export const setNames = (groupName) => {
+	const canvas = document.createElement('canvas')
+	canvas.width = 512
+	canvas.height = 512
+	const ctx = canvas.getContext('2d')
+	ctx.translate(0, canvas.height)
+    ctx.scale(1, -1)
+	ctx.font = 'bold 40px "Courier New", monospace'
+	ctx.fillStyle = 'white'
+	ctx.textAlign = 'center'
+	ctx.textBaseline = 'middle'
+	const text = (groupName && groupName.player1 && groupName.player2
+		? `${groupName.player1} vs ${groupName.player2}`
+		: "...   vs   ...")
+	ctx.fillText(text, canvas.width / 2, canvas.height / 2)
+	const texture = new THREE.Texture(canvas)
+	texture.flipY = false
+	texture.premultiplyAlpha = false
+	texture.needsUpdate = true
+	const material = new THREE.MeshBasicMaterial({
+		map: texture, transparent: true, side: THREE.DoubleSide})
+	const geometry = new THREE.PlaneGeometry(20, 20)
+	const textMesh = new THREE.Mesh(geometry, material)
+	textMesh.position.set(35, 30, 14)
+	textMesh.rotateX(Math.PI / 2)
+	return (textMesh)
 }

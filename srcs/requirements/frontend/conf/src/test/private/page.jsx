@@ -1,11 +1,14 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useGame } from "../../websockets/game"
+import { useNotification } from "../../websockets/notification";
 import createCanva from "./canva";
 
 const BGprivate = ({ state, type }) => {
 
 	const canva = useRef(null)
-	const { getSocket, PongMessages } = useGame()
+	const { getSocket, PongMessages} = useGame()
+	const { messages } = useNotification()
+	const [groupName, setGroupName] = useState({player1: "...", player2: "..."})
 
 	useEffect(() => {
 
@@ -34,7 +37,6 @@ const BGprivate = ({ state, type }) => {
 		}
 
 		const resizeCanva = () => {
-			
 			canva.current.width = window.innerWidth
 			canva.current.height = window.innerHeight
 
@@ -48,7 +50,7 @@ const BGprivate = ({ state, type }) => {
 
 		const lastPongMessage = PongMessages[PongMessages.length - 1]
 	
-		const { dispose, renderer, camera } = createCanva(canva.current, state, lastPongMessage)
+		const { dispose, renderer, camera } = createCanva(canva.current, state, lastPongMessage, groupName)
 
 		window.addEventListener("resize", resizeCanva)
 		window.addEventListener('keydown', handleKeyDown)
@@ -63,6 +65,25 @@ const BGprivate = ({ state, type }) => {
 			dispose()
 		}
 	}, [canva, state, PongMessages])
+
+	const updateNames = (string, types) => {
+		if (types === 1) {
+			if (string.length <= 8)
+				return string.padEnd(8, ' ')
+			return string.slice(0, 8) + '.'
+		}
+		else if (types === 2) {
+			if (string.length <= 8)
+				return string.padStart(8, ' ')
+			return string.slice(-8) + '.'
+		}
+		return '...'
+	}
+
+	useEffect(() => {
+		if (messages.type == "match_created")
+			setGroupName({player1: updateNames(messages.player_1, 1), player2: updateNames(messages.player_2, 2)})
+	}, [messages])
 
 	return (
 			<div className="position-fixed top-0">

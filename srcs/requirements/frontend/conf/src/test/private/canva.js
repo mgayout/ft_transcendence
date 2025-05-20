@@ -1,7 +1,7 @@
 import * as THREE from 'three'
-import { setFloor, setFog, setLine, setBorder, setBScreen, setLight, setPaddle, setWall, setBall, setScore } from './shapes'
+import { setFloor, setFog, setLine, setBorder, setBScreen, setLight, setPaddle, setWall, setBall, setScore, setNames } from './shapes'
 
-const setAll = (scene, state) => {
+const setAll = (scene, state, groupName) => {
 
 	const floor = setFloor(scene)
 	const fog = setFog(scene)
@@ -12,17 +12,18 @@ const setAll = (scene, state) => {
 	const paddle = setPaddle()
 	const wall = setWall()
 	const ball = setBall()
-	const score = setScore()
+	const score = setScore({score1: 0, score2: 0})
+	const names = setNames(groupName)
 
 	if (state == "play") {
 		//line.cubes.forEach(cube => scene.add(cube))
-		scene.add(paddle.paddleL, paddle.paddleR, wall.wallL, wall.wallR, ball)
-		scene.add(border, bscreen.bscreen1, bscreen.bscreen2, bscreen.bscreen3)
+		scene.add(paddle.paddleL, paddle.paddleR, wall.wallL, wall.wallR, ball, names)
+		scene.add(border, bscreen.bscreen1, bscreen.bscreen2, bscreen.bscreen3, score)
 	}
-	return {floor, fog, light, paddle, wall, ball, border, bscreen}
+	return {floor, fog, light, paddle, wall, ball, border, bscreen, names, score}
 }
 
-const createCanva = (canva, state, lastPongMessage) => {
+const createCanva = (canva, state, lastPongMessage, groupName) => {
 	
 	const scene = new THREE.Scene()
 
@@ -37,15 +38,26 @@ const createCanva = (canva, state, lastPongMessage) => {
 	renderer.toneMappingExposure = 2.0
 	renderer.setSize(canva.width, canva.height)
 
-	const objects = setAll(scene, state)
+	const objects = setAll(scene, state, groupName)
 
 	let animationFrameId
 
 	const animate = () => {
-		
-		objects.paddle.paddleL.position.set(0.5, lastPongMessage ? (lastPongMessage.paddleL + 2.5) : 17.5, 1)
-		objects.paddle.paddleR.position.set(70.5, lastPongMessage ? (lastPongMessage.paddleR + 2.5) : 17.5, 1)
-		objects.ball.position.set(lastPongMessage ? (lastPongMessage.x + 0.5) : 35.5, lastPongMessage ? (lastPongMessage.y + 0.5) : 15.5, 1)
+		if (state == "play" && lastPongMessage) {
+			if (lastPongMessage.type == "score_update") {
+				console.log("score update")
+				objects.score.geometry.dispose()
+				objects.score.material.dispose()
+				scene.remove(objects.score)
+				objects.score = setNames({score1: lastPongMessage.scorePlayer1, score2: lastPongMessage.scorePlayer2})
+				scene.add(objects.score)
+			}
+			if (lastPongMessage.type != "score_update") {
+				objects.paddle.paddleL.position.set(0.5, lastPongMessage ? (lastPongMessage.paddleL + 2.5) : 17.5, 1)
+				objects.paddle.paddleR.position.set(70.5, lastPongMessage ? (lastPongMessage.paddleR + 2.5) : 17.5, 1)
+				objects.ball.position.set(lastPongMessage ? (lastPongMessage.x + 0.5) : 35.5, lastPongMessage ? (lastPongMessage.y + 0.5) : 15.5, 1)
+			}
+		}
 
 		renderer.render(scene, camera)
 		animationFrameId = requestAnimationFrame(animate)

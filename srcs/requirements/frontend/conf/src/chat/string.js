@@ -17,7 +17,7 @@ export function updateSender(sender) {
 
 export function updateContent(content) {
 	if (!content) return ""
-	const lines = content.match(/.{1,70}/g) || [content]
+	const lines = content.match(/.{1,50}/g) || [content]
 	return lines.map((line, index) =>
 		index === 0 ? line : ' '.repeat(24) + ': ' + line
 	).join('\n')

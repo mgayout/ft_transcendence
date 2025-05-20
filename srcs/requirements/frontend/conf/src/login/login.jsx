@@ -1,9 +1,10 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button, Form } from "react-bootstrap"
 import { useAuth } from "../auth/context"
 import ErrorModal from "../global/error-modal"
 import axiosInstance from "../auth/instance"
+import DFAModal from "./dfa-modal"
 
 function Login() {
 
@@ -13,6 +14,7 @@ function Login() {
 
 	const [username, setUsername] = useState('')
 	const [password, setPassword] = useState('')
+	const [DFAcode, setDFAcode] = useState('')
 
 	const [passShow, setPassShow] = useState(false)
 	const showPass = () => setPassShow(true)
@@ -30,7 +32,8 @@ function Login() {
 		try {
 			const response = await axiosInstance.post('/users/api/login/', {
 				username: username,
-				password: password})
+				password: password,
+				otp_code: DFAcode})
 			if (response.data.code == 1000) {
 				localStorage.setItem('Atoken', response.data.tokens.access)
 				localStorage.setItem('Rtoken', response.data.tokens.refresh)
@@ -41,12 +44,25 @@ function Login() {
 		}
 		catch (error) {
 			console.log(error)
-			setUsername("")
-			setPassword("")
-			setCode(error.response.data.code)
-			setShow(true)
+			if (error.response.data.code == "1037") {
+				if (username && password)
+					setdfaShow(true)
+			}
+			else {
+				setUsername("")
+				setPassword("")
+				setCode(error.response.data.code)
+				setShow(true)
+			}
 		}
 	}
+
+	useEffect(() => {
+		if (!dfaShow) {
+			setUsername("")
+			setPassword("")
+		}
+	}, [dfaShow])
 
 	return (
         <Form>
@@ -88,7 +104,7 @@ function Login() {
             </Form.Group>
 			<div className="d-flex justify-content-center pt-3 mb-3 mb-lg-5">
 				<Button
-					type="submit"
+					type="button"
 					className="btn btn-secondary rounded fw-bolder"
 					onClick={sendAuth}
 				>
@@ -104,7 +120,8 @@ function Login() {
 					REGISTER
 				</Button>
 			</div>
-			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 1 } code={ code } />
+			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 1 } code={ code }/>
+			<DFAModal show={ dfaShow } hide={ hideDFA } username={ username } password={ password }/>
         </Form>
     )
 }

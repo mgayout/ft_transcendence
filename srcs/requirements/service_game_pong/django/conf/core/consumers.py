@@ -221,7 +221,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         winner_name = None
         winner_playerid = None
         if winner_id:
-            try:
+            try:handle_game_end
                 winner_info = await database_sync_to_async(self.get_winner_info)(winner_id)
                 winner_name = winner_info.get('name')
                 winner_playerid = winner_info.get('id')
@@ -263,7 +263,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             return new_game_event
         elif match_status == "ended":
             # Terminer le match
-            match_result = await self.end_match(self.match)
+            match_result = await self.end_match(self.match)handle_game_end
             match_ended_event = {
                 "type": "match_ended",
                 "winner": match_result.get("winner"),
@@ -284,7 +284,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             game.score_player_1 = self.c_scorep1.get(self.match_id, 0)
             game.score_player_2 = self.c_scorep2.get(self.match_id, 0)
             if winner_id:
-                game.winner = Player.objects.get(id=winner_id)
+                game.winner = Player.objects.get(id=winner_id)handle_game_end
             game.save()
 
             # Mettre à jour les victoires
@@ -379,7 +379,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         self.match = await self.get_match(self.match_id)
         if not self.match:
             await self.close()
-            return
+            returnhandle_game_end
 
         # Récupérer la partie active
         self.game = await self.get_active_game(self.match_id)
@@ -532,10 +532,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 self.game = await self.get_active_game(self.match_id)
                 if not self.game:
                     break
-                if len(self.c_players.get(self.match_id, set())) != 2:
-                    break
-            try:
-                await game_pong(self.game.id, self)
+                if len(self.c_players.get(self.match_id, set())) != 2:handle_game_end
                 if self.c_scorep1.get(self.match_id, 0) >= self.game.max_score or self.c_scorep2.get(self.match_id, 0) >= self.game.max_score:
                     winner_id = None
                     if self.c_scorep1[self.match_id] >= self.game.max_score:
@@ -607,6 +604,14 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             "type": "game_resumed",
             "message": event["message"]
+        }))
+
+    async def score_update(self, event):
+        """Informe les clients que le score est mise a jour."""
+        await self.send(text_data=json.dumps({
+            "type": "score_update",
+            "scorePlayer1": event["score_player_1"],
+            "scorePlayer2":event["score_player_2"],
         }))
 
     async def game_ended(self, event):

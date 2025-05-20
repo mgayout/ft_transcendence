@@ -28,6 +28,8 @@ export const Game = ({ children }) => {
 				setMessages(data)
 			if (data.type == "data_pong")
 				setPongMessages((prev) => [...prev, data])
+			else if (data.type == "score_update")
+				setPongMessages((prev) => [...prev, data])
 			else if (data.type)
 				setMessages((prev) => [...prev, data])
 			else

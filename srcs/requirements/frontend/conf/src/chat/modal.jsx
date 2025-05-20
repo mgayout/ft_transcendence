@@ -5,6 +5,7 @@ import { useChat } from "../websockets/chat"
 import { useAuth } from "../auth/context"
 import { usePrivateChat } from "../websockets/privateChat.jsx"
 import { updateTime, updateSender, updateContent} from "./string.js"
+import axiosInstance from "../auth/instance.jsx"
 
 function ChatModal({ chat, setChat }) {
 
@@ -12,16 +13,16 @@ function ChatModal({ chat, setChat }) {
 	const handleClose = () => setChat(false)
 	const [chats, setChats] = useState([])
 	const [message, setMessage] = useState("")
-	const { user, axios } = useAuth()
+	const { user } = useAuth()
 	const { messages } = useChat()
 	const { privMessages } = usePrivateChat()
 	const bottomRefs = useRef([])
 
 	const fonction = async () => {
 		try {
-			const a = await axios.get("/live_chat/general/messages/")
-			const b = await axios.get("/live_chat/private/list/")
-			const c = await axios.get('/users/api/friend/list/')
+			const a = await axiosInstance.get("/live_chat/general/messages/")
+			const b = await axiosInstance.get("/live_chat/private/list/")
+			const c = await axiosInstance.get('/users/api/friend/list/')
 			const d = c.data
 				.filter(c => c.player_1 == user.name && c.status == "accepted")
 			const temp = []
@@ -37,7 +38,7 @@ function ChatModal({ chat, setChat }) {
 
 			async function getId(friendname) {
 				try {
-					const e = await axios.get('/users/api/player/')
+					const e = await axiosInstance.get('/users/api/player/')
 					const player = e.data.find(e => e.name == friendname)
 					return player ? player.id : 0
 				}
@@ -65,17 +66,17 @@ function ChatModal({ chat, setChat }) {
 
 	const invite = async (id, name) => {
 		try {
-			const matchData = await axios(`/pong/matches/?player_id=${user.id}`)
+			const matchData = await axiosInstance.get(`/pong/matches/?player_id=${user.id}`)
 			if (matchData.data.find(match => match.status == "En cours")) return
-			const inviteData = await axios.get("/pong/invitations/")
+			const inviteData = await axiosInstance.get("/pong/invitations/")
 			if (inviteData.data.find(invite => invite.status == "En attente" && invite.from_player.name == user.name)) return
-			await axios.post("pong/invitations/create/", {
+			await axiosInstance.post("pong/invitations/create/", {
 				player_2_id: id,
 				number_of_rounds: 1,
 				max_score_per_round: 3,
 				match_type: "Normal"
 			})
-			await axios.post(`/live_chat/private/send/${id}/`, {content: `*${user.name} invited ${name} to an online game.*`})
+			await axiosInstance.post(`/live_chat/private/send/${id}/`, {content: `*${user.name} invited ${name} to an online game.*`})
 		}
 		catch(error) {console.log(error)}
 	}
@@ -84,9 +85,9 @@ function ChatModal({ chat, setChat }) {
 		if (!message) return
 		try {
 			if (id)
-				await axios.post(`/live_chat/private/send/${id}/`, {content: message})
+				await axiosInstance.post(`/live_chat/private/send/${id}/`, {content: message})
 			else
-				await axios.post("/live_chat/general/send/", {content: message})}
+				await axiosInstance.post("/live_chat/general/send/", {content: message})}
 		catch(error) {console.log(error)}
 		finally {setMessage("")}
 	}

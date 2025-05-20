@@ -48,7 +48,7 @@ class Game(models.Model):
     paddle_position = models.JSONField(default=dict, null=True, blank=True)
     ball_dx = models.IntegerField(default=1)
     ball_dy = models.IntegerField(default=0)
-    ball_speed = models.FloatField(default=4)
+    ball_speed = models.FloatField(default=0.2)
     round_number = models.PositiveIntegerField(null=True, blank=True)
     winner = models.ForeignKey(Player, on_delete=models.SET_NULL, related_name='won_games', null=True, blank=True)
     max_score = models.PositiveIntegerField(default=3 ,null=True, blank=True)

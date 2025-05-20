@@ -1,7 +1,7 @@
 .PHONY: all clean fclean re
 
 all:
-#	@sh set_dom.sh
+	@sh set_dom.sh
 
 	@docker compose -f ./srcs/docker-compose.yml up -d vault_postgresql > /dev/null
 
@@ -29,7 +29,7 @@ all:
 #	@docker exec -it vault_secrets vault operator unseal $$(cat ./srcs/env/.env_vault_secrets_key | grep UNSEAL_KEY_3 | sed -e "s/'/ /g" | cut -d ' ' -f 2)
 #	@docker exec -it vault_secrets vault login $$(cat ./srcs/env/.env_vault_secrets_key | grep INITIAL_ROOT_TOKEN | sed -e "s/'/ /g" | cut -d ' ' -f 2)
 
-	docker compose -f ./srcs/docker-compose.yml up -d
+	@docker compose -f ./srcs/docker-compose.yml up -d > /dev/null
 
 	@docker exec service_user_handler_postgresql sh /home/init/02_replicat_init.sh > /dev/null
 	@docker exec service_game_pong_postgresql sh /home/init/02_replicat_init.sh > /dev/null

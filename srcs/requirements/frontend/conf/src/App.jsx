@@ -1,4 +1,5 @@
 import React from 'react'
+import { useLocation } from "react-router-dom"
 import { Routes, Route } from 'react-router-dom'
 import { useAuth } from "./auth/context"
 import AuthRedirect from './auth/redirect'
@@ -17,7 +18,6 @@ const App = () => {
 	if (loading)
 		return(<div className="text-center mt-5">Loading...</div>)
 
-
 	return (
 		<AuthRedirect>
 			<Routes>
@@ -28,8 +28,13 @@ const App = () => {
 				<Route path="/profile/:userID/edit" element={ <ProfileEdit user={ user }/> }/>
 				<Route path="/online" element={ <Online user={ user }/>}/>
 				<Route path="/tournament" element={ <Tournament user={ user }/>}/>
+				<Route path="*" element={ <NotFound/>}/>
 			</Routes>
 		</AuthRedirect>)
 }
 
 export default App
+
+const NotFound = () => {
+	return(<div className="text-center mt-5">Error 404</div>)
+}

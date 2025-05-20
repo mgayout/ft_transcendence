@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react"
-import { Modal, Button } from "react-bootstrap"
+import { Form, Modal, Button } from "react-bootstrap"
 import axiosInstance from "../auth/instance"
+import { useAuth } from "../auth/context"
 
+function DFAModal({ show, hide, handleClose }) {
 
-function DFAModal({ show, hide, status }) {
-
+	const { refreshUser } = useAuth()
 	const [qrCode, setQrCode] = useState("")
 	const [code, setCode] = useState("")
 
@@ -23,11 +24,15 @@ function DFAModal({ show, hide, status }) {
 			const response = await axiosInstance.put("/users/api/2fa-enable/", {otp_code: code})
 			console.log(response)
 			if (response.data.code == "1000") {
+				refreshUser()
 				hide()
-				window.location.reload()
+				handleClose()
 			}
 		}
-		catch(error) {console.log(error)}
+		catch(error) {
+			console.log(error)
+			hide()
+		}
 	}
 
 	useEffect(() => {
@@ -38,17 +43,21 @@ function DFAModal({ show, hide, status }) {
 	return (
 		<Modal show={show} onHide={hide}>
 			<Modal.Header closeButton>
-				<Modal.Title></Modal.Title>
+				<Modal.Title>Enable 2FA</Modal.Title>
 			</Modal.Header>
 			<Modal.Body>
+				<Form.Group className="mb-3">
 				{qrCode && (
-				<div className="text-center mb-3">
-					<img src={qrCode} alt="QR Code" style={{ maxWidth: "100%" }} />
-				</div>)}
-				<input type="text" className="form-control mb-3" placeholder="Enter 2FA code"
-					value={code} onChange={(e) => setCode(e.target.value)}/>
-				<Button type="button" className="btn btn-secondary rounded fw-bolder"
-					onClick={() => fonction2()}>{status ? "Remove" : "Add"}</Button>
+					<div className="text-center mb-3">
+						<img src={qrCode} alt="QR Code" style={{ maxWidth: "100%" }} />
+					</div>)}
+					<Form.Control type="text" placeholder="Insert 2FA code" value={code}
+						onChange={(e) => setCode(e.target.value)}/>
+				</Form.Group>
+				<div className="d-grid mb-4">
+					<Button type="button" className="btn btn-secondary rounded fw-bolder"
+						onClick={() => fonction2(code)}>Confirm</Button>
+				</div>
 			</Modal.Body>
 		</Modal>
 	)

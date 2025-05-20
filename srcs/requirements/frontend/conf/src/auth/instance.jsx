@@ -44,7 +44,8 @@ axiosInstance.interceptors.request.use(async (config) => {
 
 	let Atoken = localStorage.getItem('Atoken')
 	const Rtoken = localStorage.getItem('Rtoken')
-	const isAuthAPI = config.url && (config.url.includes("/users/api/login/") || config.url.includes("/users/api/register/"))
+	const isAuthAPI = config.url && (config.url.includes("/users/api/login/") ||
+		config.url.includes("/users/api/register/"))
 
 	if (isAuthAPI)
 		return config

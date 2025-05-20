@@ -26,6 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 DOMAIN_NAME = os.getenv('DOMAIN_NAME', 'localhost')
 PORT_NUM = os.getenv('PORT_NUM', '4343')
+SOCIAL_AUTH_42_KEY = os.getenv('AUTH_42_KEY')
+SOCIAL_AUTH_42_SECRET = os.getenv('AUTH_42_SECRET')
+SOCIAL_AUTH_REDIRECT_URI = f"https://{DOMAIN_NAME}:{PORT_NUM}/users/api/auth-42/callback/"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -47,6 +50,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'django_otp',
     'django_otp.plugins.otp_totp',
+    'social_django',
 
     # App locale
     'core',
@@ -84,6 +88,10 @@ TEMPLATES = [
         },
     },
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+)
 
 WSGI_APPLICATION = 'django_user_handler.wsgi.application'
 
@@ -204,3 +212,10 @@ LOGIN_URL = '/login'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db' #stocker les sessions utilisateur
+
+SESSION_COOKIE_SECURE = True  # HTTPS uniquement (activé en production)
+SESSION_COOKIE_HTTPONLY = True  # Empêche l'accès JavaScript
+SESSION_COOKIE_SAMESITE = 'Lax'  # Protection CSRF
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True # Expirer à la fermeture du navigateur

@@ -34,6 +34,7 @@ function JoinMatch({ state, setState, setType }) {
 		}
 		catch(error) {
 			console.log(error)
+			setState("")
 		}
 	}
 
@@ -44,6 +45,7 @@ function JoinMatch({ state, setState, setType }) {
 		}
 		catch(error) {
 			console.log(error)
+			setState("")
 		}
 	}
 

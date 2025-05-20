@@ -50,6 +50,12 @@ urlpatterns = [
     path('api/block/list/', views.BlockListView.as_view(), name='block-list'),
     path('api/block/remove/<int:pk>/', views.UnblockPlayerView.as_view(), name='unblock-player'),
 
+    # 2FA
     path('api/2fa-enable/', views.Enable2FAView.as_view(), name='enable_2fa'),  # PUT
     path('api/2fa-disable/', views.Disable2FAView.as_view(), name='disable_2fa'),  # DELETE
+
+    #OAUTH
+    path('api/auth-42/register/', views.Auth42RegisterView.as_view(), name='auth_42_register'),
+    path('api/auth-42/callback/', views.Auth42CallbackView.as_view(), name='auth_42_callback'),
+    path('api/auth-42/complete/', views.Auth42CompleteView.as_view(), name='auth_42_complete'),
 ]
