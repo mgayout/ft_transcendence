@@ -4,6 +4,7 @@ import Header from "../global/header"
 import BGprivate from "../test/private/page.jsx"
 import JoinMatch from "./join.jsx"
 import WaitMatch from "./wait.jsx"
+import PlayMatch from "./play.jsx"
 import { useNotification } from "../websockets/notification.jsx"
 import axiosInstance from "../auth/instance.jsx"
 
@@ -16,13 +17,13 @@ function Tournament({ user }) {
 	const fonction = async () => {
 		try {
 			const tournamentData = await axiosInstance("/pong/tournament/list/")
+			console.log(tournamentData)
 			const a = tournamentData.data
 				.find(match => match.status == "Ouvert" &&
 				(match.player_1 == user.id || match.player_2 == user.id ||
 				match.player_3 == user.id || match.player_4 == user.id))
+			console.log(a)
 			if (a) {
-				if (a.player_1 == user.id) setType("host")
-				else setType("invited")
 				setState("wait")
 				setMessages({type: "tournament_created"})
 			}
@@ -40,7 +41,6 @@ function Tournament({ user }) {
 				number_of_rounds: 1,
 			})
 			setMessages({type: "tournament_created"})
-			setType("host")
 			setState("wait")
 		}
 		catch(error) {console.log(error)}
@@ -70,13 +70,11 @@ function Tournament({ user }) {
 				<JoinMatch state={ state } setState={ setState } setType={ setType }/>
 				{state == "wait" ?
 				<WaitMatch setState={ setState } type={ type } setType={ setType }/> : <></>}
+				{state == "play" ?
+				<PlayMatch/> : <></>}
 			</main>
 		</>
 	)
 }
 
 export default Tournament
-
-
-				/*{state == "play" ?
-				<PlayMatch/> : <></>}*/

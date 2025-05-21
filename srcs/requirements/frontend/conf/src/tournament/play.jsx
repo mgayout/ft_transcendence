@@ -4,6 +4,8 @@ import { useGame } from "../websockets/game"
 import { Modal, Button } from "react-bootstrap"
 import { confetti } from "dom-confetti"
 
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+
 function WinnerModal({ winnerName, show, onClose }) {
 
 	const confettiRef = useRef(null)
@@ -39,6 +41,7 @@ function WinnerModal({ winnerName, show, onClose }) {
 function PlayMatch() {
 
 	const { getSocket, messages } = useGame()
+	const { setUrl } = useGame()
 	const { setMessages, setPongMessages, setScoreMessages } = useGame()
 	const [paused, setPaused] = useState(false)
 	const [end, setEnd] = useState(false)
@@ -52,28 +55,36 @@ function PlayMatch() {
 		if (!messages.length) return
 		const lastMessage = messages[messages.length - 1]
 		console.log(lastMessage)
-		if (lastMessage.type == "match_ended") {
-			socket.close()
-			setWinner(lastMessage.winner)
-			setPaused(false)
-			setEnd(true)
-			setMessages([])
-			setPongMessages([])
-			setScoreMessages([])
+
+		const handleMessage = async () => {
+			if (lastMessage.type == "match_ended") {
+				socket.close()
+				setWinner(lastMessage.winner)
+				setPaused(false)
+				setEnd(true)
+				setMessages([])
+				setPongMessages([])
+				setScoreMessages([])
+			}
+			if (lastMessage.type == "game_paused")
+				setPaused(true)
+			if (lastMessage.type == "player_count" && lastMessage.player_count == 1) {
+				setPaused(true)
+				setShowTimer(false)
+			}
+			if (lastMessage.type == "forfeit_not_available")
+				setTimer(lastMessage.remaining_seconds)
+			if (lastMessage.type == "player_count" && lastMessage.player_count == 2) {
+				setPaused(false)
+				setShowTimer(true)
+			}
+			if (lastMessage.type == "new_game") {
+				socket.close()
+				await wait(3000)
+				setUrl(lastMessage.ws_url)
+			}
 		}
-		if (lastMessage.type == "game_paused")
-			setPaused(true)
-		if (lastMessage.type == "player_count" && lastMessage.player_count == 1) {
-			setPaused(true)
-			setShowTimer(false)
-		}
-		if (lastMessage.type == "forfeit_not_available") {
-			setTimer(lastMessage.remaining_seconds)
-		}
-		if (lastMessage.type == "player_count" && lastMessage.player_count == 2) {
-			setPaused(false)
-			setShowTimer(true)
-		}
+		handleMessage()
 	}, [messages])
 
 	useEffect(() => {
@@ -97,7 +108,7 @@ function PlayMatch() {
 		<>
 		{paused ? 
 		<div className="position-absolute top-0 d-flex flex-column justify-content-center align-items-center vh-100 w-100">
-  			<i className="bi bi-pause-circle" style={{ fontSize: "20rem", color: "white" }} />
+			<i className="bi bi-pause-circle" style={{ fontSize: "20rem", color: "white" }} />
 			<div className="fs-1 mb-5">
 				{showTimer ? `Timer : ${timer}s` : ""}
 			</div>

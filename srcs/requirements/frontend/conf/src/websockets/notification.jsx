@@ -32,6 +32,14 @@ export const Notification = ({ children }) => {
 				console.log(`Match [${data.match_id}] has been created.`)
 				setMessages(data)
 			}
+			else if (data.type == "player_join") {
+				console.log(`Player [${data.joined_player}] has joined.`)
+				setMessages(data)
+			}
+			else if (data.type == "player_leave") {
+				console.log(`Player [${data.leaved_player}] has left.`)
+				setMessages(data)
+			}
 			else
 				console.log(data)
 		}

@@ -58,10 +58,8 @@ const BGprivate = ({ state, type }) => {
 	}, [ state, PongMessages, ScoreMessages, messages ])
 
 	useEffect(() => {
-		if (messages.type == "match_created") {
-			console.log("match_created", messages)
+		if (messages.type == "match_created")
 			setGroupName({player1: updateNames(messages.player_1, 1), player2: updateNames(messages.player_2, 2)})
-		}
 	}, [messages])
 
 	const updateNames = (string, types) => {

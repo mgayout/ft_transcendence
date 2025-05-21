@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Card, Image, Button } from "react-bootstrap"
 import axiosInstance from "../auth/instance"
+import { updateTime } from "../chat/string"
 
 function Profile({ user, profile }) {
 
@@ -13,15 +14,16 @@ function Profile({ user, profile }) {
 		try {
 			const a = await axiosInstance.get(`/pong/matches/?player_id=${profile.id}`)
 			const b = await axiosInstance.get(`/pong/winrate/?player_id=${profile.id}`)
-			//console.log(b)
 			//console.log(a)
+			//console.log(b)
 			const response = a.data.filter(a => a.status == "Terminée")
 			//console.log(response)
 			const matches = []
-			let tournament, state, other
+			let tournament, state, other, date, score
 			for (let i = response.length - 1; i >= response.length - 5; i--) {
 				if (i >= 0) {
 					tournament = response[i].tournament
+					console.log(response[i])
 					if (response[i].winner && response[i].winner.name == profile.name)
 						state = "Victory"
 					else
@@ -38,16 +40,23 @@ function Profile({ user, profile }) {
 						else
 							other = "..."
 					}
+					if (response[i].created_at)
+						date = updateTime(response[i].created_at)
+					else
+						date = ""
+					if (response[i].games[0])
+						score = `${response[i].games[0].score_player_1} - ${response[i].games[0].score_player_2}`
+					else
+						score = ""
 				}
 				else {
 					tournament = ""
 					state = ""
 					other = ""
+					score = ""
+					date = ""
 				}
-				matches.push({
-					tournament: tournament,
-					state: state,
-					other: other})
+				matches.push({tournament: tournament, state: state, other: other, date: date, score: score})
 			}
 			setOnline(matches)
 			setWinrate(b.data)
@@ -83,8 +92,13 @@ function Profile({ user, profile }) {
 							</div>
 							<Card.Body className="py-2 px-2 justify-content-center">
 								<Card.Title className="m-0 text-start fs-6">
-								{card.state}<br />
-									<small>vs {card.other}</small>
+									<div className="d-flex justify-content-between w-100">
+										{`[ ${card.state} ]`}{` vs ${card.other}`}<br />
+									<small>{`Score : ${card.score}`}</small>
+									</div>
+									<div className="text-end">
+										{`${card.date}`}
+									</div>
 								</Card.Title>
 							</Card.Body></> : <></>}
 				</Card>

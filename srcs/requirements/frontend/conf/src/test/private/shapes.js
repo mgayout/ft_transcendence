@@ -128,9 +128,9 @@ export const setScore = (groupScore) => {
 	ctx.fillStyle = 'white'
 	ctx.textAlign = 'center'
 	ctx.textBaseline = 'middle'
-	const text = (groupScore && groupScore.score1 && groupScore.score2
-		? `${groupScore.score1} - ${groupScore.score2}`
-		: "0 - 0")
+	const s1 = (groupScore && groupScore.score1 != undefined ? `${groupScore.score1}` : "0")
+	const s2 = (groupScore && groupScore.score2 != undefined ? `${groupScore.score2}` : "0")
+	const text = `${s1} - ${s2}`
 	ctx.fillText(text, canvas.width / 2, canvas.height / 2)
 	const texture = new THREE.Texture(canvas)
 	texture.flipY = false

@@ -3,19 +3,21 @@ import { Button, Spinner } from "react-bootstrap"
 import { useNotification } from "../websockets/notification"
 import { useGame } from "../websockets/game"
 import axiosInstance from "../auth/instance"
+import { useAuth } from "../auth/context"
 
 function WaitMatch({ setState, type, setType }) {
 
-	const { messages } = useNotification()
+	const { messages, setMessages } = useNotification()
 	const { setUrl } = useGame()
 	const [ready, setReady] = useState(false)
 	const [data, setData] = useState({})
+	const { user } = useAuth()
 
 	const fonction = async () => {
 		try {
 			const playerData = await axiosInstance.get('/users/api/player/')
 			const tournamentData = await axiosInstance.get("/pong/tournament/list/")
-			//console.log(tournamentData)
+			console.log(tournamentData)
 			const getName = (id) => {
 				if (!id || id == null) return "..."
 				const Name = playerData.data.find(player => player.id === id)
@@ -43,6 +45,7 @@ function WaitMatch({ setState, type, setType }) {
 					p3: {name: getName(tourn.player_3), avatar: getAvatar(tourn.player_3)},
 					p4: {name: getName(tourn.player_4), avatar: getAvatar(tourn.player_4)},
 					players: getPlayers(tourn.player_1, tourn.player_2, tourn.player_3, tourn.player_4)}))
+			console.log(a)
 			if (a.length > 0)
 				setData(a[0])
 		}
@@ -79,6 +82,14 @@ function WaitMatch({ setState, type, setType }) {
 		if (messages.type == "tournament_cancelled") {
 			setState("")
 			setType("")
+		}
+		if (messages.type == "match_created") {
+			console.log(messages)
+			if (messages.player_1 == user.name) setType("paddle_l")
+			else if (messages.player_2 == user.name) setType("paddle_r")
+			setUrl(messages.ws_url)
+			setMessages([])
+			setState("play")
 		}
 	}, [messages])
 

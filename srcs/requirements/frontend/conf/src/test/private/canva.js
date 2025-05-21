@@ -44,15 +44,13 @@ const createCanva = (canva, state, lastPongMessage, groupName, groupScore, setGr
 
 	const animate = () => {
 		if (state == "play") {
-			/*if (groupScore)
-				console.log("groupScore : ", groupScore)
-			if (ScoreMessages)
-				console.log("ScoreMessages : ", ScoreMessages)*/
-
-			if (groupScore && ScoreMessages && ScoreMessages.scorePlayer1 && ScoreMessages.scorePlayer2 && (ScoreMessages.scorePlayer1 != groupScore.score1 || ScoreMessages.scorePlayer2 != groupScore.score2)) {
-				console.log("yo update score")	
-				updateScore({score1: ScoreMessages.scorePlayer1, score2: ScoreMessages.scorePlayer2}, scene, objects)
-				setGroupScore({score1: ScoreMessages.scorePlayer1, score2: ScoreMessages.scorePlayer2})
+			if (groupScore && ScoreMessages && ScoreMessages.scorePlayer1 != undefined && ScoreMessages.scorePlayer2 != undefined &&
+				(ScoreMessages.scorePlayer1 != groupScore.score1 || ScoreMessages.scorePlayer2 != groupScore.score2)) {
+				updateScore({score1: ScoreMessages.scorePlayer1 != undefined ? ScoreMessages.scorePlayer1 : 0,
+							score2: ScoreMessages.scorePlayer2 != undefined ? ScoreMessages.scorePlayer2 : 0},
+							scene, objects)
+				setGroupScore({score1: ScoreMessages.scorePlayer1 != undefined ? ScoreMessages.scorePlayer1 : 0,
+							score2: ScoreMessages.scorePlayer2 != undefined ? ScoreMessages.scorePlayer2 : 0})
 			}
 		
 			objects.paddle.paddleL.position.set(0.5, lastPongMessage ? (lastPongMessage.paddleL + 2.5) : 17.5, 1)

@@ -38,7 +38,7 @@ class PongMatchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Match
-        fields = ['id', 'url', 'status', 'number_of_rounds', 'type', 'player_1', 'player_2', 'winner', 'games', 'tournament', 'number_of_rounds']
+        fields = ['id', 'url', 'status', 'number_of_rounds', 'type', 'player_1', 'player_2', 'winner', 'games', 'tournament', 'number_of_rounds', 'created_at']
 
     def get_url(self, obj):
         request = self.context.get('request')

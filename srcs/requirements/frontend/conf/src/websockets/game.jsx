@@ -15,6 +15,7 @@ export const Game = ({ children }) => {
 
 	useEffect(() => {
 		if (!url) return
+		console.log("yoooooooooo")
 		const Atoken = localStorage.getItem('Atoken')
 		const ws = new WebSocket(`${url}?token=${Atoken}`)
 		socketRef.current = ws
@@ -31,6 +32,8 @@ export const Game = ({ children }) => {
 				setPongMessages((prev) => [...prev, data])
 			else if (data.type == "score_update")
 				setScoreMessages(data)
+			else if (data.type == "game_paused")
+				setMessages((prev) => [...prev, data])
 			else if (data.type)
 				setMessages((prev) => [...prev, data])
 			else
@@ -68,7 +71,7 @@ export const Game = ({ children }) => {
 
 	return (
 		<GameContext.Provider value={{ getSocket: () => socketRef.current, messages, setMessages, 
-							PongMessages, setPongMessages, ScoreMessages, setScoreMessages, setUrl }}>
+							PongMessages, setPongMessages, ScoreMessages, setScoreMessages, url, setUrl }}>
 			{children}
 		</GameContext.Provider>
 	)
