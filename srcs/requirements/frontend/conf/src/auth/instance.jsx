@@ -45,7 +45,9 @@ axiosInstance.interceptors.request.use(async (config) => {
 	let Atoken = localStorage.getItem('Atoken')
 	const Rtoken = localStorage.getItem('Rtoken')
 	const isAuthAPI = config.url && (config.url.includes("/users/api/login/") ||
-		config.url.includes("/users/api/register/"))
+		config.url.includes("/users/api/register/") || config.url.includes("/users/api/auth-42/register/") ||
+		config.url.includes("/users/api/auth-42/callback/?code=") || config.url.includes("/users/api/auth-42/status/") ||
+		config.url.includes("/users/api/auth-42/complete/"))
 
 	if (isAuthAPI)
 		return config

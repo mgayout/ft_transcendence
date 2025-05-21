@@ -10,6 +10,7 @@ export const Game = ({ children }) => {
 	const socketRef = useRef(null)
 	const [messages, setMessages] = useState([])
 	const [PongMessages, setPongMessages] = useState([])
+	const [ScoreMessages, setScoreMessages] = useState([])
 	const [url, setUrl] = useState('')
 
 	useEffect(() => {
@@ -29,7 +30,7 @@ export const Game = ({ children }) => {
 			if (data.type == "data_pong")
 				setPongMessages((prev) => [...prev, data])
 			else if (data.type == "score_update")
-				setPongMessages((prev) => [...prev, data])
+				setScoreMessages(data)
 			else if (data.type)
 				setMessages((prev) => [...prev, data])
 			else
@@ -66,7 +67,8 @@ export const Game = ({ children }) => {
 	}, [])
 
 	return (
-		<GameContext.Provider value={{ getSocket: () => socketRef.current, messages, PongMessages, setUrl }}>
+		<GameContext.Provider value={{ getSocket: () => socketRef.current, messages, setMessages, 
+							PongMessages, setPongMessages, ScoreMessages, setScoreMessages, setUrl }}>
 			{children}
 		</GameContext.Provider>
 	)

@@ -39,6 +39,7 @@ function WinnerModal({ winnerName, show, onClose }) {
 function PlayMatch() {
 
 	const { getSocket, messages } = useGame()
+	const { setMessages, setPongMessages, setScoreMessages } = useGame()
 	const [paused, setPaused] = useState(false)
 	const [end, setEnd] = useState(false)
 	const closeEnd = () => setEnd(false)
@@ -55,6 +56,9 @@ function PlayMatch() {
 			setWinner(lastMessage.winner)
 			setPaused(false)
 			setEnd(true)
+			setMessages([])
+			setPongMessages([])
+			setScoreMessages([])
 		}
 		if (lastMessage.type == "game_paused") {
 			setPaused(true)
@@ -88,10 +92,10 @@ function PlayMatch() {
 		<>
 		{paused ? 
 		<div className="position-absolute top-0 d-flex flex-column justify-content-center align-items-center vh-100 w-100">
-  			<div className="fs-2 text-white mb-4">
+  			<i className="bi bi-pause-circle" style={{ fontSize: "20rem", color: "white" }} />
+			<div className="fs-1 mb-5">
 				Timer : {timer}s
 			</div>
-  			<i className="bi bi-pause-circle" style={{ fontSize: "10rem", color: "white" }} />
 		</div> : <></> }
 		<WinnerModal winnerName={ winner } show={ end } onClose={ closeEnd }/>
 		</>

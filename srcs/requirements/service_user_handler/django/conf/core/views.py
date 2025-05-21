@@ -343,7 +343,6 @@ class Disable2FAView(generics.DestroyAPIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class Auth42RegisterView(APIView):
-    serializer_class = serializers.Auth42RegisterSerializer
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -357,46 +356,43 @@ class Auth42RegisterView(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class Auth42CallbackView(APIView):
-    serializer_class = serializers.Auth42RegisterSerializer
     permission_classes = [AllowAny]
 
     def get(self, request):
-        # Récupérer le code OAuth de l'URL
         code = request.GET.get('code')
         if not code:
             return Response({"code": 1051, "message": "Code d'autorisation manquant"}, 
-                           status=status.HTTP_400_BAD_REQUEST)
+                          status=status.HTTP_400_BAD_REQUEST)
 
-        # Configuration du client OAuth
-        token_url = "https://api.intra.42.fr/oauth/token"
-        payload = {
-            'grant_type': 'authorization_code',
-            'client_id': settings.SOCIAL_AUTH_42_KEY,
-            'client_secret': settings.SOCIAL_AUTH_42_SECRET,
-            'code': code,
-            'redirect_uri': settings.SOCIAL_AUTH_REDIRECT_URI
-        }
-
-        # Obtenir le token d'accès
         try:
+            # Configuration OAuth
+            token_url = "https://api.intra.42.fr/oauth/token"
+            payload = {
+                'grant_type': 'authorization_code',
+                'client_id': settings.SOCIAL_AUTH_42_KEY,
+                'client_secret': settings.SOCIAL_AUTH_42_SECRET,
+                'code': code,
+                'redirect_uri': settings.SOCIAL_AUTH_REDIRECT_URI
+            }
+
+            # Obtenir le token
             token_response = requests.post(token_url, data=payload)
             token_data = token_response.json()
             
             if 'access_token' not in token_data:
                 return Response({"code": 1052, "message": "Échec de l'obtention du token"}, 
-                              status=status.HTTP_400_BAD_REQUEST)
+                             status=status.HTTP_400_BAD_REQUEST)
             
-            # Utiliser le token pour obtenir les données utilisateur
+            # Obtenir les données utilisateur
             user_url = "https://api.intra.42.fr/v2/me"
             headers = {'Authorization': f"Bearer {token_data['access_token']}"}
             user_response = requests.get(user_url, headers=headers)
             user_data = user_response.json()
             
-            # Extraire les données nécessaires
+            # Vérifier si un compte existe déjà
             forty_two_id = str(user_data['id'])
             login = user_data['login']
             
-            # Vérifier si un compte existe déjà
             if Player.objects.filter(forty_two_id=forty_two_id).exists():
                 return Response({"code": 1050}, status=status.HTTP_400_BAD_REQUEST)
             
@@ -408,16 +404,25 @@ class Auth42CallbackView(APIView):
                 name = f"{base_name}_42_{counter}"
                 counter += 1
             
+            # Récupérer l'URL de l'avatar (simplifié)
+            avatar_url = None
+            try:
+                if 'image' in user_data and user_data['image'] and 'versions' in user_data['image']:
+                    avatar_url = user_data['image']['versions'].get('medium')
+            except:
+                pass
+            
             # Stocker dans la session
             request.session['oauth_42_data'] = {
                 'forty_two_id': forty_two_id,
-                'name': name
+                'name': name,
+                'avatar_url': avatar_url
             }
             
             return Response({
                 "code": 1000,
                 "next_step": "choose_password",
-                "redirect_url": "api/auth-42/complete/" #a mettre avc le front
+                "redirect_url": "/register/42/complete"
             }, status=status.HTTP_200_OK)
             
         except Exception as e:
@@ -430,9 +435,3 @@ class Auth42CallbackView(APIView):
 class Auth42CompleteView(generics.CreateAPIView):
     serializer_class = serializers.Auth42CompleteSerializer
     permission_classes = [AllowAny]
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        player = serializer.save()
-        return Response(serializer.to_representation(player), status=status.HTTP_201_CREATED)

@@ -1,7 +1,7 @@
 import * as THREE from 'three'
-import { setFloor, setFog, setLine, setBorder, setBScreen, setLight, setPaddle, setWall, setBall, setScore, setNames } from './shapes'
+import { setFloor, setFog, setLine, setBorder, setBScreen, setLight, setPaddle, setWall, setBall, setScore, setNames, updateScore } from './shapes'
 
-const setAll = (scene, state, groupName) => {
+const setAll = (scene, state, groupName, groupScore) => {
 
 	const floor = setFloor(scene)
 	const fog = setFog(scene)
@@ -12,8 +12,8 @@ const setAll = (scene, state, groupName) => {
 	const paddle = setPaddle()
 	const wall = setWall()
 	const ball = setBall()
-	const score = setScore({score1: 0, score2: 0})
 	const names = setNames(groupName)
+	const score = setScore(groupScore)
 
 	if (state == "play") {
 		//line.cubes.forEach(cube => scene.add(cube))
@@ -23,7 +23,7 @@ const setAll = (scene, state, groupName) => {
 	return {floor, fog, light, paddle, wall, ball, border, bscreen, names, score}
 }
 
-const createCanva = (canva, state, lastPongMessage, groupName) => {
+const createCanva = (canva, state, lastPongMessage, groupName, groupScore, setGroupScore, ScoreMessages) => {
 	
 	const scene = new THREE.Scene()
 
@@ -38,25 +38,26 @@ const createCanva = (canva, state, lastPongMessage, groupName) => {
 	renderer.toneMappingExposure = 2.0
 	renderer.setSize(canva.width, canva.height)
 
-	const objects = setAll(scene, state, groupName)
+	const objects = setAll(scene, state, groupName, groupScore)
 
 	let animationFrameId
 
 	const animate = () => {
-		if (state == "play" && lastPongMessage) {
-			if (lastPongMessage.type == "score_update") {
-				console.log("score update")
-				objects.score.geometry.dispose()
-				objects.score.material.dispose()
-				scene.remove(objects.score)
-				objects.score = setNames({score1: lastPongMessage.scorePlayer1, score2: lastPongMessage.scorePlayer2})
-				scene.add(objects.score)
+		if (state == "play") {
+			/*if (groupScore)
+				console.log("groupScore : ", groupScore)
+			if (ScoreMessages)
+				console.log("ScoreMessages : ", ScoreMessages)*/
+
+			if (groupScore && ScoreMessages && ScoreMessages.scorePlayer1 && ScoreMessages.scorePlayer2 && (ScoreMessages.scorePlayer1 != groupScore.score1 || ScoreMessages.scorePlayer2 != groupScore.score2)) {
+				console.log("yo update score")	
+				updateScore({score1: ScoreMessages.scorePlayer1, score2: ScoreMessages.scorePlayer2}, scene, objects)
+				setGroupScore({score1: ScoreMessages.scorePlayer1, score2: ScoreMessages.scorePlayer2})
 			}
-			if (lastPongMessage.type != "score_update") {
-				objects.paddle.paddleL.position.set(0.5, lastPongMessage ? (lastPongMessage.paddleL + 2.5) : 17.5, 1)
-				objects.paddle.paddleR.position.set(70.5, lastPongMessage ? (lastPongMessage.paddleR + 2.5) : 17.5, 1)
-				objects.ball.position.set(lastPongMessage ? (lastPongMessage.x + 0.5) : 35.5, lastPongMessage ? (lastPongMessage.y + 0.5) : 15.5, 1)
-			}
+		
+			objects.paddle.paddleL.position.set(0.5, lastPongMessage ? (lastPongMessage.paddleL + 2.5) : 17.5, 1)
+			objects.paddle.paddleR.position.set(70.5, lastPongMessage ? (lastPongMessage.paddleR + 2.5) : 17.5, 1)
+			objects.ball.position.set(lastPongMessage ? (lastPongMessage.x + 0.5) : 35.5, lastPongMessage ? (lastPongMessage.y + 0.5) : 15.5, 1)
 		}
 
 		renderer.render(scene, camera)
@@ -104,7 +105,7 @@ const createCanva = (canva, state, lastPongMessage, groupName) => {
 			if (objects.paddle.paddleR) {
 				objects.paddle.paddleR.geometry.dispose()
 				objects.paddle.paddleR.material.dispose()
-				scene.remove(objects.paddle.paddleL)
+				scene.remove(objects.paddle.paddleR)
 			}
 		}
 		if (objects.wall) {

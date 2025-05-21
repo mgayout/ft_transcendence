@@ -2,7 +2,7 @@ import React from 'react'
 import { useLocation, Navigate } from 'react-router-dom'
 import { useAuth } from './context'
 
-const publicRoutes = ['/', '/register']
+const publicRoutes = ['/', '/register', '/register/42', '/register/complete']
 
 const AuthRedirect = ({ children }) => {
 

@@ -16,7 +16,10 @@ import re
 import qrcode
 import io
 import base64
-import random
+import requests
+import tempfile
+import os
+from django.core.files.base import ContentFile
 
 class PlayerSerializer(serializers.ModelSerializer):
     two_factor_enabled = serializers.BooleanField(read_only=True)
@@ -156,11 +159,6 @@ class PlayerUpdateInfoSerializer(serializers.ModelSerializer):
             if not hasattr(avatar, 'name') or not avatar.name.lower().endswith(tuple(allowed_extensions)):
                 raise serializers.ValidationError({"code": 1032, "message": "Invalid file extension"})
 
-            # Vérification du type MIME réel
-            img_type = imghdr.what(avatar)
-            if img_type not in ['jpeg', 'png']:
-                raise serializers.ValidationError({"code": 1032, "message": "File is not a valid image"})
-
             # Vérification de la taille (2 Mo)
             max_weight = 2 * 1024 * 1024
             if avatar.size > max_weight:
@@ -179,7 +177,7 @@ class PlayerUpdateInfoSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError({"code": 1034, "message": "Image dimensions exceed 500x500"})
 
                 # Reconversion pour nettoyer l'image
-                output = BytesIO()
+                output = io.BytesIO()
                 img_format = 'PNG' if img.format == 'PNG' else 'JPEG'
                 img.save(output, format=img_format, quality=85, optimize=True, exif=b'')  # Supprime les métadonnées
                 output.seek(0)
@@ -627,97 +625,67 @@ class Disable2FASerializer(serializers.Serializer):
 
 #===OAUTH====
 
-class Auth42RegisterSerializer(serializers.Serializer):
-    def validate(self, data):
-        user = self.context['request'].user
-        if user.is_authenticated:
-            raise serializers.ValidationError({"code": 1030})  # Utilisateur déjà authentifié
-        return data
-
-    def create(self, validated_data):
-        request = self.context['request']
-        strategy = load_strategy(request)
-        backend = strategy.get_backend('forty_two')
-        
-        try:
-            user = backend.auth_complete(request=request)
-            if not user:
-                raise serializers.ValidationError({"code": 1051}) #Échec de l'authentification
-        except Exception as e:
-            raise serializers.ValidationError({"code": 1052, "message": f"Erreur OAuth: {str(e)}"})
-
-        social_user = user.social_user
-        data = {
-            'forty_two_id': social_user.uid,
-            'login': social_user.extra_data['login']
-        }
-
-        # Vérifier doublon forty_two_id
-        if Player.objects.filter(forty_two_id=data['forty_two_id']).exists():
-            raise serializers.ValidationError({"code": 1050}) #Un compte existe déjà avec cet identifiant 42
-
-        # Générer un nom unique
-        base_name = data['login']
-        name = base_name
-        counter = 1
-        while Player.objects.filter(name=name).exists():
-            name = f"{base_name}_42_{counter}"
-            counter += 1
-
-        # Stocker temporairement les données dans la session
-        request.session['oauth_42_data'] = {
-            'forty_two_id': data['forty_two_id'],
-            'name': name
-        }
-        return data
-
-    def to_representation(self, instance):
-        return {
-            "code": 1000,
-            "next_step": "choose_password",
-            "redirect_url": "api/auth-42/complete/"  # URL frontend pour le formulaire
-        }
-
 class Auth42CompleteSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True, required=True)
     password2 = serializers.CharField(write_only=True, required=True)
 
     def validate(self, data):
-        request = self.context['request']
-        oauth_data = request.session.get('oauth_42_data')
-        if not oauth_data:
-            raise serializers.ValidationError({"code": 1053}) #Session OAuth invalide ou expirée
-
         if data['password'] != data['password2']:
-            raise serializers.ValidationError({"code": 1001})  # Les mots de passe ne correspondent pas
+            raise serializers.ValidationError({"code": 1001})
+        
         validate_strong_password(data['password'])
+        
+        oauth_data = self.context['request'].session.get('oauth_42_data')
+        if not oauth_data:
+            raise serializers.ValidationError({"code": 1053})
+            
         return data
 
     def create(self, validated_data):
         request = self.context['request']
         oauth_data = request.session.pop('oauth_42_data', None)
-        if not oauth_data:
-            raise serializers.ValidationError({"code": 1053}) #Session OAuth invalide ou expirée"
-
-        # Générer un username unique
-        name = f"42_{oauth_data['name']}"
-
+        
         # Créer l'utilisateur
         user = User.objects.create_user(
             username=f"temp_{uuid.uuid4().hex[:8]}",
             password=validated_data['password']
         )
+        
+        # Créer le player sans l'avatar
         player = Player.objects.create(
             user=user,
-            name=name,
+            name=oauth_data['name'],
             forty_two_id=oauth_data['forty_two_id']
         )
+        
+        # Mettre à jour le nom d'utilisateur final
         user.username = f"42_player_{player.id}"
         user.save()
+        
+        # Télécharger et enregistrer l'avatar de manière ultra simple
+        avatar_url = oauth_data.get('avatar_url')
+        if avatar_url:
+            try:
+                response = requests.get(avatar_url)
+                if response.status_code == 200:
+                    # Création d'un nom de fichier simple
+                    file_name = f"avatar_42_{player.id}.jpg"
+                    
+                    # Enregistrement direct de l'image
+                    from django.core.files.base import ContentFile
+                    player.avatar.save(
+                        file_name,
+                        ContentFile(response.content),
+                        save=True
+                    )
+            except Exception as e:
+                # En cas d'erreur, on utilise l'avatar par défaut
+                print(f"Erreur lors du téléchargement de l'avatar: {str(e)}")
+        
         return player
 
     def to_representation(self, instance):
         return {
             "code": 1000,
-            "name":instance.name,
+            "name": instance.name,
         }
