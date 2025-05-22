@@ -1,4 +1,4 @@
-import axiosInstance from './instance'
+import axiosInstance from "./instance"
 
 const refreshData = async () => {
 	try {
@@ -6,8 +6,7 @@ const refreshData = async () => {
 		if (!rawData) return
 		const data = JSON.parse(rawData)
 		if (!data?.id) return
-		const params = { token: localStorage.getItem("Rtoken") }
-		const response = await axiosInstance.get(`/users/api/player/${data.id}`, { params: params })
+		const response = await axiosInstance.get(`/users/api/player/${data.id}/`)
 		if (response.data)
 			localStorage.setItem("data", JSON.stringify(response.data))
 	}

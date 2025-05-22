@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { useNavigate } from "react-router-dom"
+import axiosInstance from '../auth/instance'
 import { useAuth } from '../auth/context'
 
 const PrivateChatContext = createContext(null)
@@ -6,42 +8,62 @@ const PrivateChatContext = createContext(null)
 export const usePrivateChat = () => useContext(PrivateChatContext)
 
 export const PrivateChat = ({ children }) => {
-
+	const navigate = useNavigate()
 	const socketRef = useRef(null)
 	const [privMessages, setMessages] = useState([])
 	const { user } = useAuth()
 
 	useEffect(() => {
 		if (!user) return
-		const Atoken = localStorage.getItem('Atoken')
-		const ws = new WebSocket(`wss://${location.host}/live_chat/ws/chat/private/${user.id}/?token=${Atoken}`)
-		socketRef.current = ws
+		const Rtoken = localStorage.getItem("Rtoken")
+		if (!Rtoken) return
 
-		ws.onopen = () => {
-			console.log("PrivateChat WebSocket is open.")
-		}
+		let isMounted = true
+		let wsInstance = null
 
-		ws.onmessage = (event) => {
-			const data = JSON.parse(event.data)
-			if (data && data.code != "1000") {
-				console.log("PrivateChat notif => ", data)
-				setMessages(data)
+		const createPrivateSocket = async (Rtoken, onMessage, onError, onClose) => {
+			const tokens = await axiosInstance.post('/users/api/token/refresh/', { refresh: Rtoken })
+			const ws = new WebSocket(`wss://${location.host}/live_chat/ws/chat/private/${user.id}/?token=${tokens.data.access}`)
+		
+			ws.onopen = () => {console.log("PrivateSocket connected")}
+			ws.onmessage = (event) => {
+				const data = JSON.parse(event.data)
+				onMessage?.(data)
 			}
+			ws.onerror = (error) => {onError?.(error)}
+			ws.onclose = () => {onClose?.()}
+			return ws
 		}
 
-		ws.onclose = () => {
-			setMessages([])
-			console.log("PrivateChat WebSocket closed")
+		const initPrivateSocket = async () => {
+			try {
+				const ws = await createPrivateSocket(Rtoken, (data) => {
+					if (data && data.code == 1000) return
+					console.log("PrivateSocket notif => ", data)
+					setMessages(data)
+				}, (error) => {
+					console.error("PrivateSocket error", error)
+					navigate("/home")
+				}, () => {
+					setMessages([])
+					console.log("PrivateSocket closed")
+				})
+				if (isMounted) {
+					socketRef.current = ws
+					wsInstance = ws
+				}
+			}
+			catch(error) {console.log("Failed to create PrivateSocket: ", error)}
 		}
 
-		ws.onerror = (err) => {
-			console.error("PrivateChat WebSocket error", err)
-		}
+		initPrivateSocket()
 
 		return () => {
-			ws.close()
+			isMounted = false
+			if (wsInstance?.readyState === WebSocket.OPEN || wsInstance?.readyState === WebSocket.CONNECTING)
+				wsInstance.close()
 		}
-		
+	
 	}, [user])
 
 	return (

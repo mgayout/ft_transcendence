@@ -23,12 +23,10 @@ export const Game = ({ children }) => {
 		let wsInstance = null
 
 		const createGameSocket = async (url, Rtoken, onMessage, onError, onClose) => {
-
 			const tokens = await axiosInstance.post('/users/api/token/refresh/', { refresh: Rtoken })
-			console.log(tokens)
 			const ws = new WebSocket(`${url}?token=${tokens.data.access}`)
 
-			ws.onopen = () => {console.log("WebSocket connected")}
+			ws.onopen = () => {console.log("GameSocket connected")}
 			ws.onmessage = (event) => {
 				const data = JSON.parse(event.data)
 				onMessage?.(data)
@@ -46,31 +44,29 @@ export const Game = ({ children }) => {
 				else if (data.type) setMessages((prev) => [...prev, data])
 				else console.log(data)
 				}, (error) => {
-					console.error("Game WebSocket error", error)
+					console.error("GameSocket error", error)
 					navigate("/home")
 				}, () => {
 					setUrl("")
 					setMessages([])
 					setPongMessages([])
 					setScoreMessages([])
-					console.log("Game WebSocket closed")
+					console.log("GameSocket closed")
 				})
 				if (isMounted) {
 					socketRef.current = ws
 					wsInstance = ws
 				}
 			}
-			catch(error) {console.log("Failed to create WebSocket: ", error)}
+			catch(error) {console.log("Failed to create GameSocket: ", error)}
 		}
 
 		initGameSocket()
 
 		return () => {
 			isMounted = false
-			if (wsInstance?.readyState === WebSocket.OPEN || wsInstance?.readyState === WebSocket.CONNECTING) {
-				console.log("Closing WebSocket during cleanup")
+			if (wsInstance?.readyState === WebSocket.OPEN || wsInstance?.readyState === WebSocket.CONNECTING)
 				wsInstance.close()
-			}
 		}
 
 	}, [url])

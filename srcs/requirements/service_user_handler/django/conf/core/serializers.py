@@ -537,15 +537,6 @@ class BlockPlayerSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         return {"code": 1000}
 
-
-class BlockListSerializer(serializers.ModelSerializer):
-    blocked = serializers.CharField(source='blocked.name', read_only=True)
-
-    class Meta:
-        model = Block
-        fields = ['id', 'blocked', 'created_at']
-
-
 class UnblockPlayerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Block
