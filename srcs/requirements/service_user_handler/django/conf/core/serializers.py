@@ -5,6 +5,7 @@ from django.utils import timezone
 from shared_models.models import Player, Match, Tournament, Friendship, Block
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from django.contrib.auth.hashers import check_password
 from core.validators import validate_strong_password
 from django.contrib.auth import authenticate
@@ -273,6 +274,29 @@ class PlayerDeleteSerializer(serializers.Serializer):
     def to_representation(self, instance):
         return {"code": 1000}
 
+# FONCTION UTILITAIRE pour blacklister tous les tokens d'un utilisateur
+def blacklist_all_user_tokens(user):
+    """Blacklist tous les refresh tokens actifs d'un utilisateur avec la méthode .blacklist()"""
+    try:
+        # Récupérer tous les outstanding tokens de l'utilisateur
+        outstanding_tokens = OutstandingToken.objects.filter(user=user)
+        
+        for outstanding_token in outstanding_tokens:
+            try:
+                # Récréer le RefreshToken à partir du token stocké
+                token = RefreshToken(outstanding_token.token)
+                # Utiliser la même méthode que dans votre PlayerLogoutSerializer
+                token.blacklist()
+            except TokenError:
+                # Token déjà blacklisté ou invalide, on continue
+                pass
+            except Exception:
+                # Autres erreurs, on continue
+                pass
+                
+    except Exception as e:
+        print(f"Erreur lors du blacklisting des tokens: {e}")
+
 class PlayerLoginSerializer(serializers.Serializer):
     username = serializers.CharField(write_only=True, allow_blank=True, allow_null=True)
     password = serializers.CharField(write_only=True, allow_blank=True, allow_null=True)
@@ -312,10 +336,17 @@ class PlayerLoginSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         player = validated_data['player']
+        user = validated_data['user']
+        
+        #Blacklister tous les anciens refresh tokens de cet utilisateur
+        blacklist_all_user_tokens(user)
+        
         return player
 
     def to_representation(self, instance):
+        # Créer un nouveau refresh token
         refresh = RefreshToken.for_user(instance.user)
+        
         return {
             "code": 1000,
             "player": instance.id,
