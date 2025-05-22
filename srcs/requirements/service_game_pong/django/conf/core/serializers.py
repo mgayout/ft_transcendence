@@ -607,7 +607,7 @@ class TournamentStartSerializer(serializers.Serializer):
                 tournament=instance,
                 player_1=player_1,
                 player_2=player_2,
-                number_of_rounds=3,
+                number_of_rounds=1,
                 match_number=2,
                 status=StatusChoices.EN_COURS,
                 type=TypeChoices.TOURNAMENT,
@@ -700,7 +700,7 @@ class TournamentStartFinalSerializer(serializers.Serializer):
             match_number=1,
             player_1=finalists[0],
             player_2=finalists[1],
-            number_of_rounds=3,
+            number_of_rounds=1,
             status=StatusChoices.EN_COURS,
             type=TypeChoices.TOURNAMENT
         )
@@ -889,9 +889,42 @@ class TournamentCancelSerializer(serializers.Serializer):
 
         return attrs
 
+class TournamentGetIdSerializer(serializers.Serializer):
+    def validate(self, attrs):
+        user = self.context['request'].user
+
+        # Vérifier si l'utilisateur a un profil joueur
+        try:
+            player = Player.objects.get(user=user)
+        except Player.DoesNotExist:
+            raise serializers.ValidationError({"code": 4001}) #Aucun profil joueur associé
+        
+        # Vérifier si le joueur participe à un tournoi ouvert ou en cours
+        tournament = Tournament.objects.filter(
+            Q(player_1=player) | Q(player_2=player) | Q(player_3=player) | Q(player_4=player),
+            status__in=[TournamentStatusChoices.OUVERT, TournamentStatusChoices.EN_COURS]
+        ).first()
+
+        if not tournament:
+            raise serializers.ValidationError({"code": 4031}) #Vous ne participez à aucun tournoi ouvert ou en cours
+
+        attrs['player'] = player
+        attrs['tournament'] = tournament
+        return attrs
+
+    def to_representation(self, validated_data):
+        tournament = validated_data['tournament']
+        return {
+            "code": 1000,
+            "tournament_id": tournament.id,
+            "name": tournament.name,
+            "status": tournament.status
+        }
+
 class WinrateSerializer(serializers.ModelSerializer):
     player = PongPlayerSerializer(read_only=True)
     
     class Meta:
         model = Winrate
         fields = ['id', 'player', 'victory', 'defeat']
+

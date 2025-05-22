@@ -232,6 +232,20 @@ class TournamentLeaveAPI(generics.UpdateAPIView):
         return super().get_object()
 
 @method_decorator(csrf_exempt, name='dispatch')
+class TournamentGetIdAPI(generics.GenericAPIView):
+    """
+    Récupère l'ID d'un tournoi.
+    - GET /pong/tournaments/get-id/ : Retourne l'ID du tournoi.
+    """
+    serializer_class = serializers.TournamentGetIdSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.to_representation(serializer.validated_data))
+
+@method_decorator(csrf_exempt, name='dispatch')
 class TournamentCancelAPI(generics.DestroyAPIView):
     """
     Permet au créateur du tournoi (player_1) d'annuler un tournoi.

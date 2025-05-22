@@ -61,8 +61,10 @@ function PlayMatch() {
 
 		const startFinal = async () => {
 			try {
-				const response = await axiosInstance.get(`tournament/${id}/start-final/`)
-				console.log(response)
+				const id = await axiosInstance.get(`/pong/tournament/get-id/`)
+				console.log(id)
+				//const response = await axiosInstance.get(`tournament/${id}/start-final/`)
+				//console.log(response)
 			}
 			catch(error) {
 				console.log(error)
@@ -71,6 +73,7 @@ function PlayMatch() {
 
 		const handleMessage = async () => {
 			if (lastMessage.type == "match_ended") {
+				console.log("yo")
 				socket.close()
 				setWinner(lastMessage.winner)
 				setPaused(false)
@@ -79,7 +82,7 @@ function PlayMatch() {
 				setPongMessages([])
 				setScoreMessages([])
 				if (lastMessage.match_number == 2 && lastMessage.winner == user.name)
-					await startFinal(1)
+					await startFinal()
 			}
 			if (lastMessage.type == "game_paused")
 				setPaused(true)
@@ -94,6 +97,7 @@ function PlayMatch() {
 				setShowTimer(true)
 			}
 			if (lastMessage.type == "new_game") {
+				console.log("yo")
 				socket.close()
 				await wait(3000)
 				setUrl(lastMessage.ws_url)

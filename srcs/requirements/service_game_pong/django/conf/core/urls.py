@@ -19,6 +19,7 @@ urlpatterns = [
     path('tournament/<int:tournament_id>/games/', views.TournamentMatchListAPI.as_view(), name='tournament-games'),
     path('tournament/<int:id>/join/', views.TournamentJoinAPI.as_view(), name='tournament-join'),
     path('tournament/<int:id>/start/', views.TournamentStartAPI.as_view(), name='tournament-start'),
+	path('tournament/get-id/', views.TournamentGetIdAPI.as_view(), name='tournament-getID'),
     path('tournament/<int:id>/start-final/', views.TournamentStartFinalAPI.as_view(), name='tournament-start-final'),
     path('tournament/<int:id>/end/', views.TournamentEndAPI.as_view(), name='tournament-end'),
     path('tournament/<int:id>/leave/', views.TournamentLeaveAPI.as_view(), name='tournament-leave'),

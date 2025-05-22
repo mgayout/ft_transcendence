@@ -271,9 +271,9 @@ class PongConsumer(AsyncWebsocketConsumer):
                 "player_1_wins": match_result.get("player_1_wins"),
                 "player_2_wins": match_result.get("player_2_wins"),
 				"match_number": match_result.get("match_number"),
-                "tournament_id": match.tournament.id if match.tournament else None,
             }
             await self.channel_layer.group_send(self.room_group_name, match_ended_event)
+            await asyncio.sleep(1)
             return match_ended_event
         
     
@@ -363,7 +363,6 @@ class PongConsumer(AsyncWebsocketConsumer):
                 "player_1_wins": player_1_wins,
                 "player_2_wins": player_2_wins,
 				"match_number": match.match_number,
-                "tournament_id": match.tournament.id if match.tournament else None,
             }
         except Exception as e:
             print(f"Error ending match {self.match_id}: {str(e)}")
@@ -561,9 +560,6 @@ class PongConsumer(AsyncWebsocketConsumer):
             if self.c_status.get(self.match_id) != StatusChoices.EN_COURS:
                 self.game = await self.get_active_game(self.match_id)
                 if not self.game:
-                    match = await self.get_match(self.match_id)
-                    if match.status == StatusChoices.TERMINE:
-                        return
                     await self.handle_match_end()
                     return
             try:
@@ -658,10 +654,8 @@ class PongConsumer(AsyncWebsocketConsumer):
             "type": "match_ended",
             "winner": event["winner"],
             "match_number": event["match_number"],
-            "tournament_id": event("tournament_id"),
             "player_1_wins": event["player_1_wins"],
             "player_2_wins": event["player_2_wins"],
-			"tournament_id": match_result.get("tournament_id"),
         }))
 
     async def handle_match_end(self):
@@ -683,7 +677,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                     }
                 )
                 # Attendre que les messages soient propagés
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(1)
         except Exception as e:
             print(f"Error in handle_match_end: {str(e)}")
         finally:
@@ -737,7 +731,6 @@ class PongConsumer(AsyncWebsocketConsumer):
                 match_ended_event = {
                     "type": "match_ended",
                     "winner": match_result.get("winner"),
-					"tournament_id": match_result.get("tournament_id"),
                     "player_1_wins": match_result.get("player_1_wins"),
                     "player_2_wins": match_result.get("player_2_wins"),
                     "forfeit": True,
@@ -750,6 +743,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                     "type": "forfeit_success",
                     "message": "Vous avez été déclaré vainqueur par forfait"
                 }))
+                await asyncio.sleep(1)
                 
         except Exception as e:
             print(f"Error handling forfeit for match {self.match_id}: {str(e)}")
@@ -788,7 +782,6 @@ class PongConsumer(AsyncWebsocketConsumer):
                 "player_1_wins": player_1_wins,
                 "player_2_wins": player_2_wins,
 				"match_number": match.match_number,
-                "tournament_id": match.tournament.id if match.tournament else None,
             }
         except Exception as e:
             print(f"Error ending match by forfeit {self.match_id}: {str(e)}")
