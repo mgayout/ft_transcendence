@@ -38,7 +38,7 @@ function WinnerModal({ winnerName, show, onClose }) {
 
 function PlayMatch() {
 
-	const { getSocket, messages } = useGame()
+	const { getSocket, closeSocket, messages } = useGame()
 	const { setMessages, setPongMessages, setScoreMessages } = useGame()
 	const [paused, setPaused] = useState(false)
 	const [end, setEnd] = useState(false)
@@ -53,7 +53,7 @@ function PlayMatch() {
 		const lastMessage = messages[messages.length - 1]
 		console.log(lastMessage)
 		if (lastMessage.type == "match_ended") {
-			socket.close()
+			closeSocket()
 			setWinner(lastMessage.winner)
 			setPaused(false)
 			setEnd(true)

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from "react-router-dom"
+import axiosInstance from '../auth/instance'
 
 const GameContext = createContext(null)
 
@@ -15,63 +16,83 @@ export const Game = ({ children }) => {
 
 	useEffect(() => {
 		if (!url) return
-		console.log("yoooooooooo")
-		const Atoken = localStorage.getItem('Atoken')
-		const ws = new WebSocket(`${url}?token=${Atoken}`)
-		socketRef.current = ws
+		const Rtoken = localStorage.getItem("Rtoken")
+		if (!Rtoken) return
 
-		ws.onopen = () => {
-			console.log("Game WebSocket is open.")
+		let isMounted = true
+		let wsInstance = null
+
+		const createGameSocket = async (url, Rtoken, onMessage, onError, onClose) => {
+
+			const tokens = await axiosInstance.post('/users/api/token/refresh/', { refresh: Rtoken })
+			console.log(tokens)
+			const ws = new WebSocket(`${url}?token=${tokens.data.access}`)
+
+			ws.onopen = () => {console.log("WebSocket connected")}
+			ws.onmessage = (event) => {
+				const data = JSON.parse(event.data)
+				onMessage?.(data)
+			}
+			ws.onerror = (error) => {onError?.(error)}
+			ws.onclose = () => {onClose?.()}
+			return ws
 		}
 
-		ws.onmessage = (event) => {
-			const data = JSON.parse(event.data)
-			if (data.type == "match_created")
-				setMessages(data)
-			if (data.type == "data_pong")
-				setPongMessages((prev) => [...prev, data])
-			else if (data.type == "score_update")
-				setScoreMessages(data)
-			else if (data.type == "game_paused")
-				setMessages((prev) => [...prev, data])
-			else if (data.type)
-				setMessages((prev) => [...prev, data])
-			else
-				console.log(data)
+		const initGameSocket = async () => {
+			try {
+				const ws = await createGameSocket(url, Rtoken, (data) => {
+				if (data.type == "data_pong") setPongMessages((prev) => [...prev, data])
+				else if (data.type == "score_update") setScoreMessages(data)
+				else if (data.type) setMessages((prev) => [...prev, data])
+				else console.log(data)
+				}, (error) => {
+					console.error("Game WebSocket error", error)
+					navigate("/home")
+				}, () => {
+					setUrl("")
+					setMessages([])
+					setPongMessages([])
+					setScoreMessages([])
+					console.log("Game WebSocket closed")
+				})
+				if (isMounted) {
+					socketRef.current = ws
+					wsInstance = ws
+				}
+			}
+			catch(error) {console.log("Failed to create WebSocket: ", error)}
 		}
 
-		ws.onclose = () => {
-			setUrl("")
-			setMessages([])
-			setPongMessages([])
-			console.log("Game WebSocket closed")
-		}
-
-		ws.onerror = (err) => {
-			console.error("Game WebSocket error", err)
-			if (socketRef.current?.readyState === WebSocket.OPEN)
-				socketRef.current.close()
-			navigate("/home")
-		}
+		initGameSocket()
 
 		return () => {
-			ws.close()
+			isMounted = false
+			if (wsInstance?.readyState === WebSocket.OPEN || wsInstance?.readyState === WebSocket.CONNECTING) {
+				console.log("Closing WebSocket during cleanup")
+				wsInstance.close()
+			}
 		}
-		
+
 	}, [url])
 
-	useEffect(() => {
+	const closeSocket = () => {
+		if (socketRef.current?.readyState === WebSocket.OPEN || socketRef.current?.readyState === WebSocket.CONNECTING)
+			socketRef.current.close()
+	}
+
+
+	/*useEffect(() => {
 		const handleBeforeUnload = () => {
 			if (socketRef.current?.readyState === WebSocket.OPEN)
 				socketRef.current.close()
 		}
 		window.addEventListener('beforeunload', handleBeforeUnload)
 		return () => {window.removeEventListener('beforeunload', handleBeforeUnload)}
-	}, [])
+	}, [])*/
 
 	return (
-		<GameContext.Provider value={{ getSocket: () => socketRef.current, messages, setMessages, 
-							PongMessages, setPongMessages, ScoreMessages, setScoreMessages, url, setUrl }}>
+		<GameContext.Provider value={{ messages, setMessages, PongMessages, setPongMessages,
+			ScoreMessages, setScoreMessages, url, setUrl, getSocket: () => socketRef.current, closeSocket }}>
 			{children}
 		</GameContext.Provider>
 	)

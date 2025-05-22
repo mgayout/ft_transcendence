@@ -13,7 +13,7 @@ function Online({ user }) {
 
 	const [state, setState] = useState("")
 	const [type, setType] = useState("")
-	const { setMessages } = useNotification()
+	const { setNotifMessages } = useNotification()
 
 	const fonction = async () => {
 		try {
@@ -22,7 +22,7 @@ function Online({ user }) {
 			const a = matchData.data
 				.filter(match => match.status == "En cours" && (match.player_1.name == user.name || match.player_2.name == user.name))
 			if (a.length) {
-				setMessages({
+				setNotifMessages({
 					type: "match_created",
 					player_1: a[0].player_1.name,
 					player_2: a[0].player_2.name,

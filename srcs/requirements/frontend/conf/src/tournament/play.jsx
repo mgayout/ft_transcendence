@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { useGame } from "../websockets/game"
+import { useNotification } from "../websockets/notification"
 import { Modal, Button } from "react-bootstrap"
 import { confetti } from "dom-confetti"
 import { useAuth } from "../auth/context"
@@ -8,10 +9,11 @@ import axiosInstance from "../auth/instance"
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
-function WinnerModal({ winnerName, show, onClose }) {
+function WinnerModal({ winnerName, show, onClose, setState }) {
 
 	const confettiRef = useRef(null)
 	const navigate = useNavigate()
+	const { user } = useAuth()
 
 	useEffect(() => {
 		if (show && confettiRef.current) {
@@ -28,23 +30,31 @@ function WinnerModal({ winnerName, show, onClose }) {
 		navigate("/home")
 	}
 
+	const goToFinal = () => {
+		onClose()
+		setState("waitfinal")
+	}
+
 	return (
 		<Modal show={show} onHide={onClose} centered>
 			<Modal.Body className="text-center">
 				<div ref={confettiRef} />
 				<h2 className="fw-bold">🏆 {winnerName} wins!</h2>
 				<p>Congratulations!</p>
-				<Button variant="primary" onClick={() => backToMenu()}>Back to Menu</Button>
+				{winnerName == user.name
+					?<Button variant="primary" onClick={() => goToFinal()}>Play Final !</Button>
+					:<Button variant="primary" onClick={() => backToMenu()}>Back to Menu</Button>}
 			</Modal.Body>
 		</Modal>
 	)
 }
 
-function PlayMatch() {
+function PlayMatch({ setState }) {
 
-	const { getSocket, messages } = useGame()
+	const { getSocket, closeSocket, messages } = useGame()
 	const { setUrl } = useGame()
 	const { setMessages, setPongMessages, setScoreMessages } = useGame()
+	const { NotifMessages } = useNotification()
 	const { user } = useAuth()
 	const [paused, setPaused] = useState(false)
 	const [end, setEnd] = useState(false)
@@ -52,6 +62,7 @@ function PlayMatch() {
 	const [winner, setWinner] = useState("")
 	const [timer, setTimer] = useState(60)
 	const [showTimer, setShowTimer] = useState(true)
+	const [final, setFinal] = useState(false)
 	const socket = getSocket()
 
 	useEffect(() => {
@@ -63,8 +74,9 @@ function PlayMatch() {
 			try {
 				const id = await axiosInstance.get(`/pong/tournament/get-id/`)
 				console.log(id)
-				//const response = await axiosInstance.get(`tournament/${id}/start-final/`)
-				//console.log(response)
+				const response = await axiosInstance.put(`/pong/tournament/${id.data.tournament_id}/start-final/`)
+				console.log(response)
+				setFinal(true)
 			}
 			catch(error) {
 				console.log(error)
@@ -73,15 +85,14 @@ function PlayMatch() {
 
 		const handleMessage = async () => {
 			if (lastMessage.type == "match_ended") {
-				console.log("yo")
-				socket.close()
+				closeSocket()
 				setWinner(lastMessage.winner)
 				setPaused(false)
 				setEnd(true)
 				setMessages([])
 				setPongMessages([])
 				setScoreMessages([])
-				if (lastMessage.match_number == 2 && lastMessage.winner == user.name)
+				if (lastMessage.match_number == 2 && lastMessage.winner == user.name && final == false)
 					await startFinal()
 			}
 			if (lastMessage.type == "game_paused")
@@ -96,15 +107,16 @@ function PlayMatch() {
 				setPaused(false)
 				setShowTimer(true)
 			}
-			if (lastMessage.type == "new_game") {
-				console.log("yo")
-				socket.close()
-				await wait(3000)
-				setUrl(lastMessage.ws_url)
-			}
 		}
 		handleMessage()
 	}, [messages])
+
+	useEffect(() => {
+		if (NotifMessages.type == "match_created") {
+			setFinal(true)
+			console.log(NotifMessages)
+		}
+	}, [NotifMessages])
 
 	useEffect(() => {
 		if (paused == false || showTimer == false || !socket || socket.readyState != WebSocket.OPEN) return
@@ -132,7 +144,7 @@ function PlayMatch() {
 				{showTimer ? `Timer : ${timer}s` : ""}
 			</div>
 		</div> : <></> }
-		<WinnerModal winnerName={ winner } show={ end } onClose={ closeEnd }/>
+		<WinnerModal winnerName={ winner } show={ end } onClose={ closeEnd } setState={ setState }/>
 		</>
 	)
 }

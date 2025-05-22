@@ -868,6 +868,50 @@ class TournamentLeaveSerializer(serializers.Serializer):
             "name": instance.name
         }
 
+class TournamentSeeFinalSerializer(serializers.Serializer):
+    def validate(self, attrs):
+        tournament = self.instance
+        user = self.context['request'].user
+
+        # Vérifier que l'utilisateur a un profil joueur
+        try:
+            player = Player.objects.get(user=user)
+        except Player.DoesNotExist:
+            raise serializers.ValidationError({"code": 4001})  # Aucun profil joueur associé à l'utilisateur
+
+        # Vérifier que le joueur est présent dans le tournoi
+        if player not in [tournament.player_1, tournament.player_2, tournament.player_3, tournament.player_4]:
+            raise serializers.ValidationError({"code": 4017})  # Seul un participant du tournoi peut démarrer la finale
+
+        # Vérifier que le tournoi est en statut EN_COURS
+        if tournament.status != TournamentStatusChoices.EN_COURS:
+            raise serializers.ValidationError({"code": 4018})  # Tournoi doit être en cours pour lancer la finale
+
+        # Vérifier que les demi-finales sont terminées
+        demi_finales = Match.objects.filter(match_number=2, tournament=tournament)
+        if demi_finales.count() != 2:
+            raise serializers.ValidationError({"code": 4022})  # Tournoi doit avoir exactement deux matchs de demi-finales
+        for match in demi_finales:
+            if match.status != StatusChoices.TERMINE:
+                raise serializers.ValidationError({"code": 4023})  # Tous les matchs des demi-finales doivent être terminés
+            if not match.winner:
+                raise serializers.ValidationError({"code": 4024})  # Tous les matchs des demi-finales doivent avoir un gagnant
+
+        finalists = [match.winner for match in demi_finales]
+        attrs['finalist1'] = finalists[0]
+        attrs['finalist2'] = finalists[1]
+        return attrs
+
+    def to_representation(self, instance):
+        validated_data = self.validated_data
+        finalist1 = validated_data['finalist1']
+        finalist2 = validated_data['finalist2']
+        return {
+            "code": 1000,
+            "finalist1": finalist1.username if finalist1 else None,  # Nom du joueur
+            "finalist2": finalist2.username if finalist2 else None,  # Nom du joueur
+        }
+
 class TournamentCancelSerializer(serializers.Serializer):
     def validate(self, attrs):
         tournament = self.instance

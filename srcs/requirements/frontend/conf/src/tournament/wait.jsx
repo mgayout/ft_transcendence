@@ -7,7 +7,7 @@ import { useAuth } from "../auth/context"
 
 function WaitMatch({ setState, type, setType }) {
 
-	const { messages, setMessages } = useNotification()
+	const { NotifMessages, setNotifMessages } = useNotification()
 	const { setUrl } = useGame()
 	const [ready, setReady] = useState(false)
 	const [data, setData] = useState({})
@@ -17,7 +17,6 @@ function WaitMatch({ setState, type, setType }) {
 		try {
 			const playerData = await axiosInstance.get('/users/api/player/')
 			const tournamentData = await axiosInstance.get("/pong/tournament/list/")
-			console.log(tournamentData)
 			const getName = (id) => {
 				if (!id || id == null) return "..."
 				const Name = playerData.data.find(player => player.id === id)
@@ -37,17 +36,18 @@ function WaitMatch({ setState, type, setType }) {
 				return players
 			}
 			const a = tournamentData.data
-				.map(tourn => ({
-					name: tourn.name,
-					id: tourn.id,
-					p1: {name: getName(tourn.player_1), avatar: getAvatar(tourn.player_1)},
-					p2: {name: getName(tourn.player_2), avatar: getAvatar(tourn.player_2)},
-					p3: {name: getName(tourn.player_3), avatar: getAvatar(tourn.player_3)},
-					p4: {name: getName(tourn.player_4), avatar: getAvatar(tourn.player_4)},
-					players: getPlayers(tourn.player_1, tourn.player_2, tourn.player_3, tourn.player_4)}))
-			console.log(a)
-			if (a.length > 0)
-				setData(a[0])
+				.find(tourn => tourn.status == "Ouvert" &&
+					(tourn.player_1 == user.id || tourn.player_2 == user.id ||
+					tourn.player_3 == user.id || tourn.player_4 == user.id))
+			if (a == undefined || a.length == 0) return
+			setData({
+				name: a.name,
+				id: a.id,
+				p1: {name: getName(a.player_1), avatar: getAvatar(a.player_1)},
+				p2: {name: getName(a.player_2), avatar: getAvatar(a.player_2)},
+				p3: {name: getName(a.player_3), avatar: getAvatar(a.player_3)},
+				p4: {name: getName(a.player_4), avatar: getAvatar(a.player_4)},
+				players: getPlayers(a.player_1, a.player_2, a.player_3, a.player_4)})
 		}
 		catch(error) {console.log(error)}
 	}
@@ -77,21 +77,21 @@ function WaitMatch({ setState, type, setType }) {
 	}
 
 	useEffect(() => {
-		if (messages.type == "tournament_created" || messages.type == "player_joined" || messages.type == "player_leave")
+		if (NotifMessages.type == "tournament_created" || NotifMessages.type == "player_joined" || NotifMessages.type == "player_leave")
 			fonction()
-		if (messages.type == "tournament_cancelled") {
+		if (NotifMessages.type == "tournament_cancelled") {
 			setState("")
 			setType("")
 		}
-		if (messages.type == "match_created") {
-			console.log(messages)
-			if (messages.player_1 == user.name) setType("paddle_l")
-			else if (messages.player_2 == user.name) setType("paddle_r")
-			setUrl(messages.ws_url)
-			setMessages([])
+		if (NotifMessages.type == "match_created") {
+			console.log(NotifMessages)
+			if (NotifMessages.player_1 == user.name) setType("paddle_l")
+			else if (NotifMessages.player_2 == user.name) setType("paddle_r")
+			setUrl(NotifMessages.ws_url)
+			setNotifMessages([])
 			setState("play")
 		}
-	}, [messages])
+	}, [NotifMessages])
 
 	useEffect(() => {
 		if (data && data.players == 4)
@@ -125,7 +125,7 @@ function WaitMatch({ setState, type, setType }) {
 					<Spinner animation="border" style={{ width: '3rem', height: '3rem' }} className="mb-2"/>}
 					<div className="text-white mb-3">{data.p4.name}</div>
 					<Button type="button" variant={ready ? "success" : "danger" } className="btn btn-secondary rounded fw-bolder mt-3" onClick={() => play(data.id)}>Play</Button>
-					{type == "host" ?
+					{data.p1.name == user.name ?
 					<Button type="button" className="btn btn-secondary rounded fw-bolder mt-3" onClick={() => cancel(data.id)}>Cancel</Button> :
 					<Button type="button" className="btn btn-secondary rounded fw-bolder mt-3" onClick={() => leave(data.id)}>Leave</Button>}
 				</>	

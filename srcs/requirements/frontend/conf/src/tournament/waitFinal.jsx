@@ -5,58 +5,14 @@ import { useNotification } from "../websockets/notification"
 import { useGame } from "../websockets/game"
 import axiosInstance from "../auth/instance"
 
-function WaitMatch({ setState }) {
+function WaitFinal({ setState }) {
 
 	const { user } = useAuth()
-	const [friendName, setFriendName] = useState("")
-	const [friend, setFriend] = useState(null)
-	const { NotifMessages, setNotifMessages } = useNotification()
-	const { setUrl } = useGame()
+	const { NotifMessages } = useNotification()
 	const [ready, setReady] = useState(false)
 
-	const play = () => {
-		setUrl(NotifMessages.ws_url)
-		setNotifMessages([])
-		setState("play")
-	}
-
-	const cancel = async () => {
-		try {
-			const invitations = await axiosInstance.get("/pong/invitations/")
-			const a = invitations.data.find(invite => invite.from_player.name == user.name)
-			await axiosInstance.put(`/pong/invitations/${a.id}/cancel/`)
-			setState("")
-		}
-		catch(error) {
-			console.log(error)
-		}
-	}
-
-	const getFriend = async () => {
-		try {
-			const playerData = await axiosInstance.get('/users/api/player/')
-			const a = playerData.data
-				.find(player => player.name == friendName)
-			setFriend({name: a.name, avatar: a.avatar})
-			setReady(true)
-		}
-		catch(error) {
-			console.log(error)
-		}
-	}
-
 	useEffect(() => {
-		if (friendName)
-			getFriend()
-	}, [friendName])
 
-	useEffect(() => {
-		if (NotifMessages.type == "match_created")
-			setFriendName(user.name == NotifMessages.player_1 ? NotifMessages.player_2 : NotifMessages.player_1)
-		if (NotifMessages.type == "invitation_declined") {
-			setState("")
-			setNotifMessages([])
-		}
 	}, [NotifMessages])
 
 	return (
@@ -84,4 +40,4 @@ function WaitMatch({ setState }) {
 	)
 }
 
-export default WaitMatch
+export default WaitFinal

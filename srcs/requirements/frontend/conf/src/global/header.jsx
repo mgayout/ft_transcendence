@@ -14,20 +14,19 @@ function Header({ user, state, setState }) {
 	const [friend, setFriend] = useState(false)
 	const [chat, setChat] = useState(false)
 	const [quit, setQuit] = useState(false)
-	const { getSocket } = useGame()
-	const socket = getSocket()
+	const { closeSocket } = useGame()
 
 	if (!user) return (<></>)
 
 	const goTo = (string) => {
 		if (state && state == "play")
-			socket.close()
+			closeSocket()
 		navigate(string)
 	}
 
 	const setTo = (string) => {
 		if (state && state == "play") {
-			socket.close()
+			closeSocket()
 			setState("")
 		}
 		if (string == "settings")

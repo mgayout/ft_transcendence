@@ -7,7 +7,7 @@ const BGprivate = ({ state, type }) => {
 
 	const canva = useRef(null)
 	const { getSocket, PongMessages, ScoreMessages} = useGame()
-	const { messages } = useNotification()
+	const { NotifMessages } = useNotification()
 	const [groupName, setGroupName] = useState({player1: "...", player2: "..."})
 	const [groupScore, setGroupScore] = useState({score1: "0", score2: "0"})
 
@@ -55,12 +55,12 @@ const BGprivate = ({ state, type }) => {
 			window.removeEventListener('keyup', handleKeyUp)
 			dispose()
 		}
-	}, [ state, PongMessages, ScoreMessages, messages ])
+	}, [ state, PongMessages, ScoreMessages, NotifMessages ])
 
 	useEffect(() => {
-		if (messages.type == "match_created")
-			setGroupName({player1: updateNames(messages.player_1, 1), player2: updateNames(messages.player_2, 2)})
-	}, [messages])
+		if (NotifMessages.type == "match_created")
+			setGroupName({player1: updateNames(NotifMessages.player_1, 1), player2: updateNames(NotifMessages.player_2, 2)})
+	}, [NotifMessages])
 
 	const updateNames = (string, types) => {
 		if (types === 1) {
