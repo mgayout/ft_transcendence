@@ -96,7 +96,7 @@ class Tournament(models.Model):
 
 class Match(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='tournament', null=True, blank=True)
-    match_number= models.PositiveIntegerField(null=True, blank=True) #final = 1, demi-final=2
+    match_number= models.PositiveIntegerField(default=0, null=True, blank=True) #final = 1, demi-final=2
     player_1 = models.ForeignKey(Player, on_delete=models.SET_NULL, related_name='matches_as_player_1', null=True)
     player_2 = models.ForeignKey(Player, on_delete=models.SET_NULL, related_name='matches_as_player_2', null=True)
     status = models.CharField(choices=StatusChoices.choices, max_length=10, default=StatusChoices.EN_COURS)

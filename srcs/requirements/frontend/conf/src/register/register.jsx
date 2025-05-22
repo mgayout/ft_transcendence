@@ -86,7 +86,7 @@ function Register() {
 			</div>
 			<div className="d-flex justify-content-center pt-0 mb-3">
 				<Button type="button" className="btn btn-secondary rounded fw-bolder" onClick={() => navigate("/register/42")}>
-					<img src="42.svg" style={{ width: "40px", height: "40px"}}/>Sign in with 42
+					<img src="42.svg" style={{ width: "40px", height: "40px"}}/> Sign in with 42
 				</Button>
 			</div>
 			<div className="d-flex justify-content-end pt-3">
