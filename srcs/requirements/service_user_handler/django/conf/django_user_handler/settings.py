@@ -28,7 +28,7 @@ DOMAIN_NAME = os.getenv('DOMAIN_NAME', 'localhost')
 PORT_NUM = os.getenv('PORT_NUM', '4343')
 SOCIAL_AUTH_42_KEY = os.getenv('AUTH_42_KEY')
 SOCIAL_AUTH_42_SECRET = os.getenv('AUTH_42_SECRET')
-SOCIAL_AUTH_REDIRECT_URI = f"https://{DOMAIN_NAME}:{PORT_NUM}/users/api/auth-42/callback/"
+SOCIAL_AUTH_REDIRECT_URI = f"https://{DOMAIN_NAME}:{PORT_NUM}/register/42/complete"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

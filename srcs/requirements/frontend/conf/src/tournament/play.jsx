@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom"
 import { useGame } from "../websockets/game"
 import { Modal, Button } from "react-bootstrap"
 import { confetti } from "dom-confetti"
+import { useAuth } from "../auth/context"
+import axiosInstance from "../auth/instance"
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -43,6 +45,7 @@ function PlayMatch() {
 	const { getSocket, messages } = useGame()
 	const { setUrl } = useGame()
 	const { setMessages, setPongMessages, setScoreMessages } = useGame()
+	const { user } = useAuth()
 	const [paused, setPaused] = useState(false)
 	const [end, setEnd] = useState(false)
 	const closeEnd = () => setEnd(false)
@@ -56,6 +59,16 @@ function PlayMatch() {
 		const lastMessage = messages[messages.length - 1]
 		console.log(lastMessage)
 
+		const startFinal = async () => {
+			try {
+				const response = await axiosInstance.get(`tournament/${id}/start-final/`)
+				console.log(response)
+			}
+			catch(error) {
+				console.log(error)
+			}
+		}
+
 		const handleMessage = async () => {
 			if (lastMessage.type == "match_ended") {
 				socket.close()
@@ -65,6 +78,8 @@ function PlayMatch() {
 				setMessages([])
 				setPongMessages([])
 				setScoreMessages([])
+				if (lastMessage.match_number == 2 && lastMessage.winner == user.name)
+					await startFinal(1)
 			}
 			if (lastMessage.type == "game_paused")
 				setPaused(true)

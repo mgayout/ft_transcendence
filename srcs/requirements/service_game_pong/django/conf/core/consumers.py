@@ -271,6 +271,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 "player_1_wins": match_result.get("player_1_wins"),
                 "player_2_wins": match_result.get("player_2_wins"),
 				"match_number": match_result.get("match_number"),
+                "tournament_id": match.tournament.id if match.tournament else None,
             }
             await self.channel_layer.group_send(self.room_group_name, match_ended_event)
             return match_ended_event
@@ -362,6 +363,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 "player_1_wins": player_1_wins,
                 "player_2_wins": player_2_wins,
 				"match_number": match.match_number,
+                "tournament_id": match.tournament.id if match.tournament else None,
             }
         except Exception as e:
             print(f"Error ending match {self.match_id}: {str(e)}")
@@ -655,8 +657,11 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             "type": "match_ended",
             "winner": event["winner"],
+            "match_number": event["match_number"],
+            "tournament_id": event("tournament_id"),
             "player_1_wins": event["player_1_wins"],
-            "player_2_wins": event["player_2_wins"]
+            "player_2_wins": event["player_2_wins"],
+			"tournament_id": match_result.get("tournament_id"),
         }))
 
     async def handle_match_end(self):
@@ -732,6 +737,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 match_ended_event = {
                     "type": "match_ended",
                     "winner": match_result.get("winner"),
+					"tournament_id": match_result.get("tournament_id"),
                     "player_1_wins": match_result.get("player_1_wins"),
                     "player_2_wins": match_result.get("player_2_wins"),
                     "forfeit": True,
@@ -781,7 +787,8 @@ class PongConsumer(AsyncWebsocketConsumer):
                 "winner": match.winner.name if match.winner else None,
                 "player_1_wins": player_1_wins,
                 "player_2_wins": player_2_wins,
-				"match_number": match_result.get("match_number"),
+				"match_number": match.match_number,
+                "tournament_id": match.tournament.id if match.tournament else None,
             }
         except Exception as e:
             print(f"Error ending match by forfeit {self.match_id}: {str(e)}")
