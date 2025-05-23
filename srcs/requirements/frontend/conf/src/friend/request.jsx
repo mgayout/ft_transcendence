@@ -24,7 +24,7 @@ function RequestModal({ tab, handleClose }) {
 				.filter(friend => friend.status == "pending")
 				.map(friend => ({
 					id: friend.id,
-					avatar: getAvatar(friend.player_1 == user.name ? friend.player_1 : friend.player_2 ),
+					avatar: getAvatar(friend.player_1 == user.name ? friend.player_2 : friend.player_1 ),
 					sender: friend.player_1,
 					receiver: friend.player_2}))
 

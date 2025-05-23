@@ -50,7 +50,7 @@ async def game_pong(game_id, consumer):
     if (ball_x <= PADDLE_WIDTH + BALL_RADIUS and
         paddle_l_position <= ball_y <= paddle_l_position + PADDLE_HEIGHT):
         ball_dx = -ball_dx
-        ball_speed += 0.05
+        ball_speed *= 2
         # Calculer où la balle a frappé la raquette (de 0 à 1)
         relative_intersect_y = (ball_y - paddle_l_position) / PADDLE_HEIGHT
         # Convertir en angle entre -30 et 30 degrés
@@ -66,7 +66,7 @@ async def game_pong(game_id, consumer):
     elif (ball_x >= CANVAS_WIDTH - PADDLE_WIDTH - BALL_RADIUS and
           paddle_r_position <= ball_y <= paddle_r_position + PADDLE_HEIGHT):
         ball_dx = -ball_dx
-        ball_speed += 0.05
+        ball_speed *= 2
         # Calculer où la balle a frappé la raquette (de 0 à 1)
         relative_intersect_y = (ball_y - paddle_r_position) / PADDLE_HEIGHT
         # Convertir en angle entre -30 et 30 degrés

@@ -682,6 +682,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             print(f"Error in handle_match_end: {str(e)}")
         finally:
             # Fermer la connexion après avoir envoyé tous les messages
+            await asyncio.sleep(5)
             await self.close()
 
     async def handle_forfeit(self, winner_id):

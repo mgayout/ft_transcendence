@@ -255,7 +255,7 @@ class InvitationAcceptSerializer(serializers.Serializer):
             player_1=match.player_1,
             player_2=match.player_2,
             status=StatusChoices.EN_COURS,
-            ball_position={"x": 0, "y": 15},
+            ball_position={"x": 35.5, "y": 15.5},
             paddle_position={"paddle_l": 15, "paddle_r": 15},
             round_number=1,
             max_score=instance.max_score_per_round
@@ -616,6 +616,8 @@ class TournamentStartSerializer(serializers.Serializer):
                 match=match,
                 player_1=match.player_1,
                 player_2=match.player_2,
+                ball_position={"x": 35.5, "y": 15.5},
+                paddle_position={"paddle_l": 15, "paddle_r": 15},
                 status=StatusChoices.EN_COURS,
                 round_number=1,
                 max_score=instance.max_score_per_round
@@ -709,6 +711,8 @@ class TournamentStartFinalSerializer(serializers.Serializer):
             match=final_match,
             player_1=final_match.player_1,
             player_2=final_match.player_2,
+            ball_position={"x": 35.5, "y": 15.5},
+            paddle_position={"paddle_l": 15, "paddle_r": 15},
             status=StatusChoices.EN_COURS,
             round_number=1,
             max_score=instance.max_score_per_round
@@ -1007,5 +1011,7 @@ class MatchGetCurrentSerializer(serializers.Serializer):
         return {
             "code": 1000,
 			"match_id": match.id if match else None,
-			"ws_url": f"wss://{DOMAIN_NAME}:{PORT_NUM}/pong/ws/match/{match.id}/" if match else None
+			"ws_url": f"wss://{DOMAIN_NAME}:{PORT_NUM}/pong/ws/match/{match.id}/" if match else None,
+			"player_1": match.player_1.name if match else None,
+			"player_2": match.player_2.name if match else None
         }

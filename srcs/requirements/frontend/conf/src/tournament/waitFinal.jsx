@@ -9,14 +9,15 @@ function WaitFinal({ setState }) {
 
 	const { user } = useAuth()
 	const { NotifMessages } = useNotification()
-	const [ready, setReady] = useState(false)
 
 	const startFinal = async () => {
 		try {
 			let final
 			const idData = await axiosInstance.get("/pong/tournament/get-id/")
-			if (idData && idData.finalist1 != "" && idData.finalist2 != "")
+			console.log(idData)
+			if (idData && idData.finalist1 != null && idData.finalist2 != null)
 				final = await axiosInstance.put(`/pong/tournament/${idData.data.tournament_id}/start-final/`)
+			
 		}
 		catch(error) {
 			console.log(error)
@@ -41,18 +42,8 @@ function WaitFinal({ setState }) {
 				<div className="d-flex flex-column align-items-center">
 					<img src={user.avatar} className="mb-1" style={{ width: '80px', height: '80px', borderRadius: '50%' }}/>
 					<div className="text-white mb-3">{user.name}</div>
-					{ready ? (
-					<>
-						<img src={friend.avatar} className="mb-1" style={{ width: '80px', height: '80px', borderRadius: '50%' }}/>
-						<div className="text-white mb-3">{friend.name}</div>
-						<Button type="button" className="btn btn-secondary rounded fw-bolder mt-3" onClick={() => play()}>Play</Button>
-					</> ) : (
-					<>
 						<Spinner animation="border" style={{ width: '3rem', height: '3rem' }} className="mb-2"/>
-						<div className="text-white mb-3">...</div>
-						<Button type="button" className="btn btn-secondary rounded fw-bolder mt-3" onClick={() => cancel()}>Cancel</Button>
-					</> )}
-					
+					<div className="text-white mb-3">...</div>
 				</div>
 			</div>
 		</div>

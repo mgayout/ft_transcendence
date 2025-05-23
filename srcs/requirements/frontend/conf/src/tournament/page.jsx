@@ -17,8 +17,12 @@ function Tournament({ user }) {
 
 	const fonction = async () => {
 		try {
-			const tournamentData = await axiosInstance("/pong/tournament/list/")
+			const tournamentData = await axiosInstance.get("/pong/tournament/list/")
+			const url = await axiosInstance.get("/pong/matches/get-id/")
 			const idData = await axiosInstance.get("/pong/tournament/get-id/")
+			console.log("tournament: ", tournamentData)
+			console.log("idData: ", idData)
+			console.log("url: ", url)
 			const a = tournamentData.data
 				.find(match => match.status == "Ouvert" &&
 				(match.player_1 == user.id || match.player_2 == user.id ||
@@ -27,13 +31,23 @@ function Tournament({ user }) {
 				setState("wait")
 				setNotifMessages({type: "tournament_created"})
 			}
-			else if (idData && idData.finalist1 == user.name || idData.finalist2 == user.name) {
-				setState("waitfinal")
-				setNotifMessages({
-					type: "match_created",
-					player_1: idData.finalist1,
-					player_2: idData.finalist2,
-					ws_url: ""})
+			else if (url && url.ws_url != null) {
+				if (idData && idData.finalist1 == user.name || idData.finalist2 == user.name) {
+					setState("waitfinal")
+					setNotifMessages({
+						type: "match_created",
+						player_1: url.player_1,
+						player_2: url.player_2,
+						ws_url: url.ws_url})
+				}
+				else {
+					setState("wait")
+					setNotifMessages({
+						type: "match_created",
+						player_1: url.player_1,
+						player_2: url.player_2,
+						ws_url: url.ws_url})
+				}
 			}
 		}
 		catch(error) {
