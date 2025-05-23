@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../auth/context"
 import axiosInstance from '../auth/instance'
 
-function ListModal({ tab }) {
+function ListModal({ tab, handleClose }) {
 
 	const navigate = useNavigate()
 
@@ -32,6 +32,7 @@ function ListModal({ tab }) {
 		}
 		catch(error) {
 			console.log(error)
+			handleClose()
 		}
 	}
 
@@ -41,7 +42,10 @@ function ListModal({ tab }) {
 
 	const removeFriend = async (playerID) => {
 		try {await axiosInstance.delete(`/users/api/friend/remove/${playerID}/`)}
-		catch(error) {console.log(error)}
+		catch(error) {
+			console.log(error)
+			handleClose()
+		}
 		finally {list()}
 	}
 

@@ -325,5 +325,16 @@ class TournamentCancelAPI(generics.DestroyAPIView):
         })
 
 
+@method_decorator(csrf_exempt, name='dispatch')
+class MatchGetCurrentAPI(generics.GenericAPIView):
+    """
+    Récupère l'ID d'un tournoi.
+    - GET /pong/match/get-id/ : Retourne l'ID du tournoi.
+    """
+    serializer_class = serializers.MatchGetCurrentSerializer
+    permission_classes = [IsAuthenticated]
 
-
+    def get(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.to_representation(serializer.validated_data))

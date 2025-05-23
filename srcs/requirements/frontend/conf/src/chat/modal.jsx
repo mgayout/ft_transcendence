@@ -44,6 +44,7 @@ function ChatModal({ chat, setChat }) {
 				}
 				catch (error) {
 					console.log(error)
+					handleClose()
 					return 0
 				}
 			}
@@ -61,6 +62,7 @@ function ChatModal({ chat, setChat }) {
 		}
 		catch(error) {
 			console.log(error)
+			handleClose()
 		}
 	}
 
@@ -78,7 +80,10 @@ function ChatModal({ chat, setChat }) {
 			})
 			await axiosInstance.post(`/live_chat/private/send/${id}/`, {content: `*${user.name} invited ${name} to an online game.*`})
 		}
-		catch(error) {console.log(error)}
+		catch(error) {
+			console.log(error)
+			handleClose()
+		}
 	}
 
 	const send = async (id) => {
@@ -88,7 +93,10 @@ function ChatModal({ chat, setChat }) {
 				await axiosInstance.post(`/live_chat/private/send/${id}/`, {content: message})
 			else
 				await axiosInstance.post("/live_chat/general/send/", {content: message})}
-		catch(error) {console.log(error)}
+		catch(error) {
+			console.log(error)
+			handleClose()
+		}
 		finally {setMessage("")}
 	}
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import { useAuth } from "../auth/context"
 import axiosInstance from '../auth/instance'
 
-function SearchModal({ tab }) {
+function SearchModal({ tab, handleClose }) {
 
 	const { user } = useAuth()
 	const [data, setData] = useState()
@@ -27,18 +27,25 @@ function SearchModal({ tab }) {
 		}
 		catch(error) {
 			console.log(error)
+			handleClose()
 		}
 	}
 
 	const addFriend = async (playerID) => {
 		try {await axiosInstance.post('/users/api/friend-request/send/', { player_2: playerID })}
-		catch(error) {console.log(error)}
+		catch(error) {
+			console.log(error)
+			handleClose()
+		}
 		finally {list()}
 	}
 
 	const addBlock = async (playerID) => {
 		try {await axiosInstance.post('/users/api/block/add', { blocked_id: playerID })} //manque un /
-		catch(error) {console.log(error)}
+		catch(error) {
+			console.log(error)
+			handleClose()
+		}
 		finally {list()}
 	}
 

@@ -215,7 +215,7 @@ class InvitationAcceptSerializer(serializers.Serializer):
         # Vérifier si le joueur est le destinataire de l'invitation
         if invitation.to_player != player:
             raise serializers.ValidationError({"code": 4010})  # Pas le destinataire
-        
+
         from_player= player
         to_player=invitation.to_player
         
@@ -949,8 +949,15 @@ class TournamentGetIdSerializer(serializers.Serializer):
             status__in=[TournamentStatusChoices.OUVERT, TournamentStatusChoices.EN_COURS]
         ).first()
 
-        if not tournament:
-            raise serializers.ValidationError({"code": 1000, "tournament_id": None}) #Vous ne participez à aucun tournoi ouvert ou en cours
+        # Gestion des finalistes
+        demi_finales = Match.objects.filter(match_number=2, tournament=tournament)
+        finalists = [match.winner for match in demi_finales if match.winner]
+        if len(finalists) < 2:
+            attrs['finalist1'] = finalists[0] if len(finalists) > 0 else None
+            attrs['finalist2'] = finalists[1] if len(finalists) > 1 else None
+        else:
+            attrs['finalist1'] = finalists[0]
+            attrs['finalist2'] = finalists[1]
 
         attrs['player'] = player
         attrs['tournament'] = tournament
@@ -958,11 +965,15 @@ class TournamentGetIdSerializer(serializers.Serializer):
 
     def to_representation(self, validated_data):
         tournament = validated_data['tournament']
+        finalist1 = validated_data['finalist1']
+        finalist2 = validated_data['finalist2']
         return {
             "code": 1000,
-            "tournament_id": tournament.id,
-            "name": tournament.name,
-            "status": tournament.status
+            "tournament_id": tournament.id if tournament else None,
+            "name": tournament.name if tournament else None,
+            "status": tournament.status if tournament else None,
+            "finalist1": finalist1.name if finalist1 else None,
+            "finalist2": finalist2.name if finalist2 else None
         }
 
 class WinrateSerializer(serializers.ModelSerializer):
@@ -972,3 +983,29 @@ class WinrateSerializer(serializers.ModelSerializer):
         model = Winrate
         fields = ['id', 'player', 'victory', 'defeat']
 
+class MatchGetCurrentSerializer(serializers.Serializer):
+    def validate(self, attrs):
+        user = self.context['request'].user
+
+        # Vérifier si l'utilisateur a un profil joueur
+        try:
+            player = Player.objects.get(user=user)
+        except Player.DoesNotExist:
+            raise serializers.ValidationError({"code": 4001}) #Aucun profil joueur associé
+
+		# Récupérer le match en cours pour ce joueur
+        match = Match.objects.filter(
+            Q(player_1=player) | Q(player_2=player),
+            status__in=[StatusChoices.EN_COURS]
+        ).first()
+        attrs['match'] = match
+
+        return attrs
+
+    def to_representation(self, validated_data):
+        match = validated_data['match']
+        return {
+            "code": 1000,
+			"match_id": match.id if match else None,
+			"ws_url": f"wss://{DOMAIN_NAME}:{PORT_NUM}/pong/ws/match/{match.id}/" if match else None
+        }

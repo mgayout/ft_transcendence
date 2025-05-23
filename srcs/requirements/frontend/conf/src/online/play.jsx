@@ -70,6 +70,14 @@ function PlayMatch() {
 		if (lastMessage.type == "forfeit_not_available") {
 			setTimer(lastMessage.remaining_seconds)
 		}
+		if (lastMessage.type == "forfeit_success") {
+			setWinner(user.name)
+			setPaused(false)
+			setEnd(true)
+			setMessages([])
+			setPongMessages([])
+			setScoreMessages([])
+		}
 		if (lastMessage.type == "player_count" && lastMessage.player_count == 2) {
 			setPaused(false)
 			setShowTimer(true)

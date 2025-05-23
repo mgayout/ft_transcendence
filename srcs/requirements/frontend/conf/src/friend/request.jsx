@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import { useAuth } from "../auth/context"
 import axiosInstance from '../auth/instance'
 
-function RequestModal({ tab }) {
+function RequestModal({ tab, handleClose }) {
 
 	const { user } = useAuth()
 	const [data, setData] = useState([])
@@ -33,24 +33,34 @@ function RequestModal({ tab }) {
 		}
 		catch(error) {
 			console.log(error)
+			handleClose()
 		}
 	}
 
 	const cancelRequest = async (playerID) => {
 		try {await axiosInstance.delete(`/users/api/friend-request/cancel/${playerID}/`)}
-		catch(error) {console.log(error)}
+		catch(error) {
+			console.log(error)
+			handleClose()
+		}
 		finally {list()}
 	}
 
 	const acceptRequest = async (playerID) => {
 		try {await axiosInstance.put(`/users/api/friend-request/accept/${playerID}/`, { player_2: playerID })}
-		catch(error) {console.log(error)}
+		catch(error) {
+			console.log(error)
+			handleClose()
+		}
 		finally {list()}
 	}
 
 	const rejectRequest = async (playerID) => {
 		try {await axiosInstance.delete(`/users/api/friend-request/reject/${playerID}/`)}
-		catch(error) {console.log(error)}
+		catch(error) {
+			console.log(error)
+			handleClose()
+		}
 		finally {list()}
 	}
 

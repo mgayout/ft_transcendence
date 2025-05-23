@@ -19,7 +19,6 @@ function Tournament({ user }) {
 		try {
 			const tournamentData = await axiosInstance("/pong/tournament/list/")
 			const idData = await axiosInstance.get("/pong/tournament/get-id/")
-			let finalistData
 			const a = tournamentData.data
 				.find(match => match.status == "Ouvert" &&
 				(match.player_1 == user.id || match.player_2 == user.id ||
@@ -28,9 +27,13 @@ function Tournament({ user }) {
 				setState("wait")
 				setNotifMessages({type: "tournament_created"})
 			}
-			if (idData) {
-				finalistData = await axiosInstance.get(`/pong/tournaments/${idData.data.tournament_id}/finalists/`)
-				console.log(finalistData)
+			else if (idData && idData.finalist1 == user.name || idData.finalist2 == user.name) {
+				setState("waitfinal")
+				setNotifMessages({
+					type: "match_created",
+					player_1: idData.finalist1,
+					player_2: idData.finalist2,
+					ws_url: ""})
 			}
 		}
 		catch(error) {

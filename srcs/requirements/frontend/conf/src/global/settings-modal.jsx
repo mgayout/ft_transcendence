@@ -1,10 +1,13 @@
 import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { Modal, Form, Button } from "react-bootstrap"
 import { useAuth } from "../auth/context"
 import axiosInstance from '../auth/instance'
 import DFAModal from "./dfa-modal"
 
 function SettingsModal({ settings, setSettings }) {
+
+	const navigate = useNavigate()
 
 	const [nUsername, setNUsername] = useState('')
 	const [password1, setPassword1] = useState('')
@@ -30,8 +33,10 @@ function SettingsModal({ settings, setSettings }) {
 		try {
 			const response = await axiosInstance.put(`/users/api/player/update-name/`,
 				{name: nUsername, current_password: password1})
-			if (response.data.code == 1000)
+			if (response.data.code == 1000) {
 				handleClose()
+				refreshUser()
+			}
 		}
 		catch(error) {
 			console.log(error)
@@ -42,7 +47,7 @@ function SettingsModal({ settings, setSettings }) {
 	const changePassword = async () => {
 		try {
 			const response = await axiosInstance.put(`/users/api/player/update-PWD/`,
-				{current_password: password2, password1: nPassword1, password2: nPassword2})
+				{current_password: password2, new_pwd1: nPassword1, new_pwd2: nPassword2})
 			if (response.data.code == 1000)
 				handleClose()
 		}

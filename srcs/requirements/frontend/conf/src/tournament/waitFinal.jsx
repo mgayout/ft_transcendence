@@ -11,9 +11,28 @@ function WaitFinal({ setState }) {
 	const { NotifMessages } = useNotification()
 	const [ready, setReady] = useState(false)
 
-	useEffect(() => {
+	const startFinal = async () => {
+		try {
+			let final
+			const idData = await axiosInstance.get("/pong/tournament/get-id/")
+			if (idData && idData.finalist1 != "" && idData.finalist2 != "")
+				final = await axiosInstance.put(`/pong/tournament/${idData.data.tournament_id}/start-final/`)
+		}
+		catch(error) {
+			console.log(error)
+		}
+	}
 
+	useEffect(() => {
+		if (NotifMessages.type == "match_created") {
+			console.log(NotifMessages)
+			setState("play")
+		}
 	}, [NotifMessages])
+
+	useEffect(() => {
+		startFinal()
+	}, [])
 
 	return (
 		<div className="position-absolute top-0 d-flex justify-content-center align-items-center vh-100 w-100">
