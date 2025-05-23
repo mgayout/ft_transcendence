@@ -12,6 +12,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
 @method_decorator(csrf_exempt, name='dispatch')
+class StatusApi(APIView):
+    def get(self, request):
+        return Response({"code": 1000})
+    
+@method_decorator(csrf_exempt, name='dispatch')
 class GeneralMessageListView(generics.ListAPIView):
     serializer_class = GeneralMessageSerializer
     permission_classes = [IsAuthenticated]

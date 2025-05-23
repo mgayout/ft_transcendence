@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from social_django.utils import psa
 from django.conf import settings
+from django.http import JsonResponse
 
 # DRF imports
 from rest_framework import status, viewsets, generics, permissions
@@ -24,6 +25,10 @@ from rest_framework_simplejwt.exceptions import InvalidToken
 from shared_models.models import Player, Match, Tournament, Friendship, Block
 from . import serializers
 
+@method_decorator(csrf_exempt, name='dispatch')
+class StatusApi(APIView):
+    def get(self, request):
+        return Response({"code": 1000})
 # ==============================
 # API DJANGO REST FRAMEWORK
 # ==============================

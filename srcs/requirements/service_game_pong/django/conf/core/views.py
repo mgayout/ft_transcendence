@@ -12,6 +12,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
 @method_decorator(csrf_exempt, name='dispatch')
+class StatusApi(APIView):
+    def get(self, request):
+        return Response({"code": 1000})
+
+@method_decorator(csrf_exempt, name='dispatch')
 class InvitationListAPI(generics.ListAPIView):
     """
     Liste les invitations en attente destinées au joueur connecté.
@@ -338,3 +343,20 @@ class MatchGetCurrentAPI(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         return Response(serializer.to_representation(serializer.validated_data))
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class TournamentSeeMatchesAPI(generics.GenericAPIView):
+    """
+    Récupère les matchs en cours d’un tournoi.
+    - GET /pong/tournaments/<id>/struct/ : Retourne la liste des matchs en cours du tournoi spécifié.
+    """
+    serializer_class = serializers.TournamentGetMatchSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'id'
+    queryset = Tournament.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        tournament = self.get_object()
+        serializer = self.get_serializer(instance=tournament, context={'request': request})
+        return Response(serializer.to_representation(tournament))

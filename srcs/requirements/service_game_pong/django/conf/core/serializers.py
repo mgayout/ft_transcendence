@@ -916,6 +916,49 @@ class TournamentSeeFinalSerializer(serializers.Serializer):
             "finalist2": finalist2.username if finalist2 else None,  # Nom du joueur
         }
 
+class TournamentGetMatchSerializer(serializers.Serializer):
+    def validate(self, attrs):
+        tournament = self.instance
+        user = self.context['request'].user
+
+        # Vérifier que l'utilisateur a un profil joueur
+        try:
+            player = Player.objects.get(user=user)
+        except Player.DoesNotExist:
+            raise serializers.ValidationError({"code": 4001})  # Aucun profil joueur associé à l'utilisateur
+
+        # Vérifier que le joueur est présent dans le tournoi
+        if player not in [tournament.player_1, tournament.player_2, tournament.player_3, tournament.player_4]:
+            raise serializers.ValidationError({"code": 4017})  # Seul un participant du tournoi peut accéder aux matchs
+
+        return attrs
+
+    def to_representation(self, instance):
+        tournament = self.instance
+        # Récupérer les matchs en cours pour ce tournoi
+        matches_en_cours = Match.objects.filter(
+            tournament=tournament,
+        )
+
+        # Préparer la liste des matchs pour la réponse
+        matches_data = [
+            {
+                "match_id": match.id,
+                "match_number": match.match_number,
+                "player_1": match.player_1.username if match.player_1 else None,
+                "player_2": match.player_2.username if match.player_2 else None,
+                "type": match.type,
+                "created_at": match.created_at,
+            }
+            for match in matches_en_cours
+        ]
+
+        return {
+            "code": 1000,
+            "matches": matches_data
+        }
+
+
 class TournamentCancelSerializer(serializers.Serializer):
     def validate(self, attrs):
         tournament = self.instance

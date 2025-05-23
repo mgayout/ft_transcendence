@@ -20,7 +20,7 @@ async def game_pong(game_id, consumer):
     score_player_1 = consumer.c_scorep1.get(consumer.match_id, 0)
     score_player_2 = consumer.c_scorep2.get(consumer.match_id, 0)
     
-    ball_speed = 0.2
+    ball_speed = consumer.c_ball_speed.get(consumer.match_id, 0.2)
 
     # Utiliser les dimensions dynamiques
     CANVAS_WIDTH = game.canvas_width

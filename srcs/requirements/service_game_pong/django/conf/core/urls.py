@@ -25,4 +25,7 @@ urlpatterns = [
     path('tournament/<int:id>/end/', views.TournamentEndAPI.as_view(), name='tournament-end'),
     path('tournament/<int:id>/leave/', views.TournamentLeaveAPI.as_view(), name='tournament-leave'),
     path('tournament/<int:id>/cancel/', views.TournamentCancelAPI.as_view(), name='tournament-cancel'),
+    path('pong/tournaments/<int:id>/struct/', views.TournamentSeeMatchesAPI.as_view(), name='tournament_struct'),
+
+    path('api/status/', views.StatusApi.as_view(), name='status'),
 ]
