@@ -40,6 +40,10 @@ export const AuthProvider = ({ children }) => {
 				logout()
 				return
 			}
+			if 	(location.pathname.includes("/users/api/login/", "/users/api/register/",
+				"/users/api/auth-42/register/", "/users/api/auth-42/callback/?code=",
+				"/users/api/auth-42/status/", "/users/api/auth-42/complete/"))
+				return
 			setIsAuth(auth)
 			await refreshData()
 			const updatedUser = await getData()

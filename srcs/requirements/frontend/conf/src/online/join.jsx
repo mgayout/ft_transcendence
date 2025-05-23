@@ -14,7 +14,8 @@ function JoinMatch({ state, setState, setType }) {
 			const invitations = await axiosInstance.get("pong/invitations/")
 			const getAvatar = (name) => {
 				const Avatar = playerData.data.find(player => player.name === name)
-				return Avatar.avatar
+				if (Avatar) return Avatar.avatar
+				return null
 			}
 			const a = invitations.data
 				.filter(player => player.to_player.id == user.id)

@@ -48,7 +48,7 @@ urlpatterns = [
     # CRUD BLOCK
     path('api/block/add', views.BlockPlayer_api.as_view(), name='block-player'),
     path('api/block/list/', views.BlockListView.as_view(), name='block-list'),
-    path('api/block/remove/<int:pk>/', views.UnblockPlayerView.as_view(), name='unblock-player'),
+    path('api/block/remove/<int:id>/', views.UnblockPlayerView.as_view(), name='unblock-player'),
 
     # 2FA
     path('api/2fa-enable/', views.Enable2FAView.as_view(), name='enable_2fa'),  # PUT

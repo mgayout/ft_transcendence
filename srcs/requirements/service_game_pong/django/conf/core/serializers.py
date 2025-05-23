@@ -950,7 +950,7 @@ class TournamentGetIdSerializer(serializers.Serializer):
         ).first()
 
         if not tournament:
-            raise serializers.ValidationError({"code": 4031}) #Vous ne participez à aucun tournoi ouvert ou en cours
+            raise serializers.ValidationError({"code": 1000, "tournament_id": None}) #Vous ne participez à aucun tournoi ouvert ou en cours
 
         attrs['player'] = player
         attrs['tournament'] = tournament
