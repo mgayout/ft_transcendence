@@ -1,5 +1,5 @@
 from rest_framework import generics, serializers
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from core.models import Game, Invitation, StatusChoices, TournamentStatusChoices, Winrate
@@ -13,6 +13,7 @@ from django.utils.decorators import method_decorator
 
 @method_decorator(csrf_exempt, name='dispatch')
 class StatusApi(APIView):
+    permission_classes = [AllowAny]
     def get(self, request):
         return Response({"code": 1000})
 

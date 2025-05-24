@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "../auth/context"
 import { useGame } from "../websockets/game"
 import { Modal, Button } from "react-bootstrap"
 import { confetti } from "dom-confetti"
@@ -41,6 +42,7 @@ function PlayMatch() {
 	const { getSocket, closeSocket, messages } = useGame()
 	const { setMessages, setPongMessages, setScoreMessages } = useGame()
 	const [paused, setPaused] = useState(false)
+	const { user } = useAuth()
 	const [end, setEnd] = useState(false)
 	const closeEnd = () => setEnd(false)
 	const [winner, setWinner] = useState("")
@@ -71,6 +73,7 @@ function PlayMatch() {
 			setTimer(lastMessage.remaining_seconds)
 		}
 		if (lastMessage.type == "forfeit_success") {
+			closeSocket()
 			setWinner(user.name)
 			setPaused(false)
 			setEnd(true)

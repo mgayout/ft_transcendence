@@ -38,6 +38,8 @@ export const Game = ({ children }) => {
 
 		const initGameSocket = async () => {
 			try {
+				const containerStatus = await axiosInstance.get("/pong/api/status/")
+				if (containerStatus.data.code != 1000) return
 				const ws = await createGameSocket(url, Rtoken, (data) => {
 				if (data.type == "data_pong") setPongMessages((prev) => [...prev, data])
 				else if (data.type == "score_update") setScoreMessages(data)

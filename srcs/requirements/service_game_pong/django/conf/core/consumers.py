@@ -144,6 +144,7 @@ class PongConsumer(AsyncWebsocketConsumer):
     task_locks = {} # Verrous pour la création des tâches par match_id
     disconnection_times = {}
     c_key_states = {}
+    c_match_winner = {}  # Gagnant du match par match_id
 
     FORFEIT_DELAY = 60
 
@@ -353,10 +354,13 @@ class PongConsumer(AsyncWebsocketConsumer):
             player_2_wins = wins.get(match.player_2_id, 0)
             if player_1_wins > player_2_wins:
                 match.winner = match.player_1
+                winner_name = match.player_1.name
             elif player_2_wins > player_1_wins:
                 match.winner = match.player_2
+                winner_name = match.player_2.name
             match.save()
 
+            self.c_match_winner[self.match_id] = winner_name
             # Retourner les données, pas un événement
             return {
                 "winner": match.winner.name if match.winner else None,
@@ -517,6 +521,8 @@ class PongConsumer(AsyncWebsocketConsumer):
                         del self.c_status[self.match_id]
                         del self.c_game_wins[self.match_id]
                         del self.c_current_game_id[self.match_id]
+                        if self.match_id in self.c_match_winner:
+                            del self.c_match_winner[self.match_id]
 
 
     @database_sync_to_async
@@ -661,7 +667,16 @@ class PongConsumer(AsyncWebsocketConsumer):
     async def handle_match_end(self):
         try:
             # Envoyer un message de fin de match
-            await self.send(text_data=json.dumps({"type": "game_over", "message": "Match terminé"}))
+            if self.match is not None and self.match.status == StatusChoices.TERMINE:
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        "type": "match_ended",
+                        "winner": self.c_match_winner.get(self.match_id, None),
+                    }
+                )
+                await asyncio.sleep(5)
+                await self.close()
             
             # Vérifier si un événement match_ended doit être envoyé
             if self.match_id in self.c_game_wins:
@@ -767,16 +782,20 @@ class PongConsumer(AsyncWebsocketConsumer):
                 # Mettre à jour le gagnant pour le match
                 if winner_id == match.player_1_id:
                     match.winner = match.player_1
+                    winner_name = match.player_1.name
                     player_1_wins = match.number_of_rounds
                     player_2_wins = 0
                 else:
                     match.winner = match.player_2
+                    winner_name = match.player_2.name
                     player_1_wins = 0
                     player_2_wins = match.number_of_rounds
             
             # Mettre à jour la raison de la fin (forfait)
             match.forfeit = True
             match.save()
+
+            self.c_match_winner[self.match_id] = winner_name
 
             return {
                 "winner": match.winner.name if match.winner else None,
@@ -834,8 +853,35 @@ class PongConsumer(AsyncWebsocketConsumer):
         action = text_data_json.get('action')
         move = text_data_json.get('type')
 
+        # Vérifier l'état actuel du match en base de données
+        current_match = await self.get_match(self.match_id)
+        if current_match and current_match.status == StatusChoices.TERMINE:
+            # Le match est terminé, envoyer l'événement complet et fermer
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "match_ended",
+                    "winner": self.c_match_winner.get(self.match_id, None),
+                }
+            )
+            await asyncio.sleep(2)  # Réduit le délai
+            await self.close()
+            return
         # Gérer l'action de forfait avec vérification du délai
         if action == 'declare_win':
+            # Vérifier que la partie existe toujours
+            if not self.game:
+                # Tenter de récupérer la partie active
+                self.game = await self.get_active_game(self.match_id)
+                if not self.game:
+                    await self.channel_layer.group_send(
+                        self.room_group_name,
+                        {
+                            "type": "match_ended",
+                            "winner": self.c_match_winner.get(self.match_id, None),
+                        }
+                    )
+                    return
             # Vérifier que le joueur qui demande est bien connecté
             if self.player_id not in self.c_players.get(self.match_id, set()):
                 await self.send(text_data=json.dumps({

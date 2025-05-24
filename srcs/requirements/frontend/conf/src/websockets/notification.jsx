@@ -37,6 +37,8 @@ export const Notification = ({ children }) => {
 
 		const initNotifSocket = async () => {
 			try {
+				const containerStatus = await axiosInstance.get("/users/api/status/")
+				if (containerStatus.data.code != 1000) return
 				const ws = await createNotifSocket(Rtoken, (data) => {
 					if (data.type == "invitation_declined") setNotifMessages(data) //console.log(`${data.to_player} declined your invitation.`)
 					else if (data.type == "invitation_received") console.log(`${data.from_player} invited you.`)

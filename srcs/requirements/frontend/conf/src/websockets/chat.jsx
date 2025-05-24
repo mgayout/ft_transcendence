@@ -37,6 +37,8 @@ export const Chat = ({ children }) => {
 
 		const initChatSocket = async () => {
 			try {
+				const containerStatus = await axiosInstance.get("/live_chat/api/status/")
+				if (containerStatus.data.code != 1000) return
 				const ws = await createChatSocket(Rtoken, (data) => {
 					if (data && data.code == 1000) return
 					console.log("Chat notif => ", data)

@@ -27,8 +27,10 @@ from . import serializers
 
 @method_decorator(csrf_exempt, name='dispatch')
 class StatusApi(APIView):
+    permission_classes = [AllowAny]
     def get(self, request):
         return Response({"code": 1000})
+
 # ==============================
 # API DJANGO REST FRAMEWORK
 # ==============================

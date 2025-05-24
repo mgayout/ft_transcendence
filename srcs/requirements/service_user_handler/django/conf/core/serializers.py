@@ -173,7 +173,7 @@ class PlayerUpdateInfoSerializer(serializers.ModelSerializer):
                 img = Image.open(avatar)  # Ré-ouvrir pour traitement
 
                 # Vérification des dimensions
-                max_dimensions = (500, 500)
+                max_dimensions = (550, 550)
                 if img.width > max_dimensions[0] or img.height > max_dimensions[1]:
                     raise serializers.ValidationError({"code": 1034, "message": "Image dimensions exceed 500x500"})
 

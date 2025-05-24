@@ -37,6 +37,8 @@ export const PrivateChat = ({ children }) => {
 
 		const initPrivateSocket = async () => {
 			try {
+				const containerStatus = await axiosInstance.get("/live_chat/api/status/")
+				if (containerStatus.data.code != 1000) return
 				const ws = await createPrivateSocket(Rtoken, (data) => {
 					if (data && data.code == 1000) return
 					console.log("PrivateSocket notif => ", data)
