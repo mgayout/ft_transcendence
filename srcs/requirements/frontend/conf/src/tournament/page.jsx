@@ -20,6 +20,11 @@ function Tournament({ user }) {
 			const tournamentData = await axiosInstance.get("/pong/tournament/list/")
 			const url = await axiosInstance.get("/pong/matches/get-id/")
 			const idData = await axiosInstance.get("/pong/tournament/get-id/")
+			let structData
+			if (idData.data.tournament_id) {
+				structData = await axiosInstance.get(`/pong/tournaments/${idData.data.tournament_id}/struct/`)
+				console.log(structData)
+			}
 			console.log("tournament: ", tournamentData)
 			console.log("idData: ", idData)
 			console.log("url: ", url)

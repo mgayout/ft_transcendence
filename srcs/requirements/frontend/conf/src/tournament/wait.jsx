@@ -94,7 +94,7 @@ function WaitMatch({ setState, type, setType }) {
 	}, [NotifMessages])
 
 	useEffect(() => {
-		if (data && data.players == 4)
+		if (data && data.players == 4 && data.p1.name == user.name)
 			setReady(true)
 		else
 			setReady(false)
