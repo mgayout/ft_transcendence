@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from "react-router-dom"
 import axiosInstance from '../auth/instance'
+import axios from 'axios'
 
 const GameContext = createContext(null)
 
@@ -38,7 +39,7 @@ export const Game = ({ children }) => {
 
 		const initGameSocket = async () => {
 			try {
-				const containerStatus = await axiosInstance.get("/pong/api/status/")
+				const containerStatus = await axios.get(`https://${location.host}/pong/api/status/`)
 				if (containerStatus.data.code != 1000) return
 				const ws = await createGameSocket(url, Rtoken, (data) => {
 				if (data.type == "data_pong") setPongMessages((prev) => [...prev, data])

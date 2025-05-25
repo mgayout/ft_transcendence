@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from "react-router-dom"
-import axiosInstance from '../auth/instance'
 import { useAuth } from '../auth/context'
+import axiosInstance from '../auth/instance'
+import axios from 'axios'
 
 const PrivateChatContext = createContext(null)
 
@@ -37,7 +38,7 @@ export const PrivateChat = ({ children }) => {
 
 		const initPrivateSocket = async () => {
 			try {
-				const containerStatus = await axiosInstance.get("/live_chat/api/status/")
+				const containerStatus = await axios.get(`https://${location.host}/live_chat/api/status/`)
 				if (containerStatus.data.code != 1000) return
 				const ws = await createPrivateSocket(Rtoken, (data) => {
 					if (data && data.code == 1000) return

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { refreshData, getData, removeData } from './data.js'
-import { refreshAtoken } from './instance'
+import axiosInstance, { refreshAtoken } from './instance'
 import { useLocation } from "react-router-dom"
 
 export const AuthContext = createContext()
@@ -25,11 +25,24 @@ export const AuthProvider = ({ children }) => {
 		}
 	}
 
+	const isTokenInvalid = async (Atoken, Rtoken) => {
+		if (!Atoken || !Rtoken) return true
+		try {
+			const tokens = await axiosInstance.post('/users/api/token/refresh/', { refresh: Rtoken })
+			console.log("Atoken: ", Atoken)
+			console.log("Tokens: ", tokens)
+			if (Atoken == tokens.data.access) return false
+			return true
+		}
+		catch {return true}
+	}
+
 	const checkAuth = async () => {
 		const Atoken = localStorage.getItem('Atoken')
 		const Rtoken = localStorage.getItem('Rtoken')
 		if (!Atoken || !Rtoken) return false
 		if (isTokenExpired(Atoken)) return await refreshAtoken(Rtoken)
+		//if (isTokenInvalid(Atoken, Rtoken)) return false
 		return true
 	}
 

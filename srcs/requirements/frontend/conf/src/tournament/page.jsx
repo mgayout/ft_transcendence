@@ -8,6 +8,8 @@ import PlayMatch from "./play.jsx"
 import { useNotification } from "../websockets/notification.jsx"
 import axiosInstance from "../auth/instance.jsx"
 import WaitFinal from "./waitFinal.jsx"
+import PlayFinalMatch from "./playfinal.jsx"
+
 
 function Tournament({ user }) {
 
@@ -23,9 +25,9 @@ function Tournament({ user }) {
 			let structData
 			if (idData.data.tournament_id) {
 				structData = await axiosInstance.get(`/pong/tournaments/${idData.data.tournament_id}/struct/`)
-				console.log(structData)
+				console.log("structData", structData)
 			}
-			console.log("tournament: ", tournamentData)
+			//console.log("tournament: ", tournamentData)
 			console.log("idData: ", idData)
 			console.log("url: ", url)
 			const a = tournamentData.data
@@ -36,22 +38,23 @@ function Tournament({ user }) {
 				setState("wait")
 				setNotifMessages({type: "tournament_created"})
 			}
-			else if (url && url.ws_url != null) {
-				if (idData && idData.finalist1 == user.name || idData.finalist2 == user.name) {
+			else if (url && url.data.ws_url != null) {
+				if (idData && ((idData.data.finalist1 != null && idData.data.finalist1 == user.name) ||
+					(idData.data.finalist2 != null && idData.data.finalist2 == user.name))) {
 					setState("waitfinal")
 					setNotifMessages({
 						type: "match_created",
-						player_1: url.player_1,
-						player_2: url.player_2,
-						ws_url: url.ws_url})
+						player_1: url.data.player_1,
+						player_2: url.data.player_2,
+						ws_url: url.data.ws_url})
 				}
 				else {
 					setState("wait")
 					setNotifMessages({
 						type: "match_created",
-						player_1: url.player_1,
-						player_2: url.player_2,
-						ws_url: url.ws_url})
+						player_1: url.data.player_1,
+						player_2: url.data.player_2,
+						ws_url: url.data.ws_url})
 				}
 			}
 		}
@@ -74,7 +77,7 @@ function Tournament({ user }) {
 	}
 
 	useEffect(() => {
-		if (state != "play")
+		if (state == "" || state == "join")
 			fonction()
 	}, [state])
 
@@ -96,11 +99,13 @@ function Tournament({ user }) {
 				</div> : <></>}
 				<JoinMatch state={ state } setState={ setState } setType={ setType }/>
 				{state == "wait" ?
-				<WaitMatch setState={ setState } type={ type } setType={ setType }/> : <></>}
+				<WaitMatch setState={ setState } setType={ setType }/> : <></>}
 				{state == "play" ?
 				<PlayMatch setState={ setState }/> : <></>}
 				{state == "waitfinal" ?
-				<WaitFinal setState={ setState } type={ type } setType={ setType }/> : <></>}
+				<WaitFinal setState={ setState } setType={ setType }/> : <></>}
+				{state == "playfinal" ?
+				<PlayFinalMatch setState={ setState }/> : <></>}
 			</main>
 		</>
 	)

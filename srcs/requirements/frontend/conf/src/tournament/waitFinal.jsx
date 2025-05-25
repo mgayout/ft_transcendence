@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from "react"
-import { Button, Spinner } from "react-bootstrap"
+import React, { useEffect } from "react"
+import { Spinner } from "react-bootstrap"
 import { useAuth } from "../auth/context"
 import { useNotification } from "../websockets/notification"
-import { useGame } from "../websockets/game"
 import axiosInstance from "../auth/instance"
+import { useGame } from "../websockets/game"
 
-function WaitFinal({ setState }) {
+function WaitFinal({ setState, setType }) {
 
 	const { user } = useAuth()
+	const { setUrl } = useGame()
 	const { NotifMessages } = useNotification()
 
 	const startFinal = async () => {
@@ -15,9 +16,10 @@ function WaitFinal({ setState }) {
 			let final
 			const idData = await axiosInstance.get("/pong/tournament/get-id/")
 			console.log(idData)
-			if (idData && idData.finalist1 != null && idData.finalist2 != null)
+			if (idData && idData.data.finalist1 != null && idData.data.finalist2 != null) {
 				final = await axiosInstance.put(`/pong/tournament/${idData.data.tournament_id}/start-final/`)
-			
+				console.log(final)
+			}			
 		}
 		catch(error) {
 			console.log(error)
@@ -27,7 +29,10 @@ function WaitFinal({ setState }) {
 	useEffect(() => {
 		if (NotifMessages.type == "match_created") {
 			console.log(NotifMessages)
-			setState("play")
+			if (NotifMessages.player_1 == user.name) setType("paddle_l")
+			else if (NotifMessages.player_2 == user.name) setType("paddle_r")
+			setUrl(NotifMessages.ws_url)
+			setState("playfinal")
 		}
 	}, [NotifMessages])
 

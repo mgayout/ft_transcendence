@@ -5,7 +5,7 @@ import { useGame } from "../websockets/game"
 import axiosInstance from "../auth/instance"
 import { useAuth } from "../auth/context"
 
-function WaitMatch({ setState, type, setType }) {
+function WaitMatch({ setState, setType }) {
 
 	const { NotifMessages, setNotifMessages } = useNotification()
 	const { setUrl } = useGame()
