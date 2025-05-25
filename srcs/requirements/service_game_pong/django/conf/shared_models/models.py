@@ -27,7 +27,7 @@ class Player(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     forty_two_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=255)
     online = models.BooleanField(default=False)
     last_seen = models.DateTimeField(null=True, blank=True)
     description = models.TextField(max_length=500, blank=True, default="")
