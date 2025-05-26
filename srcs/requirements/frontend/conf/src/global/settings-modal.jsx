@@ -38,10 +38,7 @@ function SettingsModal({ settings, setSettings }) {
 				refreshUser()
 			}
 		}
-		catch(error) {
-			console.log(error)
-			handleClose()
-		}
+		catch {handleClose()}
 	}
 	
 	const changePassword = async () => {
@@ -51,10 +48,7 @@ function SettingsModal({ settings, setSettings }) {
 			if (response.data.code == 1000)
 				handleClose()
 		}
-		catch(error) {
-			console.log(error)
-			handleClose()
-		}
+		catch {handleClose()}
 	}
 	
 	const removeProfile = async () => {
@@ -62,10 +56,7 @@ function SettingsModal({ settings, setSettings }) {
 			const response = await axiosInstance.delete(`/users/api/player/delete/`)
 			logout()
 		}
-		catch(error) {
-			console.log(error)
-			handleClose()
-		}	
+		catch {handleClose()}	
 	}
 
 	const remove2FA = async (password2FA) => {
@@ -77,10 +68,7 @@ function SettingsModal({ settings, setSettings }) {
 				handleClose()
 			}
 		}
-		catch (error) {
-			console.log(error)
-			handleClose()
-		}
+		catch {handleClose()}
 	}
 		
 	const enable2FA = () => {

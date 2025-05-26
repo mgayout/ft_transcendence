@@ -53,7 +53,6 @@ function PlayMatch() {
 	useEffect(() => {
 		if (!messages.length) return
 		const lastMessage = messages[messages.length - 1]
-		console.log(lastMessage)
 		if (lastMessage.type == "match_ended" || lastMessage.type == "forfeit_success") {
 			closeSocket()
 			if (lastMessage.type == "match_ended")

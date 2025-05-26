@@ -19,18 +19,13 @@ export const AuthProvider = ({ children }) => {
 			const expiryTime = payload.exp * 1000
 			return Date.now() >= expiryTime
 		}
-		catch(error) {
-			console.log(error)
-			return true
-		}
+		catch(error) {return true}
 	}
 
 	const isTokenInvalid = async (Atoken, Rtoken) => {
 		if (!Atoken || !Rtoken) return true
 		try {
 			const tokens = await axiosInstance.post('/users/api/token/refresh/', { refresh: Rtoken })
-			console.log("Atoken: ", Atoken)
-			console.log("Tokens: ", tokens)
 			if (Atoken == tokens.data.access) return false
 			return true
 		}
@@ -62,10 +57,7 @@ export const AuthProvider = ({ children }) => {
 			const updatedUser = await getData()
 			setUser(updatedUser)
 		}
-		catch (error) {
-			console.error(error)
-			logout()
-		}
+		catch (error) {logout()}
 	}
 
 	const logout = () => {
@@ -81,9 +73,7 @@ export const AuthProvider = ({ children }) => {
 			try {
 				await refreshUser()
 			}
-			catch(error) {
-				console.log(error)
-			}
+			catch {}
 			finally {
 				setLoading(false)
 			}

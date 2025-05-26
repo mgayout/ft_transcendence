@@ -59,7 +59,6 @@ function Complete() {
                     throw new Error("Réponse invalide du serveur")
                 }
             } catch (error) {
-                console.error("Erreur lors du traitement du code:", error)
                 setCode(error.response?.data?.code || 1053)
                 setShow(true)
             } finally {
@@ -109,7 +108,6 @@ function Complete() {
                 setShowPasswordForm(false)
             }
         } catch (error) {
-            console.error("Erreur:", error)
             setPassword1("")
             setPassword2("")
             

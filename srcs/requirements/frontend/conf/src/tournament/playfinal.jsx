@@ -59,7 +59,6 @@ function PlayFinalMatch({ setState }) {
 	useEffect(() => {
 		if (!messages.length) return
 		const lastMessage = messages[messages.length - 1]
-		console.log(lastMessage)
 
 		const handleMessage = async () => {
 			if (lastMessage.type == "match_ended" || lastMessage.type == "forfeit_success") {

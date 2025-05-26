@@ -23,13 +23,8 @@ function Tournament({ user }) {
 			const url = await axiosInstance.get("/pong/matches/get-id/")
 			const idData = await axiosInstance.get("/pong/tournament/get-id/")
 			let structData
-			if (idData.data.tournament_id) {
+			if (idData.data.tournament_id)
 				structData = await axiosInstance.get(`/pong/tournaments/${idData.data.tournament_id}/struct/`)
-				console.log("structData", structData)
-			}
-			//console.log("tournament: ", tournamentData)
-			console.log("idData: ", idData)
-			console.log("url: ", url)
 			const a = tournamentData.data
 				.find(match => match.status == "Ouvert" &&
 				(match.player_1 == user.id || match.player_2 == user.id ||
@@ -58,9 +53,7 @@ function Tournament({ user }) {
 				}
 			}
 		}
-		catch(error) {
-			console.log(error)
-		}
+		catch {}
 	}
 
 	const create = async () => {
@@ -73,7 +66,7 @@ function Tournament({ user }) {
 			setNotifMessages({type: "tournament_created"})
 			setState("wait")
 		}
-		catch(error) {console.log(error)}
+		catch {}
 	}
 
 	useEffect(() => {

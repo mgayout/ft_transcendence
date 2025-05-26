@@ -14,8 +14,6 @@ const AuthRedirect = ({ children }) => {
 
 	const isPublic = publicRoutes.includes(location.pathname)
 
-	//console.log(isAuth, isPublic)
-
 	if (isAuth && isPublic)
 		return <Navigate to="/home" replace />
 	if (!isAuth && !isPublic)

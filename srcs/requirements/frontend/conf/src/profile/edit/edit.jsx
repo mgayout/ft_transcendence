@@ -39,7 +39,6 @@ function ProfileEdit({user, show, setShow, code, setCode}) {
 			}
 		}
 		catch(error) {
-			console.log(error)
 			setFile(null)
 			setPreview(null)
 			setCode(error.response.data.code)

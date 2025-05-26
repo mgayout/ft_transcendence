@@ -11,34 +11,14 @@ function WaitFinal({ setState, setType }) {
 	const { setUrl } = useGame()
 	const { NotifMessages } = useNotification()
 
-	const startFinal = async () => {
-		try {
-			let final
-			const idData = await axiosInstance.get("/pong/tournament/get-id/")
-			console.log(idData)
-			if (idData && idData.data.finalist1 != null && idData.data.finalist2 != null) {
-				final = await axiosInstance.put(`/pong/tournament/${idData.data.tournament_id}/start-final/`)
-				console.log(final)
-			}			
-		}
-		catch(error) {
-			console.log(error)
-		}
-	}
-
 	useEffect(() => {
 		if (NotifMessages.type == "match_created") {
-			console.log(NotifMessages)
 			if (NotifMessages.player_1 == user.name) setType("paddle_l")
 			else if (NotifMessages.player_2 == user.name) setType("paddle_r")
 			setUrl(NotifMessages.ws_url)
 			setState("playfinal")
 		}
 	}, [NotifMessages])
-
-	useEffect(() => {
-		startFinal()
-	}, [])
 
 	return (
 		<div className="position-absolute top-0 d-flex justify-content-center align-items-center vh-100 w-100">

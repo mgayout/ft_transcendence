@@ -66,15 +66,31 @@ function PlayMatch({ setState }) {
 	useEffect(() => {
 		if (!messages.length) return
 		const lastMessage = messages[messages.length - 1]
-		console.log(lastMessage)
+
+		const startFinal = async () => {
+			try {
+				let final
+				const idData = await axiosInstance.get("/pong/tournament/get-id/")
+				if (idData && idData.data.finalist1 != null && idData.data.finalist2 != null) {
+					final = await axiosInstance.put(`/pong/tournament/${idData.data.tournament_id}/start-final/`)
+					await axiosInstance.post("/live_chat/general/send/", {content: `It's time for final : ${idData.data.finalist1} vs ${idData.data.finalist2}`})
+				}
+			}
+			catch {}
+		}
 
 		const handleMessage = async () => {
 			if (lastMessage.type == "match_ended" || lastMessage.type == "forfeit_success") {
 				closeSocket()
-				if (lastMessage.type == "match_ended")
+				if (lastMessage.type == "match_ended") {
 					setWinner(lastMessage.winner)
-				else
+					if (lastMessage.winner == user.name)
+						await startFinal()
+				}
+				else {
 					setWinner(user.name)
+					await startFinal()
+				}
 				setPaused(false)
 				setEnd(true)
 				setMessages([])

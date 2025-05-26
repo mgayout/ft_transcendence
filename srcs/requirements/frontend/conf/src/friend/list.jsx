@@ -30,10 +30,7 @@ function ListModal({ tab, handleClose }) {
 			setData(temp)
 			setFilteredFriends(temp)
 		}
-		catch(error) {
-			console.log(error)
-			handleClose()
-		}
+		catch {handleClose()}
 	}
 
 	const viewProfile = async (name) => {
@@ -42,10 +39,7 @@ function ListModal({ tab, handleClose }) {
 
 	const removeFriend = async (playerID) => {
 		try {await axiosInstance.delete(`/users/api/friend/remove/${playerID}/`)}
-		catch(error) {
-			console.log(error)
-			handleClose()
-		}
+		catch {handleClose()}
 		finally {list()}
 	}
 

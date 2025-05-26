@@ -26,18 +26,12 @@ function BlockModal({ tab, handleClose }) {
 			setData(a)
 			setFilteredFriends(a)
 		}
-		catch(error) {
-			console.log(error)
-			handleClose()
-		}
+		catch {handleClose()}
 	}
 
 	const removeBlock = async (playerID) => {
 		try {await axiosInstance.delete(`/users/api/block/remove/${playerID}/`)}
-		catch(error) {
-			console.log(error)
-			handleClose()
-		}
+		catch {handleClose()}
 		finally {list()}
 	}
 

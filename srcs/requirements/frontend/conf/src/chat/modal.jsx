@@ -42,8 +42,7 @@ function ChatModal({ chat, setChat }) {
 					const player = e.data.find(e => e.name == friendname)
 					return player ? player.id : 0
 				}
-				catch (error) {
-					console.log(error)
+				catch {
 					handleClose()
 					return 0
 				}
@@ -60,10 +59,7 @@ function ChatModal({ chat, setChat }) {
 			}
 			setChats(temp)
 		}
-		catch(error) {
-			console.log(error)
-			handleClose()
-		}
+		catch {handleClose()}
 	}
 
 	const invite = async (id, name) => {
@@ -80,10 +76,7 @@ function ChatModal({ chat, setChat }) {
 			})
 			await axiosInstance.post(`/live_chat/private/send/${id}/`, {content: `*${user.name} invited ${name} to an online game.*`})
 		}
-		catch(error) {
-			console.log(error)
-			handleClose()
-		}
+		catch {handleClose()}
 	}
 
 	const send = async (id) => {
@@ -93,10 +86,7 @@ function ChatModal({ chat, setChat }) {
 				await axiosInstance.post(`/live_chat/private/send/${id}/`, {content: message})
 			else
 				await axiosInstance.post("/live_chat/general/send/", {content: message})}
-		catch(error) {
-			console.log(error)
-			handleClose()
-		}
+		catch {handleClose()}
 		finally {setMessage("")}
 	}
 

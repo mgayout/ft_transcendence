@@ -40,9 +40,7 @@ function Online({ user }) {
 				setState("wait")
 			}
 		}
-		catch(error) {
-			console.log(error)
-		}
+		catch {}
 	}
 
 	useEffect(() => {

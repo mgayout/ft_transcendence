@@ -25,27 +25,18 @@ function SearchModal({ tab, handleClose }) {
 			setData(temp)
 			setFilteredFriends(temp)
 		}
-		catch(error) {
-			console.log(error)
-			handleClose()
-		}
+		catch {handleClose()}
 	}
 
 	const addFriend = async (playerID) => {
 		try {await axiosInstance.post('/users/api/friend-request/send/', { player_2: playerID })}
-		catch(error) {
-			console.log(error)
-			handleClose()
-		}
+		catch {handleClose()}
 		finally {list()}
 	}
 
 	const addBlock = async (playerID) => {
 		try {await axiosInstance.post('/users/api/block/add', { blocked_id: playerID })} //manque un /
-		catch(error) {
-			console.log(error)
-			handleClose()
-		}
+		catch {handleClose()}
 		finally {list()}
 	}
 

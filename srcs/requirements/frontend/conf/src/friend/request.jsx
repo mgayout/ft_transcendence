@@ -31,36 +31,24 @@ function RequestModal({ tab, handleClose }) {
 			setData(a)
 			setFilteredFriends(a)
 		}
-		catch(error) {
-			console.log(error)
-			handleClose()
-		}
+		catch {handleClose()}
 	}
 
 	const cancelRequest = async (playerID) => {
 		try {await axiosInstance.delete(`/users/api/friend-request/cancel/${playerID}/`)}
-		catch(error) {
-			console.log(error)
-			handleClose()
-		}
+		catch {handleClose()}
 		finally {list()}
 	}
 
 	const acceptRequest = async (playerID) => {
 		try {await axiosInstance.put(`/users/api/friend-request/accept/${playerID}/`, { player_2: playerID })}
-		catch(error) {
-			console.log(error)
-			handleClose()
-		}
+		catch {handleClose()}
 		finally {list()}
 	}
 
 	const rejectRequest = async (playerID) => {
 		try {await axiosInstance.delete(`/users/api/friend-request/reject/${playerID}/`)}
-		catch(error) {
-			console.log(error)
-			handleClose()
-		}
+		catch {handleClose()}
 		finally {list()}
 	}
 
