@@ -540,7 +540,7 @@ class TournamentJoinSerializer(serializers.Serializer):
                 {"code": 4009}
             )  # Joueur déjà dans un tournoi ouvert ou en cours
 
-        if tournament.player_4 is not None:
+        if tournament.player_4 is not None and tournament.player_3 is not None and tournament.player_2 is not None and tournament.player_1 is not None :
             raise serializers.ValidationError({"code": 4015})  # Tournoi plein
 
         if tournament.status != TournamentStatusChoices.OUVERT:

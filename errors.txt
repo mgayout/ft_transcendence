@@ -1,6 +1,0 @@
-Backend :
-
- - Code erreur 4015
-	- Condition : quitter le tournoi puis revenir
-
-Frontend :

@@ -14,6 +14,9 @@ function Profile({ user, profile }) {
 		try {
 			const a = await axiosInstance.get(`/pong/matches/?player_id=${profile.id}`)
 			const b = await axiosInstance.get(`/pong/winrate/?player_id=${profile.id}`)
+			console.log(a)
+			console.log(b)
+			console.log(profile)
 			const response = a.data.filter(a => a.status == "Terminée")
 			const matches = []
 			let tournament, state, other, date, score

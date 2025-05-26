@@ -98,7 +98,6 @@ function Complete() {
                 password: password1,
                 password2: password2
             })
-            
             if (response.data.code === 1000) {
                 // Récupérer le nom du joueur
                 setPlayerName(response.data.name || '')
@@ -108,13 +107,14 @@ function Complete() {
                 setShowPasswordForm(false)
             }
         } catch (error) {
+			console.log(error)
             setPassword1("")
             setPassword2("")
             
             if (error.response?.data?.code)
                 setCode(error.response.data.code)
             else
-                setCode(1009)
+                setCode(1010)
                 
             setShow(true)
         } finally {

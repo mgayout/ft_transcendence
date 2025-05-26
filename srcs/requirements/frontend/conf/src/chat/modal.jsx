@@ -24,7 +24,7 @@ function ChatModal({ chat, setChat }) {
 			const b = await axiosInstance.get("/live_chat/private/list/")
 			const c = await axiosInstance.get('/users/api/friend/list/')
 			const d = c.data
-				.filter(c => c.player_1 == user.name && c.status == "accepted")
+				.filter(c => c.player_1 == user.name)
 			const temp = []
 
 			temp.push({
