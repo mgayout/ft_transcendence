@@ -1,8 +1,19 @@
- - Mode Online + Tournoi = Forfait des le debut
+Online + Tournament :
+
+ - Mode Online + Tournoi = Forfait des le debut V
+ - Reset le score "game_resumed" V
+ - Verif l'auth pendant la game
+ - Forfait = bouton qui affiche le temps restant V
+ - Empecher de jouer sur plusieurs games
+ - redirect online -> tournoi et inversement
+
+Chat :
+
  - Ajoutez 2 heures sur l'historique
  - Autoriser les messages direct sur tout le monde
- - Profile introuvable sur l'url
- - Reset le score
  - Rajouter player system pour les messages de games
- - Verif l'auth pendant la game
- - redirect online -> tournoi et inversement
+
+Profile :
+
+ - Profile introuvable sur l'url
+

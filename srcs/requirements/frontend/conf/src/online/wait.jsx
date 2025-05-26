@@ -14,12 +14,6 @@ function WaitMatch({ setState }) {
 	const { setUrl } = useGame()
 	const [ready, setReady] = useState(false)
 
-	const play = () => {
-		setUrl(NotifMessages.ws_url)
-		setNotifMessages([])
-		setState("play")
-	}
-
 	const cancel = async () => {
 		try {
 			const invitations = await axiosInstance.get("/pong/invitations/")
@@ -47,8 +41,13 @@ function WaitMatch({ setState }) {
 	}, [friendName])
 
 	useEffect(() => {
-		if (NotifMessages.type == "match_created")
-			setFriendName(user.name == NotifMessages.player_1 ? NotifMessages.player_2 : NotifMessages.player_1)
+		if (NotifMessages.type == "match_created") {
+			if (NotifMessages.player_1.name == user.name) setType("paddle_l")
+			else if (NotifMessages.player_2.name == user.name) setType("paddle_r")
+			setUrl(NotifMessages.ws_url)
+			setNotifMessages([])
+			setState("play")
+		}
 		if (NotifMessages.type == "invitation_declined") {
 			setState("")
 			setNotifMessages([])

@@ -8,30 +8,28 @@ import WaitMatch from "./wait.jsx"
 import PlayMatch from "./play.jsx"
 import { useNotification } from "../websockets/notification.jsx"
 import axiosInstance from "../auth/instance.jsx"
+import { useGame } from "../websockets/game.jsx"
 
 function Online({ user }) {
 
 	const [state, setState] = useState("")
 	const [type, setType] = useState("")
 	const { setNotifMessages } = useNotification()
+	const { setUrl } = useGame()
 
 	const fonction = async () => {
 		try {
 			const matchData = await axiosInstance.get(`/pong/matches/?player_id=${user.id}`)
 			const inviteData = await axiosInstance.get("/pong/invitations/")
-			const a = matchData.data
-				.filter(match => match.status == "En cours" && (match.player_1.name == user.name || match.player_2.name == user.name))
-			if (a.length) {
-				if (a[a.length - 1].player_1 != undefined && a[a.length - 1].player_2 != undefined &&
-					a[a.length - 1].player_1.name != undefined && a[a.length - 1].player_2.name != undefined) {
-					setNotifMessages({
-						type: "match_created",
-						player_1: a[a.length - 1].player_1.name,
-						player_2: a[a.length - 1].player_2.name,
-						ws_url: a[a.length - 1].url.ws_url})
-					if (a[a.length - 1].player_1.name == user.name) setType("paddle_l")
-					else if (a[a.length - 1].player_2.name == user.name) setType("paddle_r")
-					setState("wait")
+			const a = matchData.data.find(match => match.status == "En cours" && (match.player_1.name == user.name || match.player_2.name == user.name))
+			console.log(a)
+			if (a) {
+				if (a.player_1 != undefined && a.player_2 != undefined &&
+					a.player_1.name != undefined && a.player_2.name != undefined) {		
+					if (a.player_1.name == user.name) setType("paddle_l")
+					else if (a.player_2.name == user.name) setType("paddle_r")
+					setUrl(a.url.ws_url)
+					setState("play")
 				}
 			}
 			const b = inviteData.data.find(invite => invite.status == "En attente" && invite.from_player.name == user.name)

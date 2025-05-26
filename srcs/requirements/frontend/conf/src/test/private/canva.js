@@ -52,7 +52,7 @@ const createCanva = (canva, state, lastPongMessage, groupName, groupScore, setGr
 				setGroupScore({score1: ScoreMessages.scorePlayer1 != undefined ? ScoreMessages.scorePlayer1 : 0,
 							score2: ScoreMessages.scorePlayer2 != undefined ? ScoreMessages.scorePlayer2 : 0})
 			}
-		
+			//console.log(lastPongMessage)
 			objects.paddle.paddleL.position.set(0.5, lastPongMessage ? (lastPongMessage.paddleL + 2.5) : 17.5, 1)
 			objects.paddle.paddleR.position.set(70.5, lastPongMessage ? (lastPongMessage.paddleR + 2.5) : 17.5, 1)
 			objects.ball.position.set(lastPongMessage ? (lastPongMessage.x + 0.5) : 35.5, lastPongMessage ? (lastPongMessage.y + 0.5) : 15.5, 1)

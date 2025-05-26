@@ -26,7 +26,7 @@ function WinnerModal({ winnerName, show, onClose }) {
 	}
 
 	return (
-		<Modal show={show} onHide={onClose} centered>
+		<Modal show={show} onHide={backToMenu} centered>
 			<Modal.Body className="text-center">
 				<div ref={confettiRef} />
 				<h2 className="fw-bold">🏆 {winnerName} wins!</h2>
@@ -50,9 +50,12 @@ function PlayMatch() {
 	const [showTimer, setShowTimer] = useState(true)
 	const socket = getSocket()
 
+	const declareWin = async () => {socket.send(JSON.stringify({ action: "declare_win" }))}
+
 	useEffect(() => {
 		if (!messages.length) return
 		const lastMessage = messages[messages.length - 1]
+		console.log(lastMessage)
 		if (lastMessage.type == "match_ended" || lastMessage.type == "forfeit_success") {
 			closeSocket()
 			if (lastMessage.type == "match_ended")
@@ -69,7 +72,7 @@ function PlayMatch() {
 			setPaused(true)
 		if (lastMessage.type == "player_count" && lastMessage.player_count == 1) {
 			setPaused(true)
-			setShowTimer(false)
+			setShowTimer(true)
 		}
 		if (lastMessage.type == "forfeit_not_available") {
 			setTimer(lastMessage.remaining_seconds)
@@ -77,23 +80,9 @@ function PlayMatch() {
 		if (lastMessage.type == "player_count" && lastMessage.player_count == 2) {
 			setPaused(false)
 			setShowTimer(true)
+			setTimer(60)
 		}
 	}, [messages])
-
-	useEffect(() => {
-	if (paused === false || showTimer === false || !socket || socket.readyState !== WebSocket.OPEN) return;
-		const interval = setInterval(() => {
-			setTimer((prevTimer) => {
-				if (prevTimer <= 1) {
-					socket.send(JSON.stringify({ action: "declare_win" }))
-					clearInterval(interval)
-					return 0
-				}
-				return prevTimer - 1
-			})
-		}, 1000)
-		return () => clearInterval(interval)
-	}, [paused, showTimer, socket])
 
 	return (
 		<>
@@ -103,6 +92,7 @@ function PlayMatch() {
 			<div className="fs-1 mb-5">
 				{showTimer ? `Timer : ${timer}s` : ""}
 			</div>
+			<Button className="" onClick={() => declareWin()}>Declare win</Button>
 		</div> : <></> }
 		<WinnerModal winnerName={ winner } show={ end } onClose={ closeEnd }/>
 		</>
