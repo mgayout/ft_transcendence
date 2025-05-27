@@ -41,12 +41,7 @@ export const Notification = ({ children }) => {
 				const containerStatus = await axios.get(`https://${location.host}/users/api/status/`)
 				if (containerStatus.data.code != 1000) return
 				const ws = await createNotifSocket(Rtoken, (data) => {
-					if (data.type == "invitation_declined") setNotifMessages(data)
-					else if (data.type == "match_created") setNotifMessages(data)
-					else if (data.type == "player_joined") setNotifMessages(data)
-					else if (data.type == "player_leave") setNotifMessages(data)
-					else if (data.type == "tournament_created") setNotifMessages(data)
-					else if (data.type == "tournament_cancelled") setNotifMessages(data)
+					if (data.type) setNotifMessages(data)
 				}, (error) => {navigate("/home")}, () => {setNotifMessages([])})
 				if (isMounted) {
 					socketRef.current = ws

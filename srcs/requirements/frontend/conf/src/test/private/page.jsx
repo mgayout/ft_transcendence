@@ -60,6 +60,11 @@ const BGprivate = ({ state, type }) => {
 	useEffect(() => {
 		if (NotifMessages.type == "match_created")
 			setGroupName({player1: updateNames(NotifMessages.player_1, 1), player2: updateNames(NotifMessages.player_2, 2)})
+		if (NotifMessages.type == "game_resumed") {
+			setGroupName({player1: updateNames(NotifMessages.player_1, 1), player2: updateNames(NotifMessages.player_2, 2)})
+			setGroupScore({score1: NotifMessages.scorePlayer1, score2: NotifMessages.scorePlayer2 })
+		}
+
 	}, [NotifMessages])
 
 	const updateNames = (string, types) => {

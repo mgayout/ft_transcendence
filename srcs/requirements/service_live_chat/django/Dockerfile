@@ -15,6 +15,8 @@ RUN apk update \
 RUN mkdir $APP_DIR /static
 WORKDIR $APP_DIR
 
+RUN mkdir /django_web_app/live_chat_django
+
 COPY --chown=root:root ./conf/requirements.txt .
 COPY --chown=root:root ./conf/manage.py .
 

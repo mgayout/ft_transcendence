@@ -92,7 +92,7 @@ class XSSProtectionMiddleware:
         if request.method in ('POST', 'PATCH'):
             # Regex combinée pour XSS et SQL
             malicious_pattern = re.compile(
-                r'[<>\'";]|--|/\*|\*/|script|on\w+|(\b(union|select|insert|delete|update|drop|alter|exec|create|truncate|grant|revoke)\b\s*(all|from|into|set|table)?\s*[^\w])',
+                r'[<>\'";]|--|/\*|\*/|script|on(click|load|mouseover|mouseout|submit|change|focus|blur|keypress|keydown|keyup)|(\b(union|select|insert|delete|update|drop|alter|exec|create|truncate|grant|revoke)\b\s*(all|from|into|set|table)?\s*[^\w])',
                 re.IGNORECASE
             )
             if request.content_type == 'application/json':
@@ -100,11 +100,11 @@ class XSSProtectionMiddleware:
                     data = json.loads(request.body)
                     for key, value in data.items():
                         if isinstance(value, str) and malicious_pattern.search(value):
-                            return JsonResponse({"code": 1100, "message": f"Caractères non autorisés dans {key}"}, status=400)
+                            return JsonResponse({"code": 1100, "message": f"Characters not allowed in {key}"}, status=400)
                 except json.JSONDecodeError:
-                    return JsonResponse({"code": 1015, "message": "JSON invalide"}, status=400)
+                    return JsonResponse({"code": 1015, "message": "JSON invalid"}, status=400)
             elif request.content_type.startswith('multipart/form-data'):
                 for key, value in request.POST.items():
                     if malicious_pattern.search(value):
-                        return JsonResponse({"code": 1100, "message": f"Caractères non autorisés dans {key}"}, status=400)
+                        return JsonResponse({"code": 1100, "message": f"Characters not allowed in {key}"}, status=400)
         return self.get_response(request)

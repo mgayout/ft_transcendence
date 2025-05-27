@@ -108,23 +108,23 @@ class PlayerRegisterSerializer(serializers.Serializer):
 
     def validate_username(self, value):
         if len(value) > 20:
-            raise serializers.ValidationError({"code": 1011}) # Le nom d'utilisateur ne doit pas dépasser 20 caractères.
+            raise serializers.ValidationError({"code": 1011, "message": "The username must not exceed 20 characters."}) # Le nom d'utilisateur ne doit pas dépasser 20 caractères.
         if ' ' in value:
-            raise serializers.ValidationError({"code": 1012}) # Le nom d'utilisateur ne doit pas contenir d'espaces.
+            raise serializers.ValidationError({"code": 1012, "message": "The username must not contain spaces."}) # Le nom d'utilisateur ne doit pas contenir d'espaces.
         if not re.match(r'^[a-zA-Z0-9]+$', value):
-            raise serializers.ValidationError({"code": 1013}) # Le nom d'utilisateur ne doit contenir que des lettres et des chiffres.
+            raise serializers.ValidationError({"code": 1013, "message": "The username must only contain letters and numbers."}) # Le nom d'utilisateur ne doit contenir que des lettres et des chiffres.
         return value or ""
 
     def validate(self, data):
         username = data['username']
         if not data.get('username'):
-            raise serializers.ValidationError({"code": 1009}) # Nom d'utilisateur requis.
+            raise serializers.ValidationError({"code": 1009, "message": "Username required."}) # Nom d'utilisateur requis.
         if not data.get('password') or not data.get('password2'):
-            raise serializers.ValidationError({"code": 1010}) # Mot de passe requis.
+            raise serializers.ValidationError({"code": 1010, "message": "Password required."}) # Mot de passe requis.
         if data['password'] != data['password2']:
-            raise serializers.ValidationError({"code": 1001})  # Les mots de passe ne correspondent pas.
+            raise serializers.ValidationError({"code": 1001, "message": "The passwords do not match."})  # Les mots de passe ne correspondent pas.
         if Player.objects.filter(name=data['username']).exists():
-            raise serializers.ValidationError({"code": 1002})  # Ce nom d'utilisateur est déjà pris.
+            raise serializers.ValidationError({"code": 1002, "message": "This username is already taken."})  # Ce nom d'utilisateur est déjà pris.
         
         validate_strong_password(data['password'])
         return data
@@ -237,23 +237,23 @@ class PlayerUpdateNameSerializer(serializers.ModelSerializer):
 
     def validate_name(self, value):
         if not re.match(r'^[a-zA-Z0-9]+$', value):
-            raise serializers.ValidationError({"code": 1013}) # Le nom d'utilisateur ne doit contenir que des lettres et des chiffres.
+            raise serializers.ValidationError({"code": 1013, "message": "Username must only contain letters and numbers"}) # Le nom d'utilisateur ne doit contenir que des lettres et des chiffres.
         if len(value) > 20:
-            raise serializers.ValidationError({"code": 1011}) # Le nom d'utilisateur ne doit pas dépasser 20 caractères.
+            raise serializers.ValidationError({"code": 1011, "message": "The username must not exceed 20 characters."}) # Le nom d'utilisateur ne doit pas dépasser 20 caractères.
         if ' ' in value:
-            raise serializers.ValidationError({"code": 1012}) # Le nom d'utilisateur ne doit pas contenir d'espaces.
+            raise serializers.ValidationError({"code": 1012, "message": "The username must not contain spaces."}) # Le nom d'utilisateur ne doit pas contenir d'espaces.
         return value
 
     def validate(self, data):
         user = self.context['request'].user
         if not user.is_authenticated:
-            raise serializers.ValidationError({"code": 1030, "message": "Utilisateur non authentifié."})
+            raise serializers.ValidationError({"code": 1030, "message": "Unauthenticated user."})
         if not check_password(data['current_password'], user.password):
-            raise serializers.ValidationError({"code": 1008})  # Mot de passe incorrect.
+            raise serializers.ValidationError({"code": 1008, "message": "Password is incorrect"})  # Mot de passe incorrect.
         
         name = data['name']
         if Player.objects.filter(name=name).exists():
-            raise serializers.ValidationError({"code": 1002}) #Ce nom d'utilisateur est déjà pris.
+            raise serializers.ValidationError({"code": 1002, "message": "Username already chosen"}) #Ce nom d'utilisateur est déjà pris.
         
         return data
 
@@ -273,9 +273,9 @@ class PlayerUpdatePWDSerializer(serializers.Serializer):
     def validate(self, data):
         user = self.context['request'].user
         if not user.check_password(data['current_password']):
-            raise serializers.ValidationError({"code": 1008})  # Mot de passe incorrect.
+            raise serializers.ValidationError({"code": 1008, "message": "Password is incorrect"})  # Mot de passe incorrect.
         if data['new_pwd1'] != data['new_pwd2']:
-            raise serializers.ValidationError({"code": 1001})  # Les mots de passe ne correspondent pas.
+            raise serializers.ValidationError({"code": 1001, "message": "Passwords aren't similar"})  # Les mots de passe ne correspondent pas.
         validate_strong_password(data['new_pwd1'])   # À voir dans validators.py
         return data
 
@@ -294,12 +294,12 @@ class PlayerDeleteSerializer(serializers.Serializer):
         user = self.context['request'].user
         # Vérifier que l'utilisateur est authentifié
         if not user.is_authenticated:
-            raise serializers.ValidationError({"code": 1009, "message": "Utilisateur non authentifié."})
+            raise serializers.ValidationError({"code": 1009, "message": "Unauthenticated user."})
         # Vérifier le mot de passe
         if 'password' not in data:
-            raise serializers.ValidationError({"code": 1007, "message": "Le champ mot de passe est requis."})
+            raise serializers.ValidationError({"code": 1007, "message": "The password field is required."})
         if not user.check_password(data['password']):
-            raise serializers.ValidationError({"code": 1008, "message": "Mot de passe incorrect."})
+            raise serializers.ValidationError({"code": 1008, "message": "Incorrect password."})
         return data
 
     def reset_player(self, player):
@@ -405,27 +405,27 @@ class PlayerLoginSerializer(serializers.Serializer):
         otp_code = data.get('otp_code')
 
         if not player_name:
-            raise serializers.ValidationError({"code": 1009}) # Nom requis
+            raise serializers.ValidationError({"code": 1009, "message": "Username is required"}) # Nom requis
         if not password:
-            raise serializers.ValidationError({"code": 1010}) # Mot de passe requis
+            raise serializers.ValidationError({"code": 1010, "message": "Password is required"}) # Mot de passe requis
 
         try:
             player = Player.objects.get(name=player_name)
         except Player.DoesNotExist:
-            raise serializers.ValidationError({"code": 1013}) # Nom ou mot de passe incorrect
+            raise serializers.ValidationError({"code": 1013, "message": "Username or Password is incorrect"}) # Nom ou mot de passe incorrect
     
         username = player.user.username
         user = authenticate(username=username, password=password)
         if user is None:
-            raise serializers.ValidationError({"code": 1013}) # Nom ou mot de passe incorrect
+            raise serializers.ValidationError({"code": 1013, "message": "Username or Password is incorrect"}) # Nom ou mot de passe incorrect
         
         # Vérifier 2FA si activé
         if player.two_factor_enabled and player.two_factor_method == 'TOTP':
             if not otp_code:
-                raise serializers.ValidationError({"code": 1037})  # Code 2FA requis
+                raise serializers.ValidationError({"code": 1037, "message": "2FA code is required"})  # Code 2FA requis
             device = TOTPDevice.objects.filter(user=user).first()
             if not device or not device.verify_token(otp_code):
-                raise serializers.ValidationError({"code": 1036})  # Code TOTP invalide
+                raise serializers.ValidationError({"code": 1036, "message": "TOTP code is invalid"})  # Code TOTP invalide
 
         data['user'] = user
         data['player'] = player
@@ -492,23 +492,23 @@ class SendFriendRequestSerializer(serializers.ModelSerializer):
         try:
             player_2 = Player.objects.get(id=player_2_id)
         except Player.DoesNotExist:
-            raise serializers.ValidationError({"code": 1014})  # Le joueur cible n'existe pas.
+            raise serializers.ValidationError({"code": 1014, "message": "Player doesn't exist"})  # Le joueur cible n'existe pas.
         if player_1 == player_2.user:
-            raise serializers.ValidationError({"code": 1015})  # Vous ne pouvez pas envoyer une demande d'ami à vous-même.
+            raise serializers.ValidationError({"code": 1015, "message": "You can't add yourself as friend"})  # Vous ne pouvez pas envoyer une demande d'ami à vous-même.
         if Friendship.objects.filter(player_1=player_1.player_profile, player_2=player_2, status='pending').exists():
-            raise serializers.ValidationError({"code": 1016})  # Une demande d'ami a déjà été envoyée à ce joueur.
+            raise serializers.ValidationError({"code": 1016, "message": "You already added this player"})  # Une demande d'ami a déjà été envoyée à ce joueur.
         if Friendship.objects.filter(player_1=player_2, player_2=player_1.player_profile, status='pending').exists():
-            raise serializers.ValidationError({"code": 1017})  # Vous avez déjà reçu une demande d'ami de ce joueur.
+            raise serializers.ValidationError({"code": 1017, "message": "You already received something from this player"})  # Vous avez déjà reçu une demande d'ami de ce joueur.
         if Friendship.objects.filter(
             status='accepted',
             player_1__in=[player_1.player_profile, player_2],
             player_2__in=[player_1.player_profile, player_2]
         ).exists():
-            raise serializers.ValidationError({"code": 1002})  # Vous êtes déjà amis avec ce joueur.
+            raise serializers.ValidationError({"code": 1002, "message": "You are already friends"})  # Vous êtes déjà amis avec ce joueur.
         if Block.objects.filter(blocker=player_1.player_profile, blocked=player_2).exists():
-            raise serializers.ValidationError({"code": 1018})  # Vous avez bloqué ce joueur.
+            raise serializers.ValidationError({"code": 1018, "message": "You blocked this player"})  # Vous avez bloqué ce joueur.
         if Block.objects.filter(blocker=player_2, blocked=player_1.player_profile).exists():
-            raise serializers.ValidationError({"code": 1019})  # Ce joueur vous a bloqué.
+            raise serializers.ValidationError({"code": 1019, "message": "This player blocked you"})  # Ce joueur vous a bloqué.
 
         return data
 
@@ -533,9 +533,9 @@ class FriendRequestAcceptSerializer(serializers.ModelSerializer):
         request_user = self.context['request'].user
 
         if friendship.player_2.user != request_user:
-            raise serializers.ValidationError({"code": 1020})  # "Seul le destinataire peut accepter cette demande."
+            raise serializers.ValidationError({"code": 1020, "message": "You can't accept this request"})  # "Seul le destinataire peut accepter cette demande."
         if friendship.status != 'pending':
-            raise serializers.ValidationError({"code": 1021})  # "Cette demande a déjà été traitée."
+            raise serializers.ValidationError({"code": 1021, "message": "Request has already been processed"})  # "Cette demande a déjà été traitée."
 
         return data
 
@@ -561,9 +561,9 @@ class FriendRequestRejectSerializer(serializers.ModelSerializer):
         friendship = self.instance
         request_user = self.context['request'].user
         if friendship.player_2.user != request_user:
-            raise serializers.ValidationError({"code": 1020, "message": "Seul le destinataire peut rejeter cette demande."})
+            raise serializers.ValidationError({"code": 1020, "message": "Only the recipient can reject this request."})
         if friendship.status != 'pending':
-            raise serializers.ValidationError({"code": 1021, "message": "Cette demande a déjà été traitée."})
+            raise serializers.ValidationError({"code": 1021, "message": "Request has already been processed"})
         return data
 
     def to_representation(self, instance):
@@ -614,11 +614,11 @@ class BlockPlayerSerializer(serializers.ModelSerializer):
         try:
             blocked = Player.objects.get(id=blocked_id)
         except Player.DoesNotExist:
-            raise serializers.ValidationError({"code": 1014})  # "Le joueur cible n'existe pas."
+            raise serializers.ValidationError({"code": 1014, "message": "Player doesn't exist"})  # "Le joueur cible n'existe pas."
         if blocker == blocked:
-            raise serializers.ValidationError({"code": 1026})  # "Vous ne pouvez pas vous bloquer vous-même."
+            raise serializers.ValidationError({"code": 1026, "message": "You can't block yourself"})  # "Vous ne pouvez pas vous bloquer vous-même."
         if Block.objects.filter(blocker=blocker, blocked=blocked).exists():
-            raise serializers.ValidationError({"code": 1027})  # "Ce joueur est déjà bloqué."
+            raise serializers.ValidationError({"code": 1027, "message": "Player is already blocked"})  # "Ce joueur est déjà bloqué."
 
 
         Friendship.objects.filter(
@@ -659,19 +659,19 @@ class Enable2FASerializer(serializers.Serializer):
 
     def validate_otp_code(self, value):
         if value and not re.match(r'^\d{6}$', value):
-            raise serializers.ValidationError({"code": 1037, "message": "Le code OTP doit être exactement 6 chiffres."})
+            raise serializers.ValidationError({"code": 1037, "message": "The OTP code must be exactly 6 digits."})
         return value
 
     def validate(self, data):
         user = self.context['request'].user
         if not user.is_authenticated:
-            raise serializers.ValidationError({"code": 1030})  # Utilisateur non authentifié
+            raise serializers.ValidationError({"code": 1030, "message": "Unauthenticated user"})  # Utilisateur non authentifié
 
         otp_code = data.get('otp_code')
         player = user.player_profile
         device, created = TOTPDevice.objects.get_or_create(user=user, name=f"{player.name}_totp")
         if otp_code and not device.verify_token(otp_code):
-            raise serializers.ValidationError({"code": 1036})  # Code TOTP invalide
+            raise serializers.ValidationError({"code": 1036, "message": "Invalid TOTP code"})  # Code TOTP invalide
 
         return data
 
@@ -734,9 +734,9 @@ class Disable2FASerializer(serializers.Serializer):
         password = data["password"]
         user = self.context['request'].user
         if not user.is_authenticated:
-            raise serializers.ValidationError({"code": 1030})  # Utilisateur non authentifié
+            raise serializers.ValidationError({"code": 1030, "message": "Unauthenticated user"})  # Utilisateur non authentifié
         if not user.check_password(data['password']):
-            raise serializers.ValidationError({"code": 1008})  # Mot de passe incorrect
+            raise serializers.ValidationError({"code": 1008, "message": "Password is incorrect"})  # Mot de passe incorrect
         return data
 
     def update(self, instance, validated_data):
@@ -762,11 +762,11 @@ class Auth42CompleteSerializer(serializers.Serializer):
 
     def validate(self, data):
         if data['password'] != data['password2']:
-            raise serializers.ValidationError({"code": 1001})
+            raise serializers.ValidationError({"code": 1001, "message": "Passwords are not similar"})
         
         oauth_data = self.context['request'].session.get('oauth_42_data')
         if not oauth_data:
-            raise serializers.ValidationError({"code": 1053})
+            raise serializers.ValidationError({"code": 1053, "message": "Request failed"})
             
         return data
 

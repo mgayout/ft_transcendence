@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react"
 import { Form, Modal, Button } from "react-bootstrap"
 import axiosInstance from "../auth/instance"
 import { useAuth } from "../auth/context"
+import ErrorModal from "./error-modal"
 
 function DFAModal({ show, hide, handleClose }) {
 
@@ -9,13 +10,22 @@ function DFAModal({ show, hide, handleClose }) {
 	const [qrCode, setQrCode] = useState("")
 	const [code, setCode] = useState("")
 
+	const [showErr, setShowErr] = useState(false)
+	const hideModal = () => setShow(false)
+	const [info, setInfo] = useState("")
+
 	const fonction = async () => {
 		try {
 			const response = await axiosInstance.put("/users/api/2fa-enable/")
 			if (response.data.code == "1000")
 				setQrCode(response.data.qr_code_image)
 		}
-		catch {}
+		catch(error) {
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShowErr(true)
+			}
+		}
 	}
 
 	const fonction2 = async (code) => {
@@ -27,7 +37,12 @@ function DFAModal({ show, hide, handleClose }) {
 				handleClose()
 			}
 		}
-		catch {hide()}
+		catch(error) {
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
+		}
 	}
 
 	useEffect(() => {
@@ -54,6 +69,7 @@ function DFAModal({ show, hide, handleClose }) {
 						onClick={() => fonction2(code)}>Confirm</Button>
 				</div>
 			</Modal.Body>
+			<ErrorModal show={ showErr } hideModal={ hideModal } contextId={ 0 } info={ info } />
 		</Modal>
 	)
 }

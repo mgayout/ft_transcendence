@@ -5,7 +5,7 @@ ENV_FILE="./srcs/env/.env_nginx"
 
 if [ ! -f "$ENV_FILE" ]; then
     echo "Erreur : Le fichier $ENV_FILE n'existe pas."
-    exit 1
+    touch $ENV_FILE
 fi
 
 NEW_DOMAIN_NAME=\'$(hostname --short)\'

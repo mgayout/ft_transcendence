@@ -11,7 +11,7 @@ class GeneralChatConsumer(AsyncWebsocketConsumer):
 
         if not self.user.is_authenticated:
             await self.send(text_data=json.dumps({
-                "code": 3012  # Utilisateur non authentifié
+                "code": 3012, "message": "Unauthenticated user"  # Utilisateur non authentifié
             }))
             await self.close(code=3012)
             return
@@ -58,7 +58,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
 
         if not user.is_authenticated or player_id is None:
             await self.send(text_data=json.dumps({
-                "code": 3014  # Utilisateur non authentifié ou aucun joueur associé
+                "code": 3014, "message": "Unauthenticated user or no associated player"  # Utilisateur non authentifié ou aucun joueur associé
             }))
             await self.close(code=3014)
             return
@@ -66,7 +66,7 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         self.player_id = self.scope['url_route']['kwargs']['player_id']
         if str(player_id) != self.player_id:
             await self.send(text_data=json.dumps({
-                "code": 3015 # Incohérence entre l'ID du joueur dans le token et l'URL
+                "code": 3015, "message": "Inconsistency between player ID in token and URL" # Incohérence entre l'ID du joueur dans le token et l'URL
             }))
             await self.close(code=3015)
             return

@@ -200,9 +200,9 @@ class FriendRequestCancel_api(generics.DestroyAPIView):
 
         # Validation personnalisée
         if obj.player_1.user != request_user:
-            raise serializers.ValidationError({"code": 1023})  # "Seul l'expéditeur peut annuler cette demande."
+            raise serializers.ValidationError({"code": 1023, "message": "Only the sender can cancel this request."})  # "Seul l'expéditeur peut annuler cette demande."
         if obj.status != 'pending':
-            raise serializers.ValidationError({"code": 1021})  # "Cette demande a déjà été traitée."
+            raise serializers.ValidationError({"code": 1021, "message": "This request has already been processed."})  # "Cette demande a déjà été traitée."
 
         return obj
 
@@ -224,9 +224,9 @@ class FriendRemove_api(generics.DestroyAPIView):
 
         # Validation personnalisée
         if obj.status != 'accepted':
-            raise serializers.ValidationError({"code": 1030})  # "Cette relation n'est pas une amitié acceptée."
+            raise serializers.ValidationError({"code": 1030, "message": "This relationship is not an accepted friendship."})  # "Cette relation n'est pas une amitié acceptée."
         if obj.player_1 != player and obj.player_2 != player:
-            raise serializers.ValidationError({"code": 1025})  # "Vous n'êtes pas amis avec ce joueur."
+            raise serializers.ValidationError({"code": 1025, "message": "You are not friends with this player."})  # "Vous n'êtes pas amis avec ce joueur."
 
         return obj
 
@@ -289,7 +289,7 @@ class UnblockPlayerView(generics.DestroyAPIView):
 
         # Validation personnalisée
         if obj.blocker != blocker:
-            raise serializers.ValidationError({"code": 1028})  # "Vous n'avez pas bloqué ce joueur."
+            raise serializers.ValidationError({"code": 1028, "message": "You have not blocked this player."})  # "Vous n'avez pas bloqué ce joueur."
         
         return obj
 
@@ -309,7 +309,7 @@ class Enable2FAView(generics.UpdateAPIView):
         try:
             return self.request.user.player_profile
         except AttributeError:
-            return Response({"code": 1043, "message": "Aucun profil joueur associé"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"code": 1043, "message": "No associated player profile"}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -327,7 +327,7 @@ class Disable2FAView(generics.DestroyAPIView):
         try:
             return self.request.user.player_profile
         except AttributeError:
-            return Response({"code": 1043, "message": "Aucun profil joueur associé"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"code": 1043, "message": "No associated player profile"}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -361,7 +361,7 @@ class Auth42CallbackView(APIView):
     def get(self, request):
         code = request.GET.get('code')
         if not code:
-            return Response({"code": 1051, "message": "Code d'autorisation manquant"}, 
+            return Response({"code": 1051, "message": "Missing authorization code"}, 
                           status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -380,7 +380,7 @@ class Auth42CallbackView(APIView):
             token_data = token_response.json()
             
             if 'access_token' not in token_data:
-                return Response({"code": 1052, "message": "Échec de l'obtention du token"}, 
+                return Response({"code": 1052, "message": "Failed to get token"}, 
                              status=status.HTTP_400_BAD_REQUEST)
             
             # Obtenir les données utilisateur
@@ -394,7 +394,7 @@ class Auth42CallbackView(APIView):
             login = user_data['login']
             
             if Player.objects.filter(forty_two_id=forty_two_id).exists():
-                return Response({"code": 1050}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"code": 1050, "message": "Error"}, status=status.HTTP_400_BAD_REQUEST)
             
             # Générer un nom unique
             base_name = login
@@ -427,7 +427,7 @@ class Auth42CallbackView(APIView):
             
         except Exception as e:
             return Response(
-                {"code": 1052, "message": f"Erreur OAuth: {str(e)}"}, 
+                {"code": 1052, "message": f"Error OAuth: {str(e)}"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
 

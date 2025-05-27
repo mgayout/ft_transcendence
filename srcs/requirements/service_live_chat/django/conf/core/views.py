@@ -28,7 +28,7 @@ class GeneralMessageListView(generics.ListAPIView):
         try:
             player = Player.objects.get(user=user)
         except Player.DoesNotExist:
-            raise ValidationError({"code": 2008})  # Profil de joueur non trouvé
+            raise ValidationError({"code": 2008, "message": "Player profile not found"})  # Profil de joueur non trouvé
 
         blocked_by_user = Block.objects.filter(blocker=player).values_list('blocked', flat=True)
         blocked_by_others = Block.objects.filter(blocked=player).values_list('blocker', flat=True)
@@ -73,7 +73,7 @@ class PrivateMessageListView(generics.ListAPIView):
         try:
             player = Player.objects.get(user=user)
         except Player.DoesNotExist:
-            raise ValidationError({"code": 2009})  # Profil de joueur non trouvé
+            raise ValidationError({"code": 2009, "message": "Player profile not found"})  # Profil de joueur non trouvé
 
         blocked_by_user = Block.objects.filter(blocker=player).values_list('blocked', flat=True)
         blocked_by_others = Block.objects.filter(blocked=player).values_list('blocker', flat=True)
@@ -90,12 +90,12 @@ class PrivateMessageListView(generics.ListAPIView):
             try:
                 receiver = Player.objects.get(id=receiver_id)
                 if receiver.id in excluded_players:
-                    raise ValidationError({"code": 2011})  # Vous ne pouvez pas voir les messages d'un joueur bloqué
+                    raise ValidationError({"code": 2011, "message": "You cannot see messages from a blocked player"})  # Vous ne pouvez pas voir les messages d'un joueur bloqué
                 queryset = queryset.filter(
                     Q(sender=player, receiver=receiver) | Q(sender=receiver, receiver=player)
                 )
             except Player.DoesNotExist:
-                raise ValidationError({"code": 2010})  # Joueur destinataire non trouvé
+                raise ValidationError({"code": 2010, "message": "Recipient player not found"})  # Joueur destinataire non trouvé
 
         return queryset.order_by('-timestamp')
 

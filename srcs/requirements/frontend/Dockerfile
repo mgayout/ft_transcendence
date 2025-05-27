@@ -19,7 +19,7 @@ COPY --chown=root:root ./conf/public public
 COPY --chown=root:root ./conf/src src
 
 RUN npm install \
-    && npm install serve@14.2.4 \
-    && npm run build
+	&& npm install serve@14.2.4 \
+	&& npm run build
 
-CMD ["npx", "serve", "-s", "/home/frontend/dist", "-p", "3000"]
+CMD ["sh", "-c", "npx serve -s /home/frontend/dist -p 3000"]

@@ -1,13 +1,11 @@
 import React, { useState } from "react"
-import { useNavigate } from "react-router-dom"
 import { Modal, Form, Button } from "react-bootstrap"
 import { useAuth } from "../auth/context"
 import axiosInstance from '../auth/instance'
 import DFAModal from "./dfa-modal"
+import ErrorModal from "./error-modal"
 
 function SettingsModal({ settings, setSettings }) {
-
-	const navigate = useNavigate()
 
 	const [nUsername, setNUsername] = useState('')
 	const [password1, setPassword1] = useState('')
@@ -27,9 +25,22 @@ function SettingsModal({ settings, setSettings }) {
 	const [dfaShow, setdfaShow] = useState(false)
 	const hideDFA = () => setdfaShow(false)
 
+	const [show, setShow] = useState(false)
+	const hideModal = () => setShow(false)
+	const [info, setInfo] = useState("")
+
 	const { user, refreshUser, logout } = useAuth()
 
-	const handleClose = () => setSettings(false)
+	const handleClose = () => {
+		setNUsername("")
+		setPassword1("")
+		setPassword2("")
+		setNPassword1("")
+		setNPassword2()
+		setPassword2FA("")
+		setPassDelete("")
+		setSettings(false)
+	}
 
 	const changeUsername = async () => {
 		try {
@@ -40,7 +51,12 @@ function SettingsModal({ settings, setSettings }) {
 				refreshUser()
 			}
 		}
-		catch {handleClose()}
+		catch(error) {
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
+		}
 	}
 	
 	const changePassword = async () => {
@@ -50,7 +66,12 @@ function SettingsModal({ settings, setSettings }) {
 			if (response.data.code == 1000)
 				handleClose()
 		}
-		catch {handleClose()}
+		catch(error) {
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
+		}
 	}
 	
 	const removeProfile = async (password) => {
@@ -58,7 +79,12 @@ function SettingsModal({ settings, setSettings }) {
 			const response = await axiosInstance.put(`/users/api/player/delete/`, {password: password})
 			logout()
 		}
-		catch {handleClose()}	
+		catch(error) {
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
+		}	
 	}
 
 	const remove2FA = async (password2FA) => {
@@ -70,15 +96,16 @@ function SettingsModal({ settings, setSettings }) {
 				handleClose()
 			}
 		}
-		catch {handleClose()}
-	}
-		
-	const enable2FA = () => {
-		setdfaShow(true)
+		catch(error) {
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
+		}
 	}
 
 	return (
-		<Modal show={settings} onHide={() => setSettings(false)} centered>
+		<Modal show={settings} onHide={() => handleClose()} centered>
 			<Modal.Header closeButton>
 				<Modal.Title>Settings</Modal.Title>
 			</Modal.Header>
@@ -162,7 +189,7 @@ function SettingsModal({ settings, setSettings }) {
 				<div className="d-grid mb-4">
 					{user.two_factor_enabled
 						? <Button variant="secondary" onClick={() => remove2FA(password2FA)}>Remove</Button>
-						: <Button variant="secondary" onClick={() => enable2FA()}>Enable</Button>}
+						: <Button variant="secondary" onClick={() => setdfaShow(true)}>Enable</Button>}
 					
 				</div>
 				<h5 className="mb-3">Delete Account</h5>
@@ -184,6 +211,7 @@ function SettingsModal({ settings, setSettings }) {
 				</div>
 			</Modal.Body>
 			<DFAModal show={ dfaShow } hide={ hideDFA } handleClose={ handleClose }/>
+			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 0 } info={ info } />
 		</Modal>
 	)
 }

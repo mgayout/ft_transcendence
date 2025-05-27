@@ -12,15 +12,18 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+from utils.vault_utils import get_vault_secrets
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+vault_secrets = get_vault_secrets()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = vault_secrets['django_secret_key']
 DOMAIN_NAME = os.getenv("DOMAIN_NAME", "localhost")
 PORT_NUM = os.getenv("PORT_NUM", "4343")
 
@@ -53,6 +56,7 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "core.middleware.XSSProtectionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -93,15 +97,15 @@ CHANNEL_LAYERS = {
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("POSTGRES_DB"),  # Nom de ta base de données
-        "USER": os.getenv("POSTGRES_USER"),  # Nom d'utilisateur PostgreSQL
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),  # Mot de passe PostgreSQL
-        "HOST": os.getenv("POSTGRES_HOST"),  # Si tu es en local, sinon 'db' avec Docker
-        "PORT": os.getenv("POSTGRES_PORT"),  # Port par défaut de PostgreSQL
-        "CONN_MAX_AGE": None,
-        "CONN_HEALTH_CHECKS": True,
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': vault_secrets['postgres_database_name'],            # Nom de ta base de données
+        'USER': vault_secrets['postgres_user'],          # Nom d'utilisateur PostgreSQL
+        'PASSWORD': vault_secrets['postgres_password'],  # Mot de passe PostgreSQL
+        'HOST': vault_secrets['postgres_host'],          # Si tu es en local, sinon 'db' avec Docker
+        'PORT': vault_secrets['postgres_port'],          # Port par défaut de PostgreSQL
+        'CONN_MAX_AGE':None,
+        'CONN_HEALTH_CHECKS':True,
     }
 }
 

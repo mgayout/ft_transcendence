@@ -28,7 +28,7 @@ function Complete() {
 
     const [show, setShow] = useState(false)
     const hideModal = () => setShow(false)
-    const [code, setCode] = useState(0)
+    const [info, setInfo] = useState("")
     const [isLoading, setIsLoading] = useState(false)
 
     // Traiter le code d'autorisation lors du chargement du composant
@@ -37,12 +37,8 @@ function Complete() {
             const searchParams = new URLSearchParams(location.search)
             const authorizationCode = searchParams.get('code')
             
-            if (!authorizationCode) {
-                setCode(1053) // Code d'erreur pour "session OAuth invalide"
-                setShow(true)
-                return
-            }
-            
+            if (!authorizationCode) return
+
             setProcessingCode(true)
             
             try {
@@ -55,15 +51,17 @@ function Complete() {
                     
                     // Nettoyer l'URL en supprimant le paramètre code
                     navigate('/register/42/complete', { replace: true })
-                } else {
-                    throw new Error("Réponse invalide du serveur")
                 }
-            } catch (error) {
-                setCode(error.response?.data?.code || 1053)
-                setShow(true)
-            } finally {
-                setProcessingCode(false)
+				else
+                    throw new Error("Réponse invalide du serveur")
             }
+			catch (error) {
+                if (error.response.data.message) {
+					setInfo(error.response.data.message)
+					setShow(true)
+				}
+            }
+			finally {setProcessingCode(false)}
         }
         
         // Vérifier s'il y a un code dans l'URL et s'il n'a pas encore été traité
@@ -106,20 +104,16 @@ function Complete() {
                 setRegistrationSuccess(true)
                 setShowPasswordForm(false)
             }
-        } catch (error) {
-			console.log(error)
+        }
+		catch (error) {
             setPassword1("")
             setPassword2("")
-            
-            if (error.response?.data?.code)
-                setCode(error.response.data.code)
-            else
-                setCode(1010)
-                
-            setShow(true)
-        } finally {
-            setIsLoading(false)
+            if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
         }
+		finally {setIsLoading(false)}
     }
 
     // Afficher un spinner pendant le traitement du code
@@ -254,8 +248,7 @@ function Complete() {
                     Cancel
                 </Button>
             </div>
-            
-            <ErrorModal show={show} hideModal={hideModal} contextId={0} code={code} />
+            <ErrorModal show={ show } hideModal={ hideModal } contextId={ 0 } info={ info } />
         </Form>
     )
 }

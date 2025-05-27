@@ -22,7 +22,7 @@ function Register() {
 
 	const [show, setShow] = useState(false)
 	const hideModal = () => setShow(false)
-	const [code, setCode] = useState(0)
+	const [info, setInfo] = useState("")
 
 	const sendAuth = async (e) => {
 		e.preventDefault()
@@ -38,11 +38,10 @@ function Register() {
 			setUsername("")
 			setPassword1("")
 			setPassword2("")
-			if (error.response.data.code)
-				setCode(error.response.data.code)
-			else
-				setCode(1009)
-			setShow(true)
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
 		}
 	}
 
@@ -92,7 +91,7 @@ function Register() {
 					LOGIN
 				</Button>
 			</div>
-			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 0 } code={ code } />
+			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 0 } info={ info } />
         </Form>
     )
 }

@@ -3,12 +3,12 @@ import random
 from shared_models.models import Player, Match
 
 class StatusChoices(models.TextChoices):
-    EN_ATTENTE = 'En attente'
-    ACCEPTEE = 'Acceptée'
-    REFUSEE = 'Refusée'
-    EN_COURS = 'En cours'
-    TERMINE = 'Terminée'
-    ANNULER  = 'Annulé'
+    EN_ATTENTE = "En attente"
+    ACCEPTEE = "Acceptée"
+    REFUSEE = "Refusée"
+    EN_COURS = "En cours"
+    TERMINE = "Terminée"
+    ANNULEE = "Annulée"
 
 class TypeChoices(models.TextChoices):
     IA = 'IA'

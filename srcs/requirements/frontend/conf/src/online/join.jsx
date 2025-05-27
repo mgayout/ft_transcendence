@@ -5,7 +5,7 @@ import axiosInstance from "../auth/instance"
 import { useNotification } from "../websockets/notification"
 import { useGame } from "../websockets/game"
 
-function JoinMatch({ state, setState }) {
+function JoinMatch({ state, setState, setShow, setInfo }) {
 
 	const [data, setData] = useState(null)
 	const { NotifMessages, setNotifMessages } = useNotification()
@@ -26,7 +26,13 @@ function JoinMatch({ state, setState }) {
 				.map(player => ({name: player.from_player.name, id: player.id, avatar: getAvatar(player.from_player.name)}))
 			setData(a)
 		}
-		catch {}
+		catch(error) {
+			setState("")
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
+		}
 	}
 
 	const accept = async (id) => {
@@ -34,7 +40,13 @@ function JoinMatch({ state, setState }) {
 			await axiosInstance.put(`pong/invitations/${id}/accept/`)
 			setState("wait")
 		}
-		catch {setState("")}
+		catch(error) {
+			setState("")
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
+		}
 	}
 
 	const decline = async (id) => {
@@ -42,7 +54,13 @@ function JoinMatch({ state, setState }) {
 			await axiosInstance.put(`pong/invitations/${id}/decline/`)
 			setState("")
 		}
-		catch {setState("")}
+		catch(error) {
+			setState("")
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
+		}
 	}
 
 	useEffect(() => {

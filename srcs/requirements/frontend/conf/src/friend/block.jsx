@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import { useAuth } from "../auth/context"
 import axiosInstance from '../auth/instance'
 
-function BlockModal({ tab, handleClose }) {
+function BlockModal({ tab, setShow, setInfo }) {
 
 	const { user } = useAuth()
 	const [data, setData] = useState([])
@@ -26,12 +26,22 @@ function BlockModal({ tab, handleClose }) {
 			setData(a)
 			setFilteredFriends(a)
 		}
-		catch {handleClose()}
+		catch(error) {
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
+		}
 	}
 
 	const removeBlock = async (playerID) => {
 		try {await axiosInstance.delete(`/users/api/block/remove/${playerID}/`)}
-		catch {handleClose()}
+		catch(error) {
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
+		}
 		finally {list()}
 	}
 

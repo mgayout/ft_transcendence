@@ -9,9 +9,6 @@ function ProfileEditPage({ user }) {
 	const url = useLocation()
 	const username = url.pathname.split('/')[2]
 
-    const [show, setShow] = useState(false)
-    const [code, setCode] = useState(0)
-
 	return (
 		<>
 			<Header user={ user }/>
@@ -21,7 +18,7 @@ function ProfileEditPage({ user }) {
 					<div className="position-absolute top-50 start-50 translate-middle mt-3">
 						<div className="rounded border border-black border-2 px-3 px-lg-5 pt-2 pt-lg-4 pb-3 pb-lg-4"
 							style={{background: "rgba(0, 0, 0, 0.7)"}}>
-							<ProfileEdit user={ user } show={ show } setShow={ setShow } code={ code } setCode={ setCode }/>
+							<ProfileEdit user={ user }/>
 						</div>
 					</div> :
 					<></>}

@@ -30,7 +30,7 @@ class InvitationListAPI(generics.ListAPIView):
         try:
             player = Player.objects.get(user=self.request.user)
         except Player.DoesNotExist:
-            raise serializers.ValidationError({"code": 4001})  # Aucun profil joueur associé à l'utilisateur
+            raise serializers.ValidationError({"code": 4001, "message": "No player profile associated with the user"})  # Aucun profil joueur associé à l'utilisateur
         return Invitation.objects.filter(to_player=player, status=StatusChoices.EN_ATTENTE) | Invitation.objects.filter(from_player=player, status=StatusChoices.EN_ATTENTE)
     
 @method_decorator(csrf_exempt, name='dispatch')
@@ -93,12 +93,12 @@ class WinrateAPI(generics.RetrieveAPIView):
             try:
                 player = Player.objects.get(id=player_id)
             except Player.DoesNotExist:
-                raise serializers.ValidationError({"code": 4101}) #joueur rechercher introuvable
+                raise serializers.ValidationError({"code": 4101, "message": "player search not found"}) #joueur rechercher introuvable
         else:
             try:
                 player = Player.objects.get(user=self.request.user)
             except Player.DoesNotExist:
-                raise serializers.ValidationError({"code": 4001}) #joueur connecter introuvable
+                raise serializers.ValidationError({"code": 4001, "message": "player login not found"}) #joueur connecter introuvable
         
         # Récupérer ou créer le winrate pour le joueur
         winrate, _ = Winrate.objects.get_or_create(player=player)
@@ -120,7 +120,7 @@ class MatchListAPI(generics.ListAPIView):
             try:
                 player = Player.objects.get(id=player_id)
             except Player.DoesNotExist:
-                raise serializers.ValidationError({"code": 4101})
+                raise serializers.ValidationError({"code": 4101, "message": "player search not found"})
             return Match.objects.filter(player_1=player) | Match.objects.filter(player_2=player)
         player = Player.objects.get(user=self.request.user)
         return Match.objects.filter(player_1=player) | Match.objects.filter(player_2=player)

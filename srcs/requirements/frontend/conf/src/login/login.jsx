@@ -22,7 +22,7 @@ function Login() {
 
 	const [show, setShow] = useState(false)
 	const hideModal = () => setShow(false)
-	const [code, setCode] = useState(0)
+	const [info, setInfo] = useState("")
 
 	const [dfaShow, setdfaShow] = useState(false)
 	const hideDFA = () => setdfaShow(false)
@@ -50,8 +50,10 @@ function Login() {
 			else {
 				setUsername("")
 				setPassword("")
-				setCode(error.response.data.code)
-				setShow(true)
+				if (error.response.data.message) {
+					setInfo(error.response.data.message)
+					setShow(true)
+				}
 			}
 		}
 	}
@@ -119,7 +121,7 @@ function Login() {
 					REGISTER
 				</Button>
 			</div>
-			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 1 } code={ code }/>
+			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 1 } info={ info } />
 			<DFAModal show={ dfaShow } hide={ hideDFA } username={ username } password={ password }/>
         </Form>
     )

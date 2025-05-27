@@ -54,14 +54,14 @@ function Tournament({ user }) {
 	const create = async () => {
 		try {
 			await axiosInstance.post("pong/tournament/create/", {
-				name: `${user.name}'s tournament`,
+				name: `Tournament of ${user.name}`,
 				max_score_per_round: 3,
 				number_of_rounds: 1,
 			})
 			setNotifMessages({type: "tournament_created"})
 			setState("wait")
 		}
-		catch {}
+		catch(error) {console.log(error)}
 	}
 
 	useEffect(() => {

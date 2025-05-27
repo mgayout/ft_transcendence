@@ -23,5 +23,13 @@ V - Profile introuvable sur l'url
 
 General : 
 
-X - Rajouter des modals erreurs
+V - Rajouter des modals erreurs
 
+
+Retour : 
+
+X - Certaines API ne renvoit pas d'erreur personnalisé
+
+Edit Profile :
+
+X - API invalid

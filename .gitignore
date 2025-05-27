@@ -1,2 +1,1 @@
-srcs/env/.env_vault_secrets_key
-srcs/env/.env_vault_secrets_key
+**/.vault_secrets_key.json

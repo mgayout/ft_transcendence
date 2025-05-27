@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../auth/context"
 import axiosInstance from '../auth/instance'
 
-function ListModal({ tab, handleClose }) {
+function ListModal({ tab, setShow, setInfo }) {
 
 	const navigate = useNavigate()
 
@@ -30,7 +30,12 @@ function ListModal({ tab, handleClose }) {
 			setData(temp)
 			setFilteredFriends(temp)
 		}
-		catch {handleClose()}
+		catch(error) {
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
+		}
 	}
 
 	const viewProfile = async (name) => {
@@ -39,7 +44,12 @@ function ListModal({ tab, handleClose }) {
 
 	const removeFriend = async (playerID) => {
 		try {await axiosInstance.delete(`/users/api/friend/remove/${playerID}/`)}
-		catch {handleClose()}
+		catch(error) {
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
+		}
 		finally {list()}
 	}
 

@@ -6,6 +6,7 @@ import { useAuth } from "../auth/context"
 import { usePrivateChat } from "../websockets/privateChat.jsx"
 import { updateTime, updateSender, updateContent} from "./string.js"
 import axiosInstance from "../auth/instance.jsx"
+import ErrorModal from "../global/error-modal.jsx"
 
 function ChatModal({ chat, setChat }) {
 
@@ -17,6 +18,10 @@ function ChatModal({ chat, setChat }) {
 	const { messages } = useChat()
 	const { privMessages } = usePrivateChat()
 	const bottomRefs = useRef([])
+
+	const [show, setShow] = useState(false)
+	const hideModal = () => setShow(false)
+	const [info, setInfo] = useState("")
 
 	const fonction = async () => {
 		try {
@@ -44,7 +49,12 @@ function ChatModal({ chat, setChat }) {
 			}
 			setChats(temp)
 		}
-		catch {handleClose()}
+		catch(error) {
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
+		}
 	}
 
 	const invite = async (id, name) => {
@@ -59,9 +69,14 @@ function ChatModal({ chat, setChat }) {
 				max_score_per_round: 3,
 				match_type: "Normal"
 			})
-			await axiosInstance.post(`/live_chat/private/send/${id}/`, {content: `#${user.name} invited ${name} to an online game.`})
+			await axiosInstance.post(`/live_chat/private/send/${id}/`, {content: `#${user.name} invited ${name} in a game.`})
 		}
-		catch {handleClose()}
+		catch(error) {
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
+		}
 	}
 
 	const send = async (id) => {
@@ -71,7 +86,12 @@ function ChatModal({ chat, setChat }) {
 				await axiosInstance.post(`/live_chat/private/send/${id}/`, {content: message})
 			else
 				await axiosInstance.post("/live_chat/general/send/", {content: message})}
-		catch {handleClose()}
+		catch(error) {
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
+		}
 		finally {setMessage("")}
 	}
 
@@ -153,6 +173,7 @@ function ChatModal({ chat, setChat }) {
 					</div>
 				</div>
 			</Modal.Body>
+			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 0 } info={ info } />
 		</Modal>
 	)
 }

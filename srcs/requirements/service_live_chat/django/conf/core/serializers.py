@@ -19,7 +19,7 @@ class GeneralMessageSerializer(serializers.ModelSerializer):
         try:
             sender_player = Player.objects.get(user=user)
         except Player.DoesNotExist:
-            raise serializers.ValidationError({"code": 2001})  # Profil de joueur non trouvé
+            raise serializers.ValidationError({"code": 2001, "message": "Player profile not found"})  # Profil de joueur non trouvé
 
         # Ajouter le sender (Player) aux données validées
         data['sender'] = sender_player
@@ -45,24 +45,24 @@ class PrivateMessageSerializer(serializers.ModelSerializer):
         try:
             sender_player = Player.objects.get(user=user)
         except Player.DoesNotExist:
-            raise serializers.ValidationError({"code": 2002})  # Profil de joueur non trouvé
+            raise serializers.ValidationError({"code": 2002, "message": "Player profile not found"})  # Profil de joueur non trouvé
 
         # Récupérer le receiver_player_id à partir du contexte (passé par la vue depuis l'URL)
         receiver_player_id = self.context.get('receiver_player_id')
         if not receiver_player_id:
-            raise serializers.ValidationError({"code": 2003})  # L'ID du joueur destinataire est requis
+            raise serializers.ValidationError({"code": 2003, "message": "The recipient player's ID is required"})  # L'ID du joueur destinataire est requis
 
         # Récupérer le Player du destinataire
         try:
             receiver_player = Player.objects.get(id=receiver_player_id)
         except Player.DoesNotExist:
-            raise serializers.ValidationError({"code": 2004})  # Joueur destinataire non trouvé
+            raise serializers.ValidationError({"code": 2004, "message": "Recipient player not found"})  # Joueur destinataire non trouvé
 
         # Vérifier si le sender et le receiver sont bloqués
         if Block.objects.filter(blocker=sender_player, blocked=receiver_player).exists():
-            raise serializers.ValidationError({"code": 2006})  # Vous ne pouvez pas envoyer de message à un utilisateur que vous avez bloqué
+            raise serializers.ValidationError({"code": 2006, "message": "You cannot send a message to a user you have blocked"})  # Vous ne pouvez pas envoyer de message à un utilisateur que vous avez bloqué
         if Block.objects.filter(blocker=receiver_player, blocked=sender_player).exists():
-            raise serializers.ValidationError({"code": 2007})  # Vous ne pouvez pas envoyer de message à un utilisateur qui vous a bloqué
+            raise serializers.ValidationError({"code": 2007, "message": "You cannot send a message to a user who has blocked you"})  # Vous ne pouvez pas envoyer de message à un utilisateur qui vous a bloqué
 
         # Ajouter le sender (Player) et le receiver (Player) aux données validées
         data['sender'] = sender_player

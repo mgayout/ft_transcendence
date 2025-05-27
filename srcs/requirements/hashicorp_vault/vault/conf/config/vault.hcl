@@ -1,12 +1,14 @@
 ui = false
 api_addr = "http://172.20.0.9:8200"
 disable_mlock = true
+log_level = "warn"
+log_file = "/vault/logs/vault_logs.log"
 
-storage "postgresql" {
-  connection_url = "postgresql://vault_postgresql:postgrespw@vault_postgresql:5432/vault"
+storage "file" {
+	path = "/vault/data"
 }
 
 listener "tcp" {
-  address = "172.20.0.9:8200"
-  tls_disable = 1
+	address = "172.20.0.9:8200"
+	tls_disable = 1
 }

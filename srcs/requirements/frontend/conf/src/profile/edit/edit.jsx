@@ -5,7 +5,7 @@ import { useAuth } from "../../auth/context"
 import ErrorModal from "../../global/error-modal"
 import axiosInstance from '../../auth/instance'
 
-function ProfileEdit({user, show, setShow, code, setCode}) {
+function ProfileEdit({ user }) {
 
 	const navigate = useNavigate()
 	const { refreshUser } = useAuth()
@@ -14,9 +14,11 @@ function ProfileEdit({user, show, setShow, code, setCode}) {
 	const [preview, setPreview] = useState(null)
 	const [text, setText] = useState("")
 
-	const hideModal = () => setShow(false)
-
 	const fileInputRef = useRef(null)
+
+	const [show, setShow] = useState(false)
+	const hideModal = () => setShow(false)
+	const [info, setInfo] = useState("")
 
 	const updateInfo = async (string) => {
 
@@ -39,12 +41,15 @@ function ProfileEdit({user, show, setShow, code, setCode}) {
 			}
 		}
 		catch(error) {
+			console.log(error)
 			setFile(null)
 			setPreview(null)
-			setCode(error.response.data.code)
-			setShow(true)
 			if (fileInputRef.current)
 				fileInputRef.current.value = null
+			if (error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
 		}
 	}
 
@@ -80,7 +85,7 @@ function ProfileEdit({user, show, setShow, code, setCode}) {
 			<Button className="rounded-0 btn btn-dark fw-bolder" onClick={() => updateInfo("reset")}>
                 Reset Avatar
             </Button>
-			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 2 } code={ code } />
+			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 0 } info={ info } />
 		</>
 	)
 }
