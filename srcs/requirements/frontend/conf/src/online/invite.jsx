@@ -11,14 +11,13 @@ function InviteMatch({ state, setState, setType }) {
 	const fonction = async () => {
 		try {
 			const playerData = await axiosInstance.get('users/api/player/')
-			const friendData = await axiosInstance.get('users/api/friend/list/')
+			const blockData = await axiosInstance.get('/users/api/block/list/')
 			const a = playerData.data
-				.filter(player => friendData.data
-					.some(friend => friend.status == "accepted" && friend.player_1 == player.name) && player.name != user.name && player.online == true)
-				.filter(player => ({name: player.name, id: player.id, avatar: player.avatar}))
+				.filter(player => !blockData.data.some(block => block.blocked == player.name || block.blocker == player.name) &&
+					player.name != user.name)
 			setData(a)
 		}
-		catch {}
+		catch(error) {console.log(error)}
 	}
 
 	const invite = async (id) => {
@@ -36,7 +35,8 @@ function InviteMatch({ state, setState, setType }) {
 	}
 
 	useEffect(() => {
-		fonction()
+		if (state == "invite")
+			fonction()
 	}, [state])
 
 	return (

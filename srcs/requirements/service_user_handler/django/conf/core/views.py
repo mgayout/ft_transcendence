@@ -64,9 +64,12 @@ class PlayerRegister_api(generics.CreateAPIView):
     serializer_class = serializers.PlayerRegisterSerializer
     permission_classes = [AllowAny]
 
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
 @method_decorator(csrf_exempt, name='dispatch')
 class PlayerList_api(generics.ListAPIView):
-    queryset = Player.objects.all()
+    queryset = Player.objects.filter(user__is_active=True)
     serializer_class = serializers.PlayerSerializer
 
     def get_serializer_context(self):
@@ -78,6 +81,11 @@ class PlayerList_api(generics.ListAPIView):
 class PlayerDetail_api(generics.RetrieveAPIView):
     queryset = Player.objects.all()
     serializer_class = serializers.PlayerSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -110,15 +118,12 @@ class PlayerUpdatePWD_api(generics.UpdateAPIView):
         return self.request.user
 
 @method_decorator(csrf_exempt, name='dispatch')
-class PlayerDelete_api(generics.DestroyAPIView):
+class PlayerDelete_api(generics.UpdateAPIView):
     serializer_class = serializers.PlayerDeleteSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
         return self.request.user
-
-    def perform_destroy(self, instance):
-        instance.delete()
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PlayerLogin_api(APIView):
@@ -129,11 +134,9 @@ class PlayerLogin_api(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         player = serializer.save()
-        try:
+        if hasattr(player, 'online'):
             player.online = True
             player.save()
-        except (AttributeError, Player.DoesNotExist):
-            pass
         return Response(serializer.to_representation(player), status=status.HTTP_200_OK)
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -144,15 +147,11 @@ class PlayerLogout_api(APIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-
-        try:
+        if hasattr(request.user, 'player_profile'):
             player = request.user.player_profile
             player.online = False
             player.last_seen = timezone.now()
             player.save()
-        except (AttributeError, Player.DoesNotExist):
-            pass
-
         return Response({"code": 1000}, status=status.HTTP_200_OK)
 # ============CRUD FriendShip================
 
@@ -178,7 +177,7 @@ class FriendRequestAccept_api(generics.UpdateAPIView):
         serializer.save()
         return Response({"code": 1000}, status=status.HTTP_200_OK)
 
-@method_decorator(csrf_exempt, name='dispatch')   
+@method_decorator(csrf_exempt, name='dispatch')
 class FriendRequestReject_api(generics.DestroyAPIView):
     serializer_class = serializers.FriendRequestRejectSerializer
     permission_classes = [IsAuthenticated]
@@ -187,17 +186,6 @@ class FriendRequestReject_api(generics.DestroyAPIView):
 
     def get_object(self):
         return Friendship.objects.get(id=self.kwargs['pk'])
-
-    def delete(self, request, *args, **kwargs):
-        instance = self.get_object()
-        request_user = request.user
-
-        if instance.player_2.user != request_user:
-            return Response({"code": 1020}, status=status.HTTP_400_BAD_REQUEST)  # "Seul le destinataire peut rejeter cette demande."
-        if instance.status != 'pending':
-            return Response({"code": 1021}, status=status.HTTP_400_BAD_REQUEST)  # "Cette demande a déjà été traitée."
-        self.perform_destroy(instance)
-        return Response({"code": 1000}, status=status.HTTP_200_OK)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class FriendRequestCancel_api(generics.DestroyAPIView):
@@ -265,9 +253,10 @@ class FriendshipList_api(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user.player_profile
         return Friendship.objects.filter(
-            models.Q(player_1=user) | models.Q(player_2=user)
+            (models.Q(player_1=user) | models.Q(player_2=user)) &
+            models.Q(player_1__user__is_active=True) &
+            models.Q(player_2__user__is_active=True)
         )
-
 # ============CRUD Block================
 @method_decorator(csrf_exempt, name='dispatch')
 class BlockPlayer_api(generics.CreateAPIView):
@@ -281,7 +270,11 @@ class BlockListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user.player_profile
-        return Block.objects.filter(blocker=user) | Block.objects.filter(blocked=user)
+        return Block.objects.filter(
+            (models.Q(blocker=user) | models.Q(blocked=user)) &
+            models.Q(blocker__user__is_active=True) &
+            models.Q(blocked__user__is_active=True)
+        )
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UnblockPlayerView(generics.DestroyAPIView):

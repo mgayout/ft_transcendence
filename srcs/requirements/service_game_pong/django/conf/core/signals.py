@@ -2,9 +2,11 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from shared_models.models import Match,TournamentStatusChoices, StatusChoices
 from .models import Winrate
-from django.db import transaction
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+from asgiref.sync import sync_to_async
+
 
 @receiver(post_save, sender=Match)
 def handle_final_match_completion(sender, instance, **kwargs):
@@ -83,3 +85,5 @@ def update_winrate_player(sender, instance, **kwargs):
             
     except Exception as e:
         print(f"Erreur dans update_winrate_player pour match {instance.id}: {str(e)}")
+
+

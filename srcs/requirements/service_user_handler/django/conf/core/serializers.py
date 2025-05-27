@@ -102,22 +102,23 @@ class BlockListSerializer(serializers.ModelSerializer):
 #===CRUD PLAYER====
 
 class PlayerRegisterSerializer(serializers.Serializer):
-    username = serializers.CharField(write_only=True, allow_blank=True, allow_null=True)
-    password = serializers.CharField(write_only=True, allow_blank=True, allow_null=True)
-    password2 = serializers.CharField(write_only=True, required=True)
+    username = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True)
+    password2 = serializers.CharField(write_only=True)
+
+    def validate_username(self, value):
+        if len(value) > 20:
+            raise serializers.ValidationError({"code": 1011}) # Le nom d'utilisateur ne doit pas dépasser 20 caractères.
+        if ' ' in value:
+            raise serializers.ValidationError({"code": 1012}) # Le nom d'utilisateur ne doit pas contenir d'espaces.
+        if not re.match(r'^[a-zA-Z0-9]+$', value):
+            raise serializers.ValidationError({"code": 1013}) # Le nom d'utilisateur ne doit contenir que des lettres et des chiffres.
+        return value or ""
 
     def validate(self, data):
+        username = data['username']
         if not data.get('username'):
             raise serializers.ValidationError({"code": 1009}) # Nom d'utilisateur requis.
-        
-        username = data['username']
-        if len(username) > 20:
-            raise serializers.ValidationError({"code": 1011}) # Le nom d'utilisateur ne doit pas dépasser 20 caractères.
-        if ' ' in username:
-            raise serializers.ValidationError({"code": 1012}) # Le nom d'utilisateur ne doit pas contenir d'espaces.
-        if not re.match(r'^[a-zA-Z0-9]+$', username):
-            raise serializers.ValidationError({"code": 1013}) # Le nom d'utilisateur ne doit contenir que des lettres et des chiffres.
-        
         if not data.get('password') or not data.get('password2'):
             raise serializers.ValidationError({"code": 1010}) # Mot de passe requis.
         if data['password'] != data['password2']:
@@ -150,7 +151,7 @@ class PlayerUpdateInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Player
         fields = ['online', 'description', 'avatar']
-
+    
     def validate(self, data):
         # Vérification de l'utilisateur authentifié
         request = self.context.get('request')
@@ -227,27 +228,32 @@ class PlayerUpdateInfoSerializer(serializers.ModelSerializer):
         return {"code": 1000}
 
 class PlayerUpdateNameSerializer(serializers.ModelSerializer):
-    name             = serializers.CharField(write_only=True)
-    current_password = serializers.CharField(write_only=True)
+    name             = serializers.CharField(write_only=True, required=True)
+    current_password = serializers.CharField(write_only=True, required=True)
 
     class Meta:
         model = Player
         fields = ['name', 'current_password']
 
+    def validate_name(self, value):
+        if not re.match(r'^[a-zA-Z0-9]+$', value):
+            raise serializers.ValidationError({"code": 1013}) # Le nom d'utilisateur ne doit contenir que des lettres et des chiffres.
+        if len(value) > 20:
+            raise serializers.ValidationError({"code": 1011}) # Le nom d'utilisateur ne doit pas dépasser 20 caractères.
+        if ' ' in value:
+            raise serializers.ValidationError({"code": 1012}) # Le nom d'utilisateur ne doit pas contenir d'espaces.
+        return value
+
     def validate(self, data):
         user = self.context['request'].user
+        if not user.is_authenticated:
+            raise serializers.ValidationError({"code": 1030, "message": "Utilisateur non authentifié."})
         if not check_password(data['current_password'], user.password):
             raise serializers.ValidationError({"code": 1008})  # Mot de passe incorrect.
         
-        username = data['name']
-        if Player.objects.filter(username).exists():
+        name = data['name']
+        if Player.objects.filter(name=name).exists():
             raise serializers.ValidationError({"code": 1002}) #Ce nom d'utilisateur est déjà pris.
-        if len(username) > 20:
-            raise serializers.ValidationError({"code": 1011}) # Le nom d'utilisateur ne doit pas dépasser 20 caractères.
-        if ' ' in username:
-            raise serializers.ValidationError({"code": 1012}) # Le nom d'utilisateur ne doit pas contenir d'espaces.
-        if not re.match(r'^[a-zA-Z0-9]+$', username):
-            raise serializers.ValidationError({"code": 1013}) # Le nom d'utilisateur ne doit contenir que des lettres et des chiffres.
         
         return data
 
@@ -283,15 +289,87 @@ class PlayerUpdatePWDSerializer(serializers.Serializer):
 
 class PlayerDeleteSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
-
+    
     def validate(self, data):
         user = self.context['request'].user
+        # Vérifier que l'utilisateur est authentifié
+        if not user.is_authenticated:
+            raise serializers.ValidationError({"code": 1009, "message": "Utilisateur non authentifié."})
+        # Vérifier le mot de passe
+        if 'password' not in data:
+            raise serializers.ValidationError({"code": 1007, "message": "Le champ mot de passe est requis."})
         if not user.check_password(data['password']):
-            raise serializers.ValidationError({"code": 1008})  # Mot de passe incorrect.
+            raise serializers.ValidationError({"code": 1008, "message": "Mot de passe incorrect."})
         return data
-    
+
+    def reset_player(self, player):
+        """Réinitialise les champs du joueur."""
+        if not player:
+            return
+        player.forty_two_id = None
+        player.name = "[DELETED USER]"
+        player.online = False
+        player.last_seen = None
+        player.avatar = "avatars/default.jpg"
+        player.two_factor_enabled = False
+        player.save()
+
+    def remove_friend(self, player):
+        """Récupère et supprime toutes les relations d'amitié impliquant le joueur."""
+        if not player:
+            return []
+        friendships = Friendship.objects.filter(models.Q(player_1=player) | models.Q(player_2=player))
+        friendship_data = [
+            {
+                "id": friendship.id,
+                "player_1": friendship.player_1.id,
+                "player_2": friendship.player_2.id
+            }
+            for friendship in friendships
+        ]
+        if friendships.exists():
+            friendships.delete()
+        return friendship_data
+
+    def remove_block(self, player):
+        """Récupère et supprime toutes les relations de blocage impliquant le joueur."""
+        if not player:
+            return []
+        blocks = Block.objects.filter(models.Q(blocker=player) | models.Q(blocked=player))
+        block_data = [
+            {
+                "id": block.id,
+                "player_1": block.player_1.id,
+                "player_2": block.player_2.id
+            }
+            for block in blocks
+        ]
+        if blocks.exists():
+            blocks.delete()
+        return block_data
+
+    def update(self, instance, validated_data):
+        """Désactive l'utilisateur et réinitialise les données du joueur."""
+        # Récupérer le joueur associé
+        player = Player.objects.filter(user=instance).first()
+
+        # Réinitialiser le joueur et supprimer les relations
+        self.reset_player(player)
+        self.remove_friend(player)
+        self.remove_block(player)
+
+        # Désactiver l'utilisateur
+        instance.is_active = False
+        instance.username = f"deleted_{player.id}"
+        instance.save()
+
+        return instance
+
     def to_representation(self, instance):
-        return {"code": 1000}
+        """Retourne une réponse standard pour indiquer le succès."""
+        return {
+            "code": 1000,
+        }
 
 # FONCTION UTILITAIRE pour blacklister tous les tokens d'un utilisateur
 def blacklist_all_user_tokens(user):
@@ -320,7 +398,7 @@ class PlayerLoginSerializer(serializers.Serializer):
     username = serializers.CharField(write_only=True, allow_blank=True, allow_null=True)
     password = serializers.CharField(write_only=True, allow_blank=True, allow_null=True)
     otp_code = serializers.CharField(write_only=True, required=False, allow_blank=True, allow_null=True)
-
+        
     def validate(self, data):
         player_name = data.get('username')
         password = data.get('password')
@@ -479,6 +557,15 @@ class FriendRequestRejectSerializer(serializers.ModelSerializer):
         model = Friendship
         fields = []
 
+    def validate(self, data):
+        friendship = self.instance
+        request_user = self.context['request'].user
+        if friendship.player_2.user != request_user:
+            raise serializers.ValidationError({"code": 1020, "message": "Seul le destinataire peut rejeter cette demande."})
+        if friendship.status != 'pending':
+            raise serializers.ValidationError({"code": 1021, "message": "Cette demande a déjà été traitée."})
+        return data
+
     def to_representation(self, instance):
         return {"code": 1000}
 
@@ -570,6 +657,11 @@ class UnblockPlayerSerializer(serializers.ModelSerializer):
 class Enable2FASerializer(serializers.Serializer):
     otp_code = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
+    def validate_otp_code(self, value):
+        if value and not re.match(r'^\d{6}$', value):
+            raise serializers.ValidationError({"code": 1037, "message": "Le code OTP doit être exactement 6 chiffres."})
+        return value
+
     def validate(self, data):
         user = self.context['request'].user
         if not user.is_authenticated:
@@ -639,6 +731,7 @@ class Disable2FASerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
+        password = data["password"]
         user = self.context['request'].user
         if not user.is_authenticated:
             raise serializers.ValidationError({"code": 1030})  # Utilisateur non authentifié
@@ -658,10 +751,7 @@ class Disable2FASerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         print('test')
-        return {
-            "code": 1000,
-            "message": "2FA désactivé"
-        }
+        return {"code": 1000,}
 
 
 #===OAUTH====
@@ -673,8 +763,6 @@ class Auth42CompleteSerializer(serializers.Serializer):
     def validate(self, data):
         if data['password'] != data['password2']:
             raise serializers.ValidationError({"code": 1001})
-        
-        validate_strong_password(data['password'])
         
         oauth_data = self.context['request'].session.get('oauth_42_data')
         if not oauth_data:

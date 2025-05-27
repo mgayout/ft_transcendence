@@ -8,6 +8,9 @@ from channels.auth import AuthMiddlewareStack
 from shared_models.models import Player
 import asyncio
 from urllib.parse import parse_qs
+from django.http import JsonResponse
+import json
+import re
 
 # Middleware existant pour l'authentification JWT
 @database_sync_to_async
@@ -80,3 +83,28 @@ class AllowedHostsMiddleware(BaseMiddleware):
 # Mise à jour de CustomAuthMiddlewareStack pour inclure AllowedHostsMiddleware
 def CustomAuthMiddlewareStack(inner):
     return AllowedHostsMiddleware(JWTAuthMiddleware(AuthMiddlewareStack(inner)))
+
+class XSSProtectionMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.method in ('POST', 'PATCH'):
+            # Regex combinée pour XSS et SQL
+            malicious_pattern = re.compile(
+                r'[<>\'";]|--|/\*|\*/|script|on\w+|(\b(union|select|insert|delete|update|drop|alter|exec|create|truncate|grant|revoke)\b\s*(all|from|into|set|table)?\s*[^\w])',
+                re.IGNORECASE
+            )
+            if request.content_type == 'application/json':
+                try:
+                    data = json.loads(request.body)
+                    for key, value in data.items():
+                        if isinstance(value, str) and malicious_pattern.search(value):
+                            return JsonResponse({"code": 1100, "message": f"Caractères non autorisés dans {key}"}, status=400)
+                except json.JSONDecodeError:
+                    return JsonResponse({"code": 1015, "message": "JSON invalide"}, status=400)
+            elif request.content_type.startswith('multipart/form-data'):
+                for key, value in request.POST.items():
+                    if malicious_pattern.search(value):
+                        return JsonResponse({"code": 1100, "message": f"Caractères non autorisés dans {key}"}, status=400)
+        return self.get_response(request)

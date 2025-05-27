@@ -123,7 +123,7 @@ class PongInvitationSerializer(serializers.ModelSerializer):
 
         # Récupérer les données envoyées
         player_2_id = attrs.get("player_2_id")
-        number_of_rounds = attrs.get("number_of_rounds")
+        number_of_rounds = 1
         max_score_per_round = attrs.get("max_score_per_round")
         match_type = attrs.get("match_type", TypeChoices.NORMAL)
 
@@ -179,6 +179,30 @@ class PongInvitationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"code": 4028}
             )  # Invitation en attente existante
+
+        if Tournament.objects.filter(
+            Q(player_1=from_player)
+            | Q(player_2=from_player)
+            | Q(player_3=from_player)
+            | Q(player_4=from_player),
+            Q(status=TournamentStatusChoices.OUVERT)
+            | Q(status=TournamentStatusChoices.EN_COURS),
+        ).exists():
+            raise serializers.ValidationError(
+                {"code": 4009}
+            )  # Joueur déjà dans un tournoi ouvert ou en cours
+
+        if Tournament.objects.filter(
+            Q(player_1=to_player)
+            | Q(player_2=to_player)
+            | Q(player_3=to_player)
+            | Q(player_4=to_player),
+            Q(status=TournamentStatusChoices.OUVERT)
+            | Q(status=TournamentStatusChoices.EN_COURS),
+        ).exists():
+            raise serializers.ValidationError(
+                {"code": 4010}
+            )  # to_player déjà dans un tournoi ouvert ou en cours
 
         # Vérifier les blocages
         if Block.objects.filter(blocker=to_player, blocked=from_player).exists():
@@ -424,7 +448,6 @@ class InvitationDeclineSerializer(serializers.Serializer):
 class TournamentCreateSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=50, required=False)
     max_score_per_round = serializers.IntegerField(default=3, min_value=1, max_value=9)
-    number_of_rounds = serializers.IntegerField(default=3, min_value=1, max_value=9)
 
     def validate(self, attrs):
         user = self.context["request"].user
@@ -439,11 +462,6 @@ class TournamentCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {"code": 4013}
             )  # Le score maximum par manche doit être impair
-
-        if attrs["number_of_rounds"] % 2 == 0:
-            raise serializers.ValidationError(
-                {"code": 4014}
-            )  # Le nombre de manches doit être impair
 
         if Tournament.objects.filter(
             Q(player_1=player)
@@ -465,7 +483,7 @@ class TournamentCreateSerializer(serializers.Serializer):
             player_1=validated_data["player_1"],
             name=validated_data.get("name", ""),
             max_score_per_round=validated_data["max_score_per_round"],
-            number_of_rounds=validated_data["number_of_rounds"],
+            number_of_rounds=1,
         )
         return tournament
 
@@ -546,26 +564,7 @@ class TournamentJoinSerializer(serializers.Serializer):
         if tournament.status != TournamentStatusChoices.OUVERT:
             raise serializers.ValidationError({"code": 4016})  # Tournoi non ouvert
 
-        # Vérifier les blocages avec les joueurs du tournoi
-        current_players = [
-            tournament.player_1,
-            tournament.player_2,
-            tournament.player_3,
-            tournament.player_4,
-        ]
-        current_players = [p for p in current_players if p is not None]
 
-        # Vérifier si le joueur a bloqué un participant
-        if Block.objects.filter(blocker=player, blocked__in=current_players).exists():
-            raise serializers.ValidationError(
-                {"code": 4026}
-            )  # Vous avez bloqué un joueur du tournoi
-
-        # Vérifier si le joueur est bloqué par un participant
-        if Block.objects.filter(blocker__in=current_players, blocked=player).exists():
-            raise serializers.ValidationError(
-                {"code": 4027}
-            )  # Vous êtes bloqué par un joueur du tournoi
 
         attrs["player"] = player
         return attrs

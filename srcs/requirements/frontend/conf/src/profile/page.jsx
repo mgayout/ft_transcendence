@@ -35,14 +35,12 @@ function ProfilePage({ user }) {
 			<Header user={ user }/>
 			<main>
 				<Background type={"private"} />
-				{profile ?
-					<div className="position-absolute top-50 start-50 translate-middle mt-3">
-						<div className="rounded border border-black border-2 px-3 px-lg-5 pt-2 pt-lg-4 pb-3 pb-lg-4"
-							style={{background: "rgba(0, 0, 0, 0.7)"}}>
-							<Profile user={ user } profile={ profile }/>
-						</div>
-					</div> :
-					<></>}
+				<div className="position-absolute top-50 start-50 translate-middle mt-3">
+					<div className="rounded border border-black border-2 px-3 px-lg-5 pt-2 pt-lg-4 pb-3 pb-lg-4"
+						style={{background: "rgba(0, 0, 0, 0.7)"}}>
+						{profile ? <Profile user={ user } profile={ profile }/> : <div className="text-white text-center">Profile not found</div>}
+					</div>
+				</div>
 			</main>
 		</>
 	)

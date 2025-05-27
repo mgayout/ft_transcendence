@@ -47,7 +47,7 @@ function PlayMatch() {
 	const closeEnd = () => setEnd(false)
 	const [winner, setWinner] = useState("")
 	const [timer, setTimer] = useState(60)
-	const [showTimer, setShowTimer] = useState(true)
+	const [wait, setWait] = useState(false)
 	const socket = getSocket()
 
 	const declareWin = async () => {socket.send(JSON.stringify({ action: "declare_win" }))}
@@ -63,6 +63,7 @@ function PlayMatch() {
 			else
 				setWinner(user.name)
 			setPaused(false)
+			setWait(false)
 			setEnd(true)
 			setMessages([])
 			setPongMessages([])
@@ -71,15 +72,15 @@ function PlayMatch() {
 		if (lastMessage.type == "game_paused")
 			setPaused(true)
 		if (lastMessage.type == "player_count" && lastMessage.player_count == 1) {
+			setWait(true)
 			setPaused(true)
-			setShowTimer(true)
 		}
 		if (lastMessage.type == "forfeit_not_available") {
 			setTimer(lastMessage.remaining_seconds)
 		}
 		if (lastMessage.type == "player_count" && lastMessage.player_count == 2) {
 			setPaused(false)
-			setShowTimer(true)
+			setWait(false)
 			setTimer(60)
 		}
 	}, [messages])
@@ -90,9 +91,10 @@ function PlayMatch() {
 		<div className="position-absolute top-0 d-flex flex-column justify-content-center align-items-center vh-100 w-100">
   			<i className="bi bi-pause-circle" style={{ fontSize: "20rem", color: "white" }} />
 			<div className="fs-1 mb-5">
-				{showTimer ? `Timer : ${timer}s` : ""}
+			{wait 
+				? <div className="text-white text-center">Waiting ...</div>
+				: <Button className="" onClick={() => declareWin()}>Declare win in {timer}s</Button> }
 			</div>
-			<Button className="" onClick={() => declareWin()}>Declare win</Button>
 		</div> : <></> }
 		<WinnerModal winnerName={ winner } show={ end } onClose={ closeEnd }/>
 		</>

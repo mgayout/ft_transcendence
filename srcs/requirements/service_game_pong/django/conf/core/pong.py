@@ -112,4 +112,4 @@ async def game_pong(game_id, consumer):
     consumer.c_scorep2[consumer.match_id] = score_player_2
 
     # Sauvegarder l'état
-    await consumer.save_game_state()
+    #await consumer.save_game_state()

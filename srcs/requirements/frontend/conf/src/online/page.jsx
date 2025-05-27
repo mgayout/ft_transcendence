@@ -22,7 +22,7 @@ function Online({ user }) {
 			const matchData = await axiosInstance.get(`/pong/matches/?player_id=${user.id}`)
 			const inviteData = await axiosInstance.get("/pong/invitations/")
 			const a = matchData.data.find(match => match.status == "En cours" && (match.player_1.name == user.name || match.player_2.name == user.name))
-			console.log(a)
+			//console.log(a)
 			if (a) {
 				if (a.player_1 != undefined && a.player_2 != undefined &&
 					a.player_1.name != undefined && a.player_2.name != undefined) {		

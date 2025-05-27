@@ -8,7 +8,7 @@ class StatusChoices(models.TextChoices):
     REFUSEE = 'Refusée'
     EN_COURS = 'En cours'
     TERMINE = 'Terminée'
-    ANNULEE  = 'Annulée'
+    ANNULER  = 'Annulé'
 
 class TypeChoices(models.TextChoices):
     IA = 'IA'
@@ -46,8 +46,8 @@ class Game(models.Model):
     status = models.CharField(choices=StatusChoices.choices, max_length=10, default=StatusChoices.EN_COURS)
     ball_position = models.JSONField(default=dict, null=True, blank=True)
     paddle_position = models.JSONField(default=dict, null=True, blank=True)
-    ball_dx = models.IntegerField(default=1)
-    ball_dy = models.IntegerField(default=0)
+    ball_dx = models.FloatField(default=1)
+    ball_dy = models.FloatField(default=0)
     ball_speed = models.FloatField(default=0.2)
     round_number = models.PositiveIntegerField(null=True, blank=True)
     winner = models.ForeignKey(Player, on_delete=models.SET_NULL, related_name='won_games', null=True, blank=True)
