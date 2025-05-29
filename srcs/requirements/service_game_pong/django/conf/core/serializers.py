@@ -113,6 +113,44 @@ class PongInvitationSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
 
+    def check_player_tournament_and_match_status(self, player, error_code, error_message):
+        """
+        Vérifie si un joueur est dans un tournoi ouvert ou en cours et s'il a gagné un match.
+        Lève une ValidationError si le joueur a gagné un match dans un tournoi ouvert ou en cours.
+        """
+        # Vérifier les matchs en cours hors tournoi
+        if Match.objects.filter(
+            Q(player_1=player) | Q(player_2=player),
+            status=StatusChoices.EN_COURS,
+            tournament__isnull=True
+        ).exists():
+            raise serializers.ValidationError({
+                "code": error_code,
+                "message": "Player is already in an ongoing match"
+            })
+
+        # Vérifie si le joueur est dans un tournoi ouvert ou en cours
+        tournament_query = Tournament.objects.filter(
+            Q(player_1=player) | Q(player_2=player) | Q(player_3=player) | Q(player_4=player),
+            status__in=[TournamentStatusChoices.OUVERT, TournamentStatusChoices.EN_COURS]
+        )
+
+        if tournament_query.exists():
+            # Récupérer les tournois correspondants
+            tournaments = tournament_query.values_list('id', flat=True)
+            
+            # Vérifier si le joueur a gagné un match dans l'un de ces tournois
+            if Match.objects.filter(
+                tournament__id__in=tournaments,
+                winner=player
+            ).exists():
+                # Si le joueur a gagné un match, lever une erreur
+                raise serializers.ValidationError({
+                    "code": error_code,
+                    "message": error_message
+                })
+            # Si le joueur est dans un tournoi mais n'a pas gagné de match, la validation passe
+
     def validate(self, attrs):
         # Récupérer l'utilisateur connecté et son profil joueur
         user = self.context["request"].user
@@ -180,29 +218,17 @@ class PongInvitationSerializer(serializers.ModelSerializer):
                 {"code": 4028, "message": "Existing pending invitation"}
             )  # Invitation en attente existante
 
-        if Tournament.objects.filter(
-            Q(player_1=from_player)
-            | Q(player_2=from_player)
-            | Q(player_3=from_player)
-            | Q(player_4=from_player),
-            Q(status=TournamentStatusChoices.OUVERT)
-            | Q(status=TournamentStatusChoices.EN_COURS),
-        ).exists():
-            raise serializers.ValidationError(
-                {"code": 4009, "message": "Player already in an open or ongoing tournament"}
-            )  # Joueur déjà dans un tournoi ouvert ou en cours
-
-        if Tournament.objects.filter(
-            Q(player_1=to_player)
-            | Q(player_2=to_player)
-            | Q(player_3=to_player)
-            | Q(player_4=to_player),
-            Q(status=TournamentStatusChoices.OUVERT)
-            | Q(status=TournamentStatusChoices.EN_COURS),
-        ).exists():
-            raise serializers.ValidationError(
-                {"code": 4010, "message": "player already in an open or ongoing tournament"}
-            )  # to_player déjà dans un tournoi ouvert ou en cours
+        # Vérifier si les joueurs ont gagné un match dans un tournoi ouvert ou en cours
+        self.check_player_tournament_and_match_status(
+            from_player,
+            4009,
+            "Player has won a match in an open or ongoing tournament and cannot create a new match"
+        )
+        self.check_player_tournament_and_match_status(
+            to_player,
+            4010,
+            "Player has won a match in an open or ongoing tournament and cannot create a new match"
+        )
 
         # Vérifier les blocages
         if Block.objects.filter(blocker=to_player, blocked=from_player).exists():
@@ -294,47 +320,70 @@ class InvitationCancelSerializer(serializers.Serializer):
 
 
 class InvitationAcceptSerializer(serializers.Serializer):
+    def check_player_tournament_and_match_status(self, player, error_code, error_message):
+        """
+        Vérifie si un joueur est dans un tournoi ouvert ou en cours et s'il a gagné un match,
+        ou s'il est dans un match en cours hors tournoi.
+        """
+        if Match.objects.filter(
+            Q(player_1=player) | Q(player_2=player),
+            status=StatusChoices.EN_COURS,
+            tournament__isnull=True
+        ).exists():
+            raise serializers.ValidationError({
+                "code": error_code,
+                "message": "Player is already in an ongoing match"
+            })
+
+        tournament_query = Tournament.objects.filter(
+            Q(player_1=player) | Q(player_2=player) | Q(player_3=player) | Q(player_4=player),
+            status__in=[TournamentStatusChoices.OUVERT, TournamentStatusChoices.EN_COURS]
+        )
+
+        if tournament_query.exists():
+            tournaments = tournament_query.values_list('id', flat=True)
+            if Match.objects.filter(
+                tournament__id__in=tournaments,
+                winner=player
+            ).exists():
+                raise serializers.ValidationError({
+                    "code": error_code,
+                    "message": error_message
+                })
+
     def validate(self, attrs):
         invitation = self.instance
         user = self.context["request"].user
 
-        # Vérifier si l'utilisateur a un profil joueur
         try:
             player = Player.objects.get(user=user)
         except Player.DoesNotExist:
-            raise serializers.ValidationError({"code": 4001, "message": "No player profile"})  # Pas de profil joueur
+            raise serializers.ValidationError({"code": 4001, "message": "No player profile"})
 
-        # Vérifier si le joueur est le destinataire de l'invitation
         if invitation.to_player != player:
-            raise serializers.ValidationError({"code": 4010, "message": "Not the recipient"})  # Pas le destinataire
+            raise serializers.ValidationError({"code": 4010, "message": "Not the recipient"})
 
-        from_player = player
-        to_player = invitation.to_player
-
-        if Tournament.objects.filter(
-            Q(player_1__in=[from_player, to_player])
-            | Q(player_2__in=[from_player, to_player])
-            | Q(player_3__in=[from_player, to_player])
-            | Q(player_4__in=[from_player, to_player]),
-            status__in=["OPEN", "IN_PROGRESS"],
-        ).exists():
-            raise serializers.ValidationError({"code": 4009, "message": "Player already in an open or ongoing tournament"})
-
-        # Vérifier si l'invitation est en attente
         if invitation.status != StatusChoices.EN_ATTENTE:
-            raise serializers.ValidationError(
-                {"code": 4011, "message": "Invitation not pending"}
-            )  # Invitation non en attente
+            raise serializers.ValidationError({"code": 4011, "message": "Invitation not pending"})
+
+        self.check_player_tournament_and_match_status(
+            invitation.from_player,
+            4009,
+            "Sender has won a match in an open or ongoing tournament and cannot play a new match"
+        )
+        self.check_player_tournament_and_match_status(
+            invitation.to_player,
+            4010,
+            "Recipient has won a match in an open or ongoing tournament and cannot play a new match"
+        )
 
         attrs["player"] = player
         return attrs
 
     def update(self, instance, validated_data):
-        # Mettre à jour l'invitation
         instance.status = StatusChoices.ACCEPTEE
         instance.save()
 
-        # Créer le match
         match = Match.objects.create(
             player_1=instance.from_player,
             player_2=instance.to_player,
@@ -343,7 +392,6 @@ class InvitationAcceptSerializer(serializers.Serializer):
             type=instance.match_type,
         )
 
-        # Créer le jeu
         game = Game.objects.create(
             match=match,
             player_1=match.player_1,
@@ -357,7 +405,6 @@ class InvitationAcceptSerializer(serializers.Serializer):
         game.initialize_ball_direction()
         game.save()
 
-        # Annuler les autres invitations en attente du from_player
         other_invitations = Invitation.objects.filter(
             from_player=instance.from_player, status=StatusChoices.EN_ATTENTE
         ).exclude(id=instance.id)
@@ -365,7 +412,6 @@ class InvitationAcceptSerializer(serializers.Serializer):
             inv.status = StatusChoices.ANNULEE
             inv.save()
 
-        # Notifier les deux joueurs via WebSocket
         channel_layer = get_channel_layer()
         for player_id in [instance.from_player.id, instance.to_player.id]:
             async_to_sync(channel_layer.group_send)(
@@ -449,31 +495,52 @@ class TournamentCreateSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=50, required=False)
     max_score_per_round = serializers.IntegerField(default=3, min_value=1, max_value=9)
 
+    def check_player_tournament_and_match_status(self, player, error_code, error_message):
+        """
+        Vérifie si un joueur est dans un tournoi ouvert ou en cours et s'il a gagné un match,
+        ou s'il est dans un match en cours hors tournoi.
+        """
+        if Match.objects.filter(
+            Q(player_1=player) | Q(player_2=player),
+            status=StatusChoices.EN_COURS,
+            tournament__isnull=True
+        ).exists():
+            raise serializers.ValidationError({
+                "code": error_code,
+                "message": "Player is already in an ongoing match"
+            })
+
+        tournament_query = Tournament.objects.filter(
+            Q(player_1=player) | Q(player_2=player) | Q(player_3=player) | Q(player_4=player),
+            status__in=[TournamentStatusChoices.OUVERT, TournamentStatusChoices.EN_COURS]
+        )
+
+        if tournament_query.exists():
+            tournaments = tournament_query.values_list('id', flat=True)
+            if Match.objects.filter(
+                tournament__id__in=tournaments,
+                winner=player
+            ).exists():
+                raise serializers.ValidationError({
+                    "code": error_code,
+                    "message": error_message
+                })
+
     def validate(self, attrs):
         user = self.context["request"].user
         try:
             player = Player.objects.get(user=user)
         except Player.DoesNotExist:
-            raise serializers.ValidationError(
-                {"code": 4001, "message": "No player profile associated with the user"}
-            )  # Aucun profil joueur associé à l'utilisateur
+            raise serializers.ValidationError({"code": 4001, "message": "No player profile associated with the user"})
+
+        self.check_player_tournament_and_match_status(
+            player,
+            4009,
+            "Player has won a match in an open or ongoing tournament and cannot create a new tournament"
+        )
 
         if attrs["max_score_per_round"] % 2 == 0:
-            raise serializers.ValidationError(
-                {"code": 4013, "message": "The maximum score per round must be odd"}
-            )  # Le score maximum par manche doit être impair
-
-        if Tournament.objects.filter(
-            Q(player_1=player)
-            | Q(player_2=player)
-            | Q(player_3=player)
-            | Q(player_4=player),
-            Q(status=TournamentStatusChoices.OUVERT)
-            | Q(status=TournamentStatusChoices.EN_COURS),
-        ).exists():
-            raise serializers.ValidationError(
-                {"code": 4009, "message": "Player already in an open or ongoing tournament"}
-            )  # Joueur déjà dans un tournoi ouvert ou en cours
+            raise serializers.ValidationError({"code": 4013, "message": "The maximum score per round must be odd"})
 
         attrs["player_1"] = player
         return attrs
@@ -535,6 +602,37 @@ class TournamentMatchSerializer(serializers.ModelSerializer):
 
 
 class TournamentJoinSerializer(serializers.Serializer):
+    def check_player_tournament_and_match_status(self, player, error_code, error_message):
+        """
+        Vérifie si un joueur est dans un tournoi ouvert ou en cours et s'il a gagné un match,
+        ou s'il est dans un match en cours hors tournoi.
+        """
+        if Match.objects.filter(
+            Q(player_1=player) | Q(player_2=player),
+            status=StatusChoices.EN_COURS,
+            tournament__isnull=True
+        ).exists():
+            raise serializers.ValidationError({
+                "code": error_code,
+                "message": "Player is already in an ongoing match"
+            })
+
+        tournament_query = Tournament.objects.filter(
+            Q(player_1=player) | Q(player_2=player) | Q(player_3=player) | Q(player_4=player),
+            status__in=[TournamentStatusChoices.OUVERT, TournamentStatusChoices.EN_COURS]
+        )
+
+        if tournament_query.exists():
+            tournaments = tournament_query.values_list('id', flat=True)
+            if Match.objects.filter(
+                tournament__id__in=tournaments,
+                winner=player
+            ).exists():
+                raise serializers.ValidationError({
+                    "code": error_code,
+                    "message": error_message
+                })
+
     def validate(self, attrs):
         tournament = self.instance
         user = self.context["request"].user
@@ -542,29 +640,19 @@ class TournamentJoinSerializer(serializers.Serializer):
         try:
             player = Player.objects.get(user=user)
         except Player.DoesNotExist:
-            raise serializers.ValidationError(
-                {"code": 4001, "message": "No player profile associated with the user"}
-            )  # Aucun profil joueur associé à l'utilisateur
+            raise serializers.ValidationError({"code": 4001, "message": "No player profile associated with the user"})
 
-        if Tournament.objects.filter(
-            Q(player_1=player)
-            | Q(player_2=player)
-            | Q(player_3=player)
-            | Q(player_4=player),
-            Q(status=TournamentStatusChoices.OUVERT)
-            | Q(status=TournamentStatusChoices.EN_COURS),
-        ).exists():
-            raise serializers.ValidationError(
-                {"code": 4009, "message": "Player already in an open or ongoing tournament"}
-            )  # Joueur déjà dans un tournoi ouvert ou en cours
+        self.check_player_tournament_and_match_status(
+            player,
+            4009,
+            "Player has won a match in an open or ongoing tournament and cannot join a new tournament"
+        )
 
-        if tournament.player_4 is not None and tournament.player_3 is not None and tournament.player_2 is not None and tournament.player_1 is not None :
-            raise serializers.ValidationError({"code": 4015, "message": "Full tournament"})  # Tournoi plein
+        if all([tournament.player_1, tournament.player_2, tournament.player_3, tournament.player_4]):
+            raise serializers.ValidationError({"code": 4015, "message": "Full tournament"})
 
         if tournament.status != TournamentStatusChoices.OUVERT:
-            raise serializers.ValidationError({"code": 4016, "message": "Tournoi non ouvert"})  # Tournoi non ouvert
-
-
+            raise serializers.ValidationError({"code": 4016, "message": "Tournament not open"})
 
         attrs["player"] = player
         return attrs
@@ -573,7 +661,6 @@ class TournamentJoinSerializer(serializers.Serializer):
         player = validated_data["player"]
         channel_layer = get_channel_layer()
 
-        # Liste des joueurs actuels (non nuls) avant d'ajouter le nouveau
         current_players = [
             instance.player_1,
             instance.player_2,
@@ -582,7 +669,6 @@ class TournamentJoinSerializer(serializers.Serializer):
         ]
         current_players = [p for p in current_players if p is not None]
 
-        # Ajouter le nouveau joueur
         if instance.player_2 is None:
             instance.player_2 = player
         elif instance.player_3 is None:
@@ -590,12 +676,10 @@ class TournamentJoinSerializer(serializers.Serializer):
         elif instance.player_4 is None:
             instance.player_4 = player
 
-        # Notifier tous les joueurs actuels (y compris le nouveau joueur)
         players_to_notify = current_players + [player]
         for p in players_to_notify:
-            group_name = f"user_{p.id}"
             async_to_sync(channel_layer.group_send)(
-                group_name,
+                f"user_{p.id}",
                 {
                     "type": "player_joined",
                     "tournament_id": instance.id,
@@ -604,11 +688,9 @@ class TournamentJoinSerializer(serializers.Serializer):
                 },
             )
 
-        # Si le tournoi est plein, notifier le créateur
         if instance.player_4 is not None:
-            group_name = f"user_{instance.player_1.id}"
             async_to_sync(channel_layer.group_send)(
-                group_name,
+                f"user_{instance.player_1.id}",
                 {
                     "type": "tournament_ready",
                     "tournament_id": instance.id,

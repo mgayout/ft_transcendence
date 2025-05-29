@@ -24,7 +24,8 @@ function Online({ user }) {
 		try {
 			const matchData = await axiosInstance.get(`/pong/matches/?player_id=${user.id}`)
 			const inviteData = await axiosInstance.get("/pong/invitations/")
-			const a = matchData.data.find(match => match.status == "En cours" && (match.player_1.name == user.name || match.player_2.name == user.name))
+			const a = matchData.data.find(match => (match.player_1.name == user.name || match.player_2.name == user.name) &&
+				match.status == "En cours" && match.tournament == null)
 			if (a) {
 				if (a.player_1 != undefined && a.player_2 != undefined &&
 					a.player_1.name != undefined && a.player_2.name != undefined) {		
@@ -41,7 +42,7 @@ function Online({ user }) {
 			}
 		}
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -74,8 +75,8 @@ function Online({ user }) {
 				{state == "wait" ?
 				<WaitMatch setState={ setState } setShow={ setShow } setInfo={ setInfo }/> : <></>}
 				{state == "play" ?
-				<PlayMatch/> : <></>}
-				<ErrorModal show={ show } hideModal={ hideModal } contextId={ 0 } info={ info } />
+				<PlayMatch setState={ setState }/> : <></>}
+				<ErrorModal show={ show } hideModal={ hideModal } contextId={ 5 } info={ info } />
 			</main>
 		</>
 	)

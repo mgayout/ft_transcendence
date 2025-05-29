@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react"
 import { Modal, Button, Spinner } from "react-bootstrap"
 import axiosInstance from "../auth/instance"
 
-function JoinMatch({ state, setState, setType }) {
+function JoinMatch({ state, setState, setShow, setInfo }) {
 
 	const [data, setData] = useState(null)
 	const [full, setFull] = useState(false)
@@ -35,17 +35,28 @@ function JoinMatch({ state, setState, setType }) {
 					players: getPlayers(tourn.player_1, tourn.player_2, tourn.player_3, tourn.player_4)}))
 			setData(a)
 		}
-		catch {}
+		catch(error) {
+			fonction()
+			if (error && error.response && error.response.data && error.response.data.message) {
+				setShow(true)
+				setInfo(error.response.data.message)
+			}
+		}
 	}
 
 	const join = async (id) => {
 		if (full == true) return
 		try {
 			await axiosInstance.put(`pong/tournament/${id}/join/`)
-			setType("invited")
 			setState("wait")
 		}
-		catch {fonction()}
+		catch(error) {
+			fonction()
+			if (error && error.response && error.response.data && error.response.data.message) {
+				setShow(true)
+				setInfo(error.response.data.message)
+			}
+		}
 	}
 
 	useEffect(() => {

@@ -5,7 +5,7 @@ import { useGame } from "../websockets/game"
 import axiosInstance from "../auth/instance"
 import { useAuth } from "../auth/context"
 
-function WaitMatch({ setState, setType }) {
+function WaitMatch({ setState, setType, setShow, setInfo }) {
 
 	const { NotifMessages, setNotifMessages } = useNotification()
 	const { setUrl } = useGame()
@@ -49,7 +49,12 @@ function WaitMatch({ setState, setType }) {
 				p4: {name: getName(a.player_4), avatar: getAvatar(a.player_4)},
 				players: getPlayers(a.player_1, a.player_2, a.player_3, a.player_4)})
 		}
-		catch {}
+		catch(error) {
+			if (error && error.response && error.response.data && error.response.data.message) {
+				setShow(true)
+				setInfo(error.response.data.message)
+			}
+		}
 	}
 
 	const startGame = async (message) => {
@@ -59,11 +64,16 @@ function WaitMatch({ setState, setType }) {
 				let a
 				if (idData.data.tournament_id) {
 					a = await axiosInstance.get(`/pong/tournaments/${idData.data.tournament_id}/struct/`)
-					await axiosInstance.post("/live_chat/general/send/", {content: `A tournament has started ! Semi-final-1 : ${a.data.matches[0].player_1} vs ${a.data.matches[0].player_2}, Semi-final-2: ${a.data.matches[1].player_1} vs ${a.data.matches[1].player_2}`})
+					await axiosInstance.post("/live_chat/general/send/", {content: `#A tournament has started ! Semi-final-1 : ${a.data.matches[0].player_1} vs ${a.data.matches[0].player_2}, Semi-final-2: ${a.data.matches[1].player_1} vs ${a.data.matches[1].player_2}`})
 				}
 			}
 		}
-		catch {} 
+		catch(error) {
+			if (error && error.response && error.response.data && error.response.data.message) {
+				setShow(true)
+				setInfo(error.response.data.message)
+			}
+		} 
 		finally {
 			if (message.player_1 == user.name) setType("paddle_l")
 			else if (message.player_2 == user.name) setType("paddle_r")
@@ -76,13 +86,23 @@ function WaitMatch({ setState, setType }) {
 	const play = async (id) => {
 		if (ready == false) return
 		try {const response = await axiosInstance.put(`/pong/tournament/${id}/start/`)}
-		catch {}
+		catch(error) {
+			if (error && error.response && error.response.data && error.response.data.message) {
+				setShow(true)
+				setInfo(error.response.data.message)
+			}
+		}
 	}
 
 
 	const cancel = async (id) => {
 		try {await axiosInstance.delete(`/pong/tournament/${id}/cancel/`)}
-		catch {}
+		catch(error) {
+			if (error && error.response && error.response.data && error.response.data.message) {
+				setShow(true)
+				setInfo(error.response.data.message)
+			}
+		}
 	}
 
 	const leave = async (id) => {
@@ -91,7 +111,12 @@ function WaitMatch({ setState, setType }) {
 			setType("")
 			setState("")
 		}
-		catch {}
+		catch(error) {
+			if (error && error.response && error.response.data && error.response.data.message) {
+				setShow(true)
+				setInfo(error.response.data.message)
+			}
+		}
 	}
 
 	useEffect(() => {

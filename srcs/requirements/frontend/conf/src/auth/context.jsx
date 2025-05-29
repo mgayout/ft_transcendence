@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
 		const Atoken = localStorage.getItem('Atoken')
 		const Rtoken = localStorage.getItem('Rtoken')
 		if (!Atoken || !Rtoken) return false
-		if (isTokenExpired(Atoken)) return await refreshAtoken(Rtoken)
+		if (isTokenExpired(Atoken)) return await refreshAtoken(Rtoken, "")
 		//if (isTokenInvalid(Atoken, Rtoken)) return false
 		return true
 	}

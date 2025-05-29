@@ -31,7 +31,7 @@ function ListModal({ tab, setShow, setInfo }) {
 			setFilteredFriends(temp)
 		}
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -43,9 +43,10 @@ function ListModal({ tab, setShow, setInfo }) {
 	}
 
 	const removeFriend = async (playerID) => {
-		try {await axiosInstance.delete(`/users/api/friend/remove/${playerID}/`)}
+		const json = {data: {"id": playerID}}
+		try {await axiosInstance.delete(`/users/api/friend/remove/`, json)}
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -55,7 +56,8 @@ function ListModal({ tab, setShow, setInfo }) {
 
 	const filterList = (e) => {
 		const query = e.target.value
-		setSearch(query)	
+		setSearch(query)
+		if (!data) return
 		const filtered = data.filter(player =>player.name.toLowerCase().includes(query.toLowerCase()))
 		setFilteredFriends(filtered)
 	}

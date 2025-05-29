@@ -2,7 +2,26 @@ import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { AmbientLight, DirectionalLight } from 'three'
 
-export const setFloor = (scene) => {
+export const setAll = (scene, state, groupName, groupScore) => {
+
+	const floor = setFloor(scene)
+	const fog = setFog(scene)
+	const light = setLight(scene)
+	if (state != "play") return {floor, fog, light}
+	//const line = setLine()
+	const border = setBorder(scene)
+	const bscreen = setBScreen(scene)
+	const paddle = setPaddle(scene)
+	const wall = setWall(scene)
+	const ball = setBall(scene)
+	const names = setNames(groupName, scene)
+	const score = setScore(groupScore, scene)
+
+	//line.cubes.forEach(cube => scene.add(cube))
+	return {floor, fog, light, paddle, wall, ball, border, bscreen, names, score}
+}
+
+const setFloor = (scene) => {
 	const geometry = new THREE.PlaneGeometry(1000, 1000)
 	const material = new THREE.MeshStandardMaterial({color: 0x7fdce2})
 	const floor = new THREE.Mesh(geometry, material)
@@ -12,7 +31,7 @@ export const setFloor = (scene) => {
 	return floor
 }
 
-export const setFog = (scene) => {
+const setFog = (scene) => {
 	const bg = new THREE.Color(0x326e72)
 	const fog = new THREE.Fog(0x326e72, 15, 150)
 	scene.background = bg
@@ -20,7 +39,7 @@ export const setFog = (scene) => {
 	return {bg, fog}
 }
 
-export const setLine = () => {
+const setLine = () => {
 	let cubes = [], geometry, material, cube, n = 19
 	for (let i = 1; i <= n; i++) {
 		geometry = new THREE.PlaneGeometry(0.8, 0.5)
@@ -33,7 +52,7 @@ export const setLine = () => {
 	return {cubes, n}
 }
 
-export const setBorder = () => {
+const setBorder = (scene) => {
 	const geometry = new THREE.TubeGeometry( new THREE.CatmullRomCurve3([
 		new THREE.Vector3(-15, 0, 0),
 		new THREE.Vector3(-15, 0, 20),
@@ -43,10 +62,11 @@ export const setBorder = () => {
 	const material = new THREE.MeshStandardMaterial({color: 0xDDDDDD})
 	const border = new THREE.Mesh(geometry, material)
 	border.position.set(35, 31, -5)
+	scene.add(border)
 	return border
 }
 
-export const setBScreen = () => {
+const setBScreen = (scene) => {
 	const geometry1 = new THREE.PlaneGeometry(34, 12)
 	const geometry2 = new THREE.PlaneGeometry(32, 2)
 	const geometry3 = new THREE.PlaneGeometry(26, 2.5)
@@ -60,10 +80,11 @@ export const setBScreen = () => {
 	bscreen1.rotateX(-Math.PI / 2)
 	bscreen2.rotateX(-Math.PI / 2)
 	bscreen3.rotateX(-Math.PI / 2)
+	scene.add(bscreen1, bscreen2, bscreen3)
 	return {bscreen1, bscreen2, bscreen3}
 }
 
-export const setLight = (scene) => {
+const setLight = (scene) => {
 	const ambientLight = new AmbientLight(0xffffff, 0.5)
 	const dirLight = new DirectionalLight(0xffffff, 1)
 	dirLight.position.set(50, 30, 20)
@@ -86,17 +107,18 @@ export const setLight = (scene) => {
 	return {ambientLight, dirLight}
 }
 
-export const setPaddle = () => {
+const setPaddle = (scene) => {
 	const geometry = new THREE.BoxGeometry(1, 5, 1)
 	const material = new THREE.MeshStandardMaterial({color: 0x2a484a})
 	const paddleL = new THREE.Mesh(geometry, material)
 	paddleL.castShadow = true
 	paddleL.receiveShadow = true
 	const paddleR = paddleL.clone()
+	scene.add(paddleL, paddleR)
 	return {paddleL, paddleR}
 }
 
-export const setWall = () => {
+const setWall = (scene) => {
 	const geometry = new RoundedBoxGeometry(75, 1, 3, 5, 0.5)
 	const material = new THREE.MeshStandardMaterial({color: 0xDDDDDD})
 	const wallL = new THREE.Mesh(geometry, material)
@@ -105,19 +127,21 @@ export const setWall = () => {
 	const wallR = wallL.clone()
 	wallL.position.set(35, -0.5, 0)
 	wallR.position.set(35, 30.5, 0)
+	scene.add(wallL, wallR)
 	return {wallL, wallR}
 }
 
-export const setBall = () => {
+const setBall = (scene) => {
 	const geometry = new RoundedBoxGeometry(1, 1, 1, 5, 0.5)
 	const material = new THREE.MeshStandardMaterial({color: 0xffaa00})
 	const ball = new THREE.Mesh(geometry, material)
 	ball.castShadow = true
 	ball.receiveShadow = true
+	scene.add(ball)
 	return ball
 }
 
-export const setScore = (groupScore) => {
+const setScore = (groupScore, scene) => {
 	const canvas = document.createElement('canvas')
 	canvas.width = 512
 	canvas.height = 512
@@ -142,19 +166,19 @@ export const setScore = (groupScore) => {
 	const textMesh = new THREE.Mesh(geometry, material)
 	textMesh.position.set(35, 30, 7)
 	textMesh.rotateX(Math.PI / 2)
+	scene.add(textMesh)
 	return (textMesh)
 }
 
 export const updateScore = (newScore, scene, objects) => {
-	const newScoreMesh = setScore(newScore)
+	scene.remove(objects.score)
 	objects.score.geometry.dispose()
 	objects.score.material.dispose()
-	scene.remove(objects.score)
-	scene.add(newScoreMesh)
+	const newScoreMesh = setScore(newScore, scene)
 	objects.score = newScoreMesh
 }
 
-export const setNames = (groupName) => {
+const setNames = (groupName, scene) => {
 	const canvas = document.createElement('canvas')
 	canvas.width = 512
 	canvas.height = 512
@@ -165,8 +189,8 @@ export const setNames = (groupName) => {
 	ctx.fillStyle = 'white'
 	ctx.textAlign = 'center'
 	ctx.textBaseline = 'middle'
-	const text = (groupName && groupName.player1 && groupName.player2
-		? `${groupName.player1} vs ${groupName.player2}`
+	const text = (groupName && groupName.name1 && groupName.name2
+		? `${groupName.name1} vs ${groupName.name2}`
 		: "...   vs   ...")
 	ctx.fillText(text, canvas.width / 2, canvas.height / 2)
 	const texture = new THREE.Texture(canvas)
@@ -179,5 +203,14 @@ export const setNames = (groupName) => {
 	const textMesh = new THREE.Mesh(geometry, material)
 	textMesh.position.set(35, 30, 14)
 	textMesh.rotateX(Math.PI / 2)
+	scene.add(textMesh)
 	return (textMesh)
+}
+
+export const updateName = (newName, scene, objects) => {
+	scene.remove(objects.names)
+	objects.names.geometry.dispose()
+	objects.names.material.dispose()
+	const newNameMesh = setNames(newName, scene)
+	objects.names = newNameMesh
 }

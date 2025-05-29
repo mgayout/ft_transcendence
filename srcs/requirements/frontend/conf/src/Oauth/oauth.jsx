@@ -23,7 +23,7 @@ function OauthRegister() {
                 throw new Error("Réponse invalide du serveur")
         }
 		catch (error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}

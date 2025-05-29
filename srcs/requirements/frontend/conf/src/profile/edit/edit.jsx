@@ -41,12 +41,11 @@ function ProfileEdit({ user }) {
 			}
 		}
 		catch(error) {
-			console.log(error)
 			setFile(null)
 			setPreview(null)
 			if (fileInputRef.current)
 				fileInputRef.current.value = null
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -85,7 +84,7 @@ function ProfileEdit({ user }) {
 			<Button className="rounded-0 btn btn-dark fw-bolder" onClick={() => updateInfo("reset")}>
                 Reset Avatar
             </Button>
-			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 0 } info={ info } />
+			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 6 } info={ info } />
 		</>
 	)
 }

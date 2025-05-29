@@ -34,7 +34,7 @@ function FriendModal({ friend, setFriend }) {
 					</Tab>
     			</Tabs>
 			</Modal.Body>
-			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 0 } info={ info } />
+			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 3 } info={ info } />
 		</Modal>
 	)
 }

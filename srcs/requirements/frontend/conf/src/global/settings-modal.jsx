@@ -52,7 +52,7 @@ function SettingsModal({ settings, setSettings }) {
 			}
 		}
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -67,7 +67,7 @@ function SettingsModal({ settings, setSettings }) {
 				handleClose()
 		}
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -77,10 +77,11 @@ function SettingsModal({ settings, setSettings }) {
 	const removeProfile = async (password) => {
 		try {
 			const response = await axiosInstance.put(`/users/api/player/delete/`, {password: password})
-			logout()
+			if (response.data.code == 1000)
+				logout()
 		}
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -97,7 +98,7 @@ function SettingsModal({ settings, setSettings }) {
 			}
 		}
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -199,7 +200,7 @@ function SettingsModal({ settings, setSettings }) {
 							value={passDelete} onChange={(e) => setPassDelete(e.target.value)}
 							className="rounded-0 rounded-start"/>
 						<Button type="button" className="rounded-0 rounded-end btn btn-light"
-							aria-label="show" onClick={() => setShowPassDelete(!passDelete)}>
+							aria-label="show" onClick={() => setShowPassDelete(!showPassDelete)}>
 							{showPassDelete
 								? <i className="eye bi-eye-fill"></i>
 								: <i className="eye bi-eye-slash-fill"></i>}
@@ -211,7 +212,7 @@ function SettingsModal({ settings, setSettings }) {
 				</div>
 			</Modal.Body>
 			<DFAModal show={ dfaShow } hide={ hideDFA } handleClose={ handleClose }/>
-			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 0 } info={ info } />
+			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 4 } info={ info } />
 		</Modal>
 	)
 }

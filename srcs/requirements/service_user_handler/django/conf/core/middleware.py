@@ -11,7 +11,7 @@ class UserActivityMiddleware:
         self.get_response = get_response
         self.jwt_auth = JWTAuthentication()
         self.last_cleanup = timezone.now()
-        self.cleanup_interval = timedelta(minutes=1) #Nettoyage toutes les x minutes
+        self.cleanup_interval = timedelta(minutes=5) #Nettoyage toutes les x minutes
 
     def __call__(self, request):
         #Mise à jour des utilisateurs connectés
@@ -43,7 +43,7 @@ class UserActivityMiddleware:
     def cleanup_inactive_users(self):
         """Marque les utilisateurs inactifs comme hors ligne."""
         try:
-            inactive_time = timezone.now() - timedelta(minutes=1) # Considérer comme inactif après x minutes sans activité
+            inactive_time = timezone.now() - timedelta(minutes=10) # Considérer comme inactif après x minutes sans activité
             Player.objects.filter(online=True, last_seen__lt=inactive_time).update(online=False)
         except Exception as e:
             print(f"Erreur lors du nettoyage des utilisateurs inactifs: {e}")

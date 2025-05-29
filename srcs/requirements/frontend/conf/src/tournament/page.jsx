@@ -7,8 +7,8 @@ import WaitMatch from "./wait.jsx"
 import PlayMatch from "./play.jsx"
 import { useNotification } from "../websockets/notification.jsx"
 import axiosInstance from "../auth/instance.jsx"
-import WaitFinal from "./waitFinal.jsx"
-import PlayFinalMatch from "./playfinal.jsx"
+import ErrorModal from "../global/error-modal.jsx"
+import { useGame } from "../websockets/game.jsx"
 
 
 function Tournament({ user }) {
@@ -16,12 +16,16 @@ function Tournament({ user }) {
 	const [state, setState] = useState("")
 	const [type, setType] = useState("")
 	const { setNotifMessages } = useNotification()
+	const { setUrl } = useGame()
+
+	const [show, setShow] = useState(false)
+	const hideModal = () => setShow(false)
+	const [info, setInfo] = useState("")
 
 	const fonction = async () => {
 		try {
 			const tournamentData = await axiosInstance.get("/pong/tournament/list/")
-			const url = await axiosInstance.get("/pong/matches/get-id/")
-			const idData = await axiosInstance.get("/pong/tournament/get-id/")
+			const matchData = await axiosInstance.get(`/pong/matches/?player_id=${user.id}`)
 			const a = tournamentData.data
 				.find(match => match.status == "Ouvert" &&
 				(match.player_1 == user.id || match.player_2 == user.id ||
@@ -30,25 +34,21 @@ function Tournament({ user }) {
 				setState("wait")
 				setNotifMessages({type: "tournament_created"})
 			}
-			else if (url && url.data.ws_url != null) {
-				if (idData && ((idData.data.finalist1 != null && idData.data.finalist1 == user.name) ||
-					(idData.data.finalist2 != null && idData.data.finalist2 == user.name))) {
-					console.log("url pour final", url)
-					if (url.data.player_1.name == user.name) setType("paddle_l")
-					else if (url.data.player_2.name == user.name) setType("paddle_r")
-					setUrl(url.data.ws_url)
-					setState("playfinal")
-				}
-				else {
-					console.log("url pour semi final", url)
-					if (url.data.player_1 == user.name) setType("paddle_l")
-					else if (url.data.player_2 == user.name) setType("paddle_r")
-					setUrl(url.data.ws_url)
-					setState("play")
-				}
+			const b = matchData.data
+				.find(match => match.status == "En cours" && match.type == "Tournois")
+			if (b) {
+				if (b.player_1.name == user.name) setType("paddle_l")
+				else if (b.player_2.name == user.name) setType("paddle_r")
+				setUrl(b.url.ws_url)
+				setState("play")
 			}
 		}
-		catch {}
+		catch {
+			if (error && error.response && error.response.data && error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
+		}
 	}
 
 	const create = async () => {
@@ -61,12 +61,16 @@ function Tournament({ user }) {
 			setNotifMessages({type: "tournament_created"})
 			setState("wait")
 		}
-		catch(error) {console.log(error)}
+		catch(error) {
+			if (error && error.response && error.response.data && error.response.data.message) {
+				setInfo(error.response.data.message)
+				setShow(true)
+			}
+		}
 	}
 
 	useEffect(() => {
-		console.log(state)
-		if (state == "" || state == "join")
+		if (state == "")
 			fonction()
 	}, [state])
 
@@ -86,15 +90,12 @@ function Tournament({ user }) {
 						</div>
 					</div>
 				</div> : <></>}
-				<JoinMatch state={ state } setState={ setState } setType={ setType }/>
+				<JoinMatch state={ state } setState={ setState } setShow={ setShow } setInfo={ setInfo }/>
 				{state == "wait" ?
 				<WaitMatch setState={ setState } setType={ setType }/> : <></>}
 				{state == "play" ?
-				<PlayMatch setState={ setState }/> : <></>}
-				{state == "waitfinal" ?
-				<WaitFinal setState={ setState } setType={ setType }/> : <></>}
-				{state == "playfinal" ?
-				<PlayFinalMatch setState={ setState }/> : <></>}
+				<PlayMatch setState={ setState } setType={ setType }/> : <></>}
+				<ErrorModal show={ show } hideModal={ hideModal } contextId={ 5 } info={ info } />
 			</main>
 		</>
 	)

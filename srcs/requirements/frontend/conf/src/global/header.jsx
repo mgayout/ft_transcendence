@@ -19,15 +19,15 @@ function Header({ user, state, setState }) {
 	if (!user) return (<></>)
 
 	const goTo = (string) => {
-		if (state && (state == "play" || state == "playfinal"))
+		if (state && state == "play")
 			closeSocket()
 		navigate(string)
 	}
 
 	const setTo = (string) => {
-		if (state && (state == "play" || state == "playfinal")) {
+		if (state && state == "play") {
 			closeSocket()
-			setState("")
+			navigate("/home")
 		}
 		if (string == "settings")
 			setSettings(true)

@@ -38,7 +38,7 @@ function Register() {
 			setUsername("")
 			setPassword1("")
 			setPassword2("")
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}

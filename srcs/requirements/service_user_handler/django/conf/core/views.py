@@ -32,35 +32,13 @@ class StatusApi(APIView):
         return Response({"code": 1000})
 
 # ==============================
-# API DJANGO REST FRAMEWORK
-# ==============================
-
-class AdminViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdminUser]
-
-class PlayerViewSet(AdminViewSet):
-    queryset = Player.objects.all()
-    serializer_class = serializers.PlayerSerializer
-    permission_classes = [IsAdminUser]
-
-class MatchViewSet(AdminViewSet):
-    queryset = Match.objects.all()
-    serializer_class = serializers.MatchSerializer
-    permission_classes = [IsAdminUser]
-
-class TournamentViewSet(AdminViewSet):
-    queryset = Tournament.objects.all()
-    serializer_class = serializers.TournamentSerializer
-    permission_classes = [IsAdminUser]
-
-# ==============================
 # AUTHENTIFICATION API
 # ==============================
 
 
 #===CRUD PLAYER====
 @method_decorator(csrf_exempt, name='dispatch')
-class PlayerRegister_api(generics.CreateAPIView):
+class PlayerRegisterView(generics.CreateAPIView):
     serializer_class = serializers.PlayerRegisterSerializer
     permission_classes = [AllowAny]
 
@@ -68,7 +46,7 @@ class PlayerRegister_api(generics.CreateAPIView):
         return super().post(request, *args, **kwargs)
 
 @method_decorator(csrf_exempt, name='dispatch')
-class PlayerList_api(generics.ListAPIView):
+class PlayerListView(generics.ListAPIView):
     queryset = Player.objects.filter(user__is_active=True)
     serializer_class = serializers.PlayerSerializer
 
@@ -78,7 +56,7 @@ class PlayerList_api(generics.ListAPIView):
         return context
 
 @method_decorator(csrf_exempt, name='dispatch')
-class PlayerDetail_api(generics.RetrieveAPIView):
+class PlayerDetailView(generics.RetrieveAPIView):
     queryset = Player.objects.all()
     serializer_class = serializers.PlayerSerializer
 
@@ -89,7 +67,7 @@ class PlayerDetail_api(generics.RetrieveAPIView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class PlayerUpdateInfo_api(generics.UpdateAPIView):
+class PlayerUpdateInfoView(generics.UpdateAPIView):
     serializer_class = serializers.PlayerUpdateInfoSerializer
     permission_classes = [IsAuthenticated]
 
@@ -102,7 +80,7 @@ class PlayerUpdateInfo_api(generics.UpdateAPIView):
         return context
 
 @method_decorator(csrf_exempt, name='dispatch')
-class PlayerUpdateName_api(generics.UpdateAPIView):
+class PlayerUpdateNameView(generics.UpdateAPIView):
     serializer_class = serializers.PlayerUpdateNameSerializer
     permission_classes = [IsAuthenticated]
 
@@ -110,7 +88,7 @@ class PlayerUpdateName_api(generics.UpdateAPIView):
         return self.request.user.player_profile
 
 @method_decorator(csrf_exempt, name='dispatch')   
-class PlayerUpdatePWD_api(generics.UpdateAPIView):
+class PlayerUpdatePWDView(generics.UpdateAPIView):
     serializer_class = serializers.PlayerUpdatePWDSerializer
     permission_classes = [IsAuthenticated]
 
@@ -118,7 +96,7 @@ class PlayerUpdatePWD_api(generics.UpdateAPIView):
         return self.request.user
 
 @method_decorator(csrf_exempt, name='dispatch')
-class PlayerDelete_api(generics.UpdateAPIView):
+class PlayerDeleteView(generics.UpdateAPIView):
     serializer_class = serializers.PlayerDeleteSerializer
     permission_classes = [IsAuthenticated]
 
@@ -126,7 +104,7 @@ class PlayerDelete_api(generics.UpdateAPIView):
         return self.request.user
 
 @method_decorator(csrf_exempt, name='dispatch')
-class PlayerLogin_api(APIView):
+class PlayerLoginView(APIView):
     serializer_class = serializers.PlayerLoginSerializer
     permission_classes = [AllowAny]
 
@@ -140,98 +118,74 @@ class PlayerLogin_api(APIView):
         return Response(serializer.to_representation(player), status=status.HTTP_200_OK)
 
 @method_decorator(csrf_exempt, name='dispatch')
-class PlayerLogout_api(APIView):
+class PlayerLogoutView(APIView):
     serializer_class = serializers.PlayerLogoutSerializer
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-        if hasattr(request.user, 'player_profile'):
-            player = request.user.player_profile
-            player.online = False
-            player.last_seen = timezone.now()
-            player.save()
+        player = serializer.validated_data['player']
+        player.online = False
+        player.last_seen = timezone.now()
+        player.save()
         return Response({"code": 1000}, status=status.HTTP_200_OK)
 # ============CRUD FriendShip================
 
 @method_decorator(csrf_exempt, name='dispatch')
-class SendFriendRequest_api(generics.CreateAPIView):
+class SendFriendRequestView(generics.CreateAPIView):
     serializer_class = serializers.SendFriendRequestSerializer
     permission_classes = [IsAuthenticated]
 
 @method_decorator(csrf_exempt, name='dispatch')
-class FriendRequestAccept_api(generics.UpdateAPIView):
+class FriendRequestAcceptView(generics.UpdateAPIView):
     serializer_class = serializers.FriendRequestAcceptSerializer
     permission_classes = [IsAuthenticated]
-    lookup_field = 'pk'
     queryset = Friendship.objects.all()
 
-    def get_object(self):
-        return Friendship.objects.get(id=self.kwargs['pk'])
-
     def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        instance = serializer.save()
         return Response({"code": 1000}, status=status.HTTP_200_OK)
 
 @method_decorator(csrf_exempt, name='dispatch')
-class FriendRequestReject_api(generics.DestroyAPIView):
+class FriendRequestRejectView(generics.DestroyAPIView):
     serializer_class = serializers.FriendRequestRejectSerializer
     permission_classes = [IsAuthenticated]
-    lookup_field = 'pk'
     queryset = Friendship.objects.all()
 
-    def get_object(self):
-        return Friendship.objects.get(id=self.kwargs['pk'])
-
-@method_decorator(csrf_exempt, name='dispatch')
-class FriendRequestCancel_api(generics.DestroyAPIView):
-    serializer_class = serializers.FriendRequestCancelSerializer
-    permission_classes = [IsAuthenticated]
-    lookup_field = 'pk'
-    queryset = Friendship.objects.all()
-
-    def get_object(self):
-        request_user = self.request.user
-        obj = super().get_object()
-
-        # Validation personnalisée
-        if obj.player_1.user != request_user:
-            raise serializers.ValidationError({"code": 1023, "message": "Only the sender can cancel this request."})  # "Seul l'expéditeur peut annuler cette demande."
-        if obj.status != 'pending':
-            raise serializers.ValidationError({"code": 1021, "message": "This request has already been processed."})  # "Cette demande a déjà été traitée."
-
-        return obj
-
-    def delete(self, request, *args, **kwargs):
-        instance = self.get_object()
+    def destroy(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.instance
         self.perform_destroy(instance)
         return Response({"code": 1000}, status=status.HTTP_200_OK)
 
-@method_decorator(csrf_exempt, name='dispatch')    
-class FriendRemove_api(generics.DestroyAPIView):
-    serializer_class = serializers.FriendshipRemoveSerializer
+@method_decorator(csrf_exempt, name='dispatch')
+class FriendRequestCancelView(generics.DestroyAPIView):
+    serializer_class = serializers.FriendRequestCancelSerializer
     permission_classes = [IsAuthenticated]
-    lookup_field = 'id' 
     queryset = Friendship.objects.all()
 
-    def get_object(self):
-        player = self.request.user.player_profile
-        obj = super().get_object()
+    def delete(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.instance
+        self.perform_destroy(instance)
+        return Response({"code": 1000}, status=status.HTTP_200_OK)
 
-        # Validation personnalisée
-        if obj.status != 'accepted':
-            raise serializers.ValidationError({"code": 1030, "message": "This relationship is not an accepted friendship."})  # "Cette relation n'est pas une amitié acceptée."
-        if obj.player_1 != player and obj.player_2 != player:
-            raise serializers.ValidationError({"code": 1025, "message": "You are not friends with this player."})  # "Vous n'êtes pas amis avec ce joueur."
-
-        return obj
+@method_decorator(csrf_exempt, name='dispatch')
+class FriendRemoveView(generics.DestroyAPIView):
+    serializer_class = serializers.FriendshipRemoveSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Friendship.objects.all()
 
     def delete(self, request, *args, **kwargs):
-        instance = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.instance
+        # Supprimer les relations d'amitié dans les deux sens
         Friendship.objects.filter(
             status='accepted',
             player_1=instance.player_1,
@@ -246,7 +200,7 @@ class FriendRemove_api(generics.DestroyAPIView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class FriendshipList_api(generics.ListAPIView):
+class FriendshipListView(generics.ListAPIView):
     serializer_class = serializers.FriendshipListSerializer
     permission_classes = [IsAuthenticated]
 
@@ -259,7 +213,7 @@ class FriendshipList_api(generics.ListAPIView):
         )
 # ============CRUD Block================
 @method_decorator(csrf_exempt, name='dispatch')
-class BlockPlayer_api(generics.CreateAPIView):
+class BlockPlayerView(generics.CreateAPIView):
     serializer_class = serializers.BlockPlayerSerializer
     permission_classes = [IsAuthenticated]
 
@@ -280,21 +234,12 @@ class BlockListView(generics.ListAPIView):
 class UnblockPlayerView(generics.DestroyAPIView):
     serializer_class = serializers.UnblockPlayerSerializer
     permission_classes = [IsAuthenticated]
-    lookup_field = 'id'
     queryset = Block.objects.all()
 
-    def get_object(self):
-        blocker = self.request.user.player_profile
-        obj = super().get_object()
-
-        # Validation personnalisée
-        if obj.blocker != blocker:
-            raise serializers.ValidationError({"code": 1028, "message": "You have not blocked this player."})  # "Vous n'avez pas bloqué ce joueur."
-        
-        return obj
-
     def delete(self, request, *args, **kwargs):
-        instance = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.instance
         self.perform_destroy(instance)
         return Response({"code": 1000}, status=status.HTTP_200_OK)
 
@@ -309,7 +254,7 @@ class Enable2FAView(generics.UpdateAPIView):
         try:
             return self.request.user.player_profile
         except AttributeError:
-            return Response({"code": 1043, "message": "No associated player profile"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"code": 1043, "message": "Aucun profil joueur associé"}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()

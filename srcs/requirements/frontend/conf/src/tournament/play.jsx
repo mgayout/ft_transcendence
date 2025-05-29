@@ -7,13 +7,10 @@ import { confetti } from "dom-confetti"
 import { useAuth } from "../auth/context"
 import axiosInstance from "../auth/instance"
 
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms))
-
-function WinnerModal({ winnerName, show, onClose, setState }) {
+function WinnerModal({ winnerName, show, onClose }) {
 
 	const confettiRef = useRef(null)
 	const navigate = useNavigate()
-	const { user } = useAuth()
 
 	useEffect(() => {
 		if (show && confettiRef.current) {
@@ -30,37 +27,27 @@ function WinnerModal({ winnerName, show, onClose, setState }) {
 		navigate("/home")
 	}
 
-	const goToFinal = () => {
-		onClose()
-		setState("waitfinal")
-	}
-
 	return (
-		<Modal show={show} onHide={winnerName == user.name ? goToFinal : backToMenu } centered>
+		<Modal show={show} onHide={ backToMenu } centered>
 			<Modal.Body className="text-center">
 				<div ref={confettiRef} />
 				<h2 className="fw-bold">🏆 {winnerName} wins!</h2>
 				<p>Congratulations!</p>
-				{winnerName == user.name
-					?<Button variant="primary" onClick={() => goToFinal()}>Play Final !</Button>
-					:<Button variant="primary" onClick={() => backToMenu()}>Back to Menu</Button>}
+					<Button variant="primary" onClick={() => backToMenu()}>Back to Menu</Button>
 			</Modal.Body>
 		</Modal>
 	)
 }
 
-function PlayMatch({ setState }) {
+function PlayMatch({ setState, setType }) {
 
 	const { getSocket, closeSocket, messages } = useGame()
-	const { setMessages, setPongMessages, setScoreMessages } = useGame()
-	const { NotifMessages } = useNotification()
 	const { user } = useAuth()
 	const [paused, setPaused] = useState(false)
 	const [end, setEnd] = useState(false)
 	const closeEnd = () => setEnd(false)
 	const [winner, setWinner] = useState("")
 	const [timer, setTimer] = useState(60)
-	const [showTimer, setShowTimer] = useState(true)
 	const socket = getSocket()
 
 	const declareWin = async () => {socket.send(JSON.stringify({ action: "declare_win" }))}
@@ -75,10 +62,15 @@ function PlayMatch({ setState }) {
 				const idData = await axiosInstance.get("/pong/tournament/get-id/")
 				if (idData && idData.data.finalist1 != null && idData.data.finalist2 != null) {
 					final = await axiosInstance.put(`/pong/tournament/${idData.data.tournament_id}/start-final/`)
-					await axiosInstance.post("/live_chat/general/send/", {content: `It's time for final : ${idData.data.finalist1} vs ${idData.data.finalist2}`})
+					await axiosInstance.post("/live_chat/general/send/", {content: `#Time for final : ${idData.data.finalist1} vs ${idData.data.finalist2}`})
 				}
 			}
-			catch {}
+			catch(error) {
+				if (error && error.response && error.response.data && error.response.data.message) {
+					setInfo(error.response.data.message)
+					setShow(true)
+				}
+			}
 		}
 
 		const handleMessage = async () => {
@@ -86,30 +78,23 @@ function PlayMatch({ setState }) {
 				closeSocket()
 				if (lastMessage.type == "match_ended") {
 					setWinner(lastMessage.winner)
-					if (lastMessage.winner == user.name)
-						await startFinal()
+					if (lastMessage.winner == user.name && lastMessage.match_number == 2)
+						startFinal()
 				}
 				else {
 					setWinner(user.name)
-					await startFinal()
+					if (lastMessage.match_number == 2)
+						startFinal()
 				}
 				setPaused(false)
 				setEnd(true)
-				setMessages([])
-				setPongMessages([])
-				setScoreMessages([])
 			}
-			if (lastMessage.type == "game_paused")
+			if (lastMessage.type == "game_paused" || (lastMessage.type == "player_count" && lastMessage.player_count == 1))
 				setPaused(true)
-			if (lastMessage.type == "player_count" && lastMessage.player_count == 1) {
-				setPaused(true)
-				setShowTimer(true)
-			}
 			if (lastMessage.type == "forfeit_not_available")
 				setTimer(lastMessage.remaining_seconds)
 			if (lastMessage.type == "player_count" && lastMessage.player_count == 2) {
 				setPaused(false)
-				setShowTimer(true)
 				setTimer(60)
 			}
 		}
@@ -118,15 +103,14 @@ function PlayMatch({ setState }) {
 
 	return (
 		<>
-		{paused ? 
+		{paused ?
 		<div className="position-absolute top-0 d-flex flex-column justify-content-center align-items-center vh-100 w-100">
 			<i className="bi bi-pause-circle" style={{ fontSize: "20rem", color: "white" }} />
 			<div className="fs-1 mb-5">
-				{showTimer ? `Timer : ${timer}s` : ""}
+				<Button className="" onClick={() => declareWin()}>Declare win in {timer}s</Button>
 			</div>
-			<Button className="" onClick={() => declareWin()}>Declare win</Button>
 		</div> : <></> }
-		<WinnerModal winnerName={ winner } show={ end } onClose={ closeEnd } setState={ setState }/>
+		<WinnerModal winnerName={ winner } show={ end } onClose={ closeEnd }/>
 		</>
 	)
 }

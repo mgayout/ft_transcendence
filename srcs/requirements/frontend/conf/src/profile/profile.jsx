@@ -63,7 +63,7 @@ function Profile({ user, profile }) {
 			setWinrate(b.data)
 		}
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -133,7 +133,7 @@ function Profile({ user, profile }) {
 					</div>
 				</div>
 			</div>
-			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 0 } info={ info } />
+			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 6 } info={ info } />
 		</div>
 	)
 }

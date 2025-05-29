@@ -14,10 +14,7 @@ function QuitModal({ quit, setQuit }) {
 	const disconnect = async (e) => {
 		e.preventDefault()
 		try {
-			const Atoken = localStorage.getItem('Atoken')
-			const Rtoken = localStorage.getItem('Rtoken')
-			const config = {headers: {Authorization: `Bearer ${Atoken}`}}
-			const response = await axiosInstance.post('/users/api/logout/', {token: Rtoken}, config)
+			const response = await axiosInstance.post('/users/api/logout/')
 			if (response.data.code == 1000) {
 				logout()
 				handleClose()

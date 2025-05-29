@@ -15,13 +15,19 @@ const rawAxios = axios.create({
 let isRefreshing = false
 let refreshPromise = null
 
-export const refreshAtoken = async (Rtoken) => {
+export const refreshAtoken = async (Rtoken, container) => {
 	if (!Rtoken) return false
 	if (isRefreshing) return refreshPromise
 	isRefreshing = true
 	refreshPromise = (async () => {
 		try {
-			const response = await rawAxios.post('/users/api/token/refresh/', { refresh: Rtoken })
+			let response
+			if (container == "live_chat")
+				response = await rawAxios.post('/live_chat/api/token/refresh/', { refresh: Rtoken })
+			else if (container == "pong")
+				response = await rawAxios.post('/pong/api/token/refresh/', { refresh: Rtoken })
+			else
+				response = await rawAxios.post('/users/api/token/refresh/', { refresh: Rtoken })
 			if (response.data.access) {
 				localStorage.setItem('Atoken', response.data.access)
 				return true
@@ -78,8 +84,10 @@ axiosInstance.interceptors.request.use(async (config) => {
 		return config
 	}
 
+	const container = config.url.split('/').filter(Boolean)
+
 	if (istokenExpired(Atoken)) {
-		const success = await refreshAtoken(Rtoken)
+		const success = await refreshAtoken(Rtoken, container[0])
 		if (!success) {
 			removeData()
 			return Promise.reject(new axios.Cancel("Access token refresh failed"))
@@ -99,7 +107,8 @@ axiosInstance.interceptors.response.use((response) => response, async (error) =>
 		originalRequest._retry = true
 		
 		const Rtoken = localStorage.getItem('Rtoken')
-		const refreshed = await refreshAtoken(Rtoken)
+		const container = config.url.split('/').filter(Boolean)
+		const refreshed = await refreshAtoken(Rtoken, container[0])
 		
 		if (refreshed) {
 			const newAtoken = localStorage.getItem('Atoken')

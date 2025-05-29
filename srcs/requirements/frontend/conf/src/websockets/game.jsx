@@ -12,7 +12,6 @@ export const Game = ({ children }) => {
 	const socketRef = useRef(null)
 	const [messages, setMessages] = useState([])
 	const [PongMessages, setPongMessages] = useState([])
-	const [ScoreMessages, setScoreMessages] = useState([])
 	const [url, setUrl] = useState('')
 
 	useEffect(() => {
@@ -43,13 +42,11 @@ export const Game = ({ children }) => {
 				if (containerStatus.data.code != 1000) return
 				const ws = await createGameSocket(url, Rtoken, (data) => {
 				if (data.type == "data_pong") setPongMessages((prev) => [...prev, data])
-				else if (data.type == "score_update") setScoreMessages(data)
 				else if (data.type) setMessages((prev) => [...prev, data])
-				}, (error) => {navigate("/home")}, () => {
+				}, () => {navigate("/home")}, () => {
 					setUrl("")
 					setMessages([])
 					setPongMessages([])
-					setScoreMessages([])
 				})
 				if (isMounted) {
 					socketRef.current = ws
@@ -86,7 +83,7 @@ export const Game = ({ children }) => {
 
 	return (
 		<GameContext.Provider value={{ messages, setMessages, PongMessages, setPongMessages,
-			ScoreMessages, setScoreMessages, url, setUrl, getSocket: () => socketRef.current, closeSocket }}>
+			url, setUrl, getSocket: () => socketRef.current, closeSocket }}>
 			{children}
 		</GameContext.Provider>
 	)

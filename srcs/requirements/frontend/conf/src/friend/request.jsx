@@ -32,7 +32,7 @@ function RequestModal({ tab, setShow, setInfo }) {
 			setFilteredFriends(a)
 		}
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -40,9 +40,10 @@ function RequestModal({ tab, setShow, setInfo }) {
 	}
 
 	const cancelRequest = async (playerID) => {
-		try {await axiosInstance.delete(`/users/api/friend-request/cancel/${playerID}/`)}
+		const json = {data: {"id": playerID}}
+		try {await axiosInstance.delete(`/users/api/friend-request/cancel/`, json)}
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -51,9 +52,9 @@ function RequestModal({ tab, setShow, setInfo }) {
 	}
 
 	const acceptRequest = async (playerID) => {
-		try {await axiosInstance.put(`/users/api/friend-request/accept/${playerID}/`, { player_2: playerID })}
+		try {await axiosInstance.put(`/users/api/friend-request/accept/`, { id: playerID })}
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -62,9 +63,10 @@ function RequestModal({ tab, setShow, setInfo }) {
 	}
 
 	const rejectRequest = async (playerID) => {
-		try {await axiosInstance.delete(`/users/api/friend-request/reject/${playerID}/`)}
+		const json = {data: {"id": playerID}}
+		try {await axiosInstance.delete(`/users/api/friend-request/reject/`, json)}
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -74,7 +76,8 @@ function RequestModal({ tab, setShow, setInfo }) {
 
 	const filterList = (e) => {
 		const query = e.target.value
-		setSearch(query)	
+		setSearch(query)
+		if (!data) return
 		const filtered = data.filter(player =>player.name.toLowerCase().includes(query.toLowerCase()))
 		setFilteredFriends(filtered)
 	}

@@ -26,7 +26,7 @@ function SearchModal({ tab, setShow, setInfo }) {
 			setFilteredFriends(temp)
 		}
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -36,7 +36,7 @@ function SearchModal({ tab, setShow, setInfo }) {
 	const addFriend = async (playerID) => {
 		try {await axiosInstance.post('/users/api/friend-request/send/', { player_2: playerID })}
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -47,7 +47,7 @@ function SearchModal({ tab, setShow, setInfo }) {
 	const addBlock = async (playerID) => {
 		try {await axiosInstance.post('/users/api/block/add', { blocked_id: playerID })} //manque un /
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -57,7 +57,8 @@ function SearchModal({ tab, setShow, setInfo }) {
 
 	const filterList = (e) => {
 		const query = e.target.value
-		setSearch(query)	
+		setSearch(query)
+		if (!data) return
 		const filtered = data.filter(player =>player.name.toLowerCase().includes(query.toLowerCase()))
 		setFilteredFriends(filtered)
 	}

@@ -50,7 +50,8 @@ function ChatModal({ chat, setChat }) {
 			setChats(temp)
 		}
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message)
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -72,7 +73,7 @@ function ChatModal({ chat, setChat }) {
 			await axiosInstance.post(`/live_chat/private/send/${id}/`, {content: `#${user.name} invited ${name} in a game.`})
 		}
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -87,7 +88,7 @@ function ChatModal({ chat, setChat }) {
 			else
 				await axiosInstance.post("/live_chat/general/send/", {content: message})}
 		catch(error) {
-			if (error.response.data.message) {
+			if (error && error.response && error.response.data && error.response.data.message) {
 				setInfo(error.response.data.message)
 				setShow(true)
 			}
@@ -173,7 +174,7 @@ function ChatModal({ chat, setChat }) {
 					</div>
 				</div>
 			</Modal.Body>
-			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 0 } info={ info } />
+			<ErrorModal show={ show } hideModal={ hideModal } contextId={ 2 } info={ info } />
 		</Modal>
 	)
 }
