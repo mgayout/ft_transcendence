@@ -4,8 +4,8 @@ COMPOSE_FILE="./srcs/docker-compose.yml"
 ENV_FILE="./srcs/env/.env_nginx"
 
 if [ ! -f "$ENV_FILE" ]; then
-    echo "Erreur : Le fichier $ENV_FILE n'existe pas."
     touch $ENV_FILE
+    echo "PORT_NUM='4343'" >> $ENV_FILE
 fi
 
 NEW_DOMAIN_NAME=\'$(hostname --short)\'
@@ -15,7 +15,7 @@ if [ -z "$NEW_DOMAIN_NAME" ]; then
     exit 1
 fi
 
-NEW_DOMAIN_NAME="'localhost'" #a retirer a 42
+#NEW_DOMAIN_NAME="'localhost'" #a retirer a 42
 
 if grep -q "^DOMAIN_NAME=" "$ENV_FILE"; then
     sed -i "s/^DOMAIN_NAME=.*/DOMAIN_NAME=$NEW_DOMAIN_NAME/" "$ENV_FILE"

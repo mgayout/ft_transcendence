@@ -126,7 +126,7 @@ function WaitMatch({ setState, setType, setShow, setInfo }) {
 			setState("")
 			setType("")
 		}
-		if (NotifMessages.type == "match_created")
+		if (NotifMessages.type == "match_created" && NotifMessages.type != "tournament_semi_final")
 			startGame(NotifMessages)
 	}, [NotifMessages])
 

@@ -5,7 +5,7 @@ FROM node:23.9.0-alpine3.20a@sha256:d328a006af9cd556fec56d3fb325ce8fdee988b511df
 
 RUN apk update \
 	&& apk upgrade \
-	&& apk add vim
+	&& apk add vim curl
 
 ARG VITE_DOMAIN_NAME
 ARG VITE_PORT_NUM

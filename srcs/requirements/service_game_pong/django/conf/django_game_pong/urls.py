@@ -16,8 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from core.views import health_check
 
 urlpatterns = [
+	path('pong/health/', health_check, name='health_check'),
     path('pong/admin/', admin.site.urls),
     path('pong/', include('core.urls')),
     path('pong/api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

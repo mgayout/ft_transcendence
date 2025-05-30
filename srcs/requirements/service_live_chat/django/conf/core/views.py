@@ -11,6 +11,7 @@ from django.db.models import Q
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.http import JsonResponse
 
 @method_decorator(csrf_exempt, name='dispatch')
 class StatusApi(APIView):
@@ -138,3 +139,6 @@ class PrivateMessageSendView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
         return response
+
+def health_check(request):
+    return JsonResponse({"status": "ok"})

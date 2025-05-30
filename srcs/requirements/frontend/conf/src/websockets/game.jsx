@@ -41,7 +41,7 @@ export const Game = ({ children }) => {
 				const containerStatus = await axios.get(`https://${location.host}/pong/api/status/`)
 				if (containerStatus.data.code != 1000) return
 				const ws = await createGameSocket(url, Rtoken, (data) => {
-				if (data.type == "data_pong") setPongMessages((prev) => [...prev, data])
+				if (data.type == "data_pong") setPongMessages(data)
 				else if (data.type) setMessages((prev) => [...prev, data])
 				}, () => {navigate("/home")}, () => {
 					setUrl("")
@@ -70,16 +70,6 @@ export const Game = ({ children }) => {
 		if (socketRef.current?.readyState === WebSocket.OPEN || socketRef.current?.readyState === WebSocket.CONNECTING)
 			socketRef.current.close()
 	}
-
-
-	/*useEffect(() => {
-		const handleBeforeUnload = () => {
-			if (socketRef.current?.readyState === WebSocket.OPEN)
-				socketRef.current.close()
-		}
-		window.addEventListener('beforeunload', handleBeforeUnload)
-		return () => {window.removeEventListener('beforeunload', handleBeforeUnload)}
-	}, [])*/
 
 	return (
 		<GameContext.Provider value={{ messages, setMessages, PongMessages, setPongMessages,

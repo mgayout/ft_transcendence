@@ -1,4 +1,4 @@
-const dispose = (objects, scene, renderer, animationFrameId) => {
+const dispose = (objects, scene, rendererRef, animationFrameId) => {
 	cancelAnimationFrame(animationFrameId)
 	if (objects.floor) {
 		objects.floor.geometry.dispose()
@@ -61,7 +61,7 @@ const dispose = (objects, scene, renderer, animationFrameId) => {
 	}
 	scene.fog = null
 	scene.background = null
-	renderer.dispose()
+	rendererRef.current.dispose()
 }
 
 export default dispose

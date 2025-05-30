@@ -172,11 +172,15 @@ const setScore = (groupScore, scene) => {
 
 export const updateScore = (newScore, scene, objects) => {
 	scene.remove(objects.score)
+	if (objects.score.material.map) {
+		objects.score.material.map.dispose()
+	}
 	objects.score.geometry.dispose()
 	objects.score.material.dispose()
 	const newScoreMesh = setScore(newScore, scene)
 	objects.score = newScoreMesh
 }
+
 
 const setNames = (groupName, scene) => {
 	const canvas = document.createElement('canvas')
@@ -209,6 +213,9 @@ const setNames = (groupName, scene) => {
 
 export const updateName = (newName, scene, objects) => {
 	scene.remove(objects.names)
+	if (objects.names.material.map) {
+		objects.names.material.map.dispose()
+	}
 	objects.names.geometry.dispose()
 	objects.names.material.dispose()
 	const newNameMesh = setNames(newName, scene)

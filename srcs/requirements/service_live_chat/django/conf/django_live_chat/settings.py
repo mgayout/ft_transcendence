@@ -186,7 +186,7 @@ CSRF_TRUSTED_ORIGINS = [
     f"https://{DOMAIN_NAME}",
 ]
 
-ALLOWED_HOSTS = [DOMAIN_NAME]
+ALLOWED_HOSTS = [DOMAIN_NAME, 'localhost']
 
 # Autoriser les en-têtes spécifiques (nécessaire pour les tokens JWT et WebSocket)
 CORS_ALLOW_HEADERS = [

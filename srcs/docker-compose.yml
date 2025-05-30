@@ -31,8 +31,12 @@ services:
       context: ./requirements/frontend
       dockerfile: Dockerfile
       args:
-        VITE_DOMAIN_NAME: 'localhost'
+        VITE_DOMAIN_NAME: 'c3r2p2'
         VITE_PORT_NUM: 4343
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://frontend:3000/health"]
+      interval: 30s
+      retries: 3
     container_name: frontend
     init: true
     restart: always
@@ -48,6 +52,10 @@ services:
     build:
       context: ./requirements/service_user_handler/django
       dockerfile: Dockerfile
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/users/health"]
+      interval: 30s
+      retries: 3
     container_name: service_user_handler_django
     environment:
       - DJANGO_SETTINGS_MODULE=django_user_handler.settings
@@ -85,6 +93,10 @@ services:
     build:
       context: ./requirements/service_game_pong/django
       dockerfile: Dockerfile
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/pong/health"]
+      interval: 30s
+      retries: 3
     container_name: service_game_pong_django
     environment:
       - DJANGO_SETTINGS_MODULE=django_game_pong.settings
@@ -121,6 +133,10 @@ services:
     build:
       context: ./requirements/service_live_chat/django
       dockerfile: Dockerfile
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/live_chat/health"]
+      interval: 30s
+      retries: 3
     container_name: service_live_chat_django
     environment:
       - DJANGO_SETTINGS_MODULE=django_live_chat.settings

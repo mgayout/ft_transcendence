@@ -380,3 +380,6 @@ class Auth42CallbackView(APIView):
 class Auth42CompleteView(generics.CreateAPIView):
     serializer_class = serializers.Auth42CompleteSerializer
     permission_classes = [AllowAny]
+
+def health_check(request):
+    return JsonResponse({"status": "ok"})

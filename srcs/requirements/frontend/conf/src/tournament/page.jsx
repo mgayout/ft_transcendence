@@ -10,12 +10,11 @@ import axiosInstance from "../auth/instance.jsx"
 import ErrorModal from "../global/error-modal.jsx"
 import { useGame } from "../websockets/game.jsx"
 
-
 function Tournament({ user }) {
 
 	const [state, setState] = useState("")
 	const [type, setType] = useState("")
-	const { setNotifMessages } = useNotification()
+	const { setNotifMessages, NotifMessages } = useNotification()
 	const { setUrl } = useGame()
 
 	const [show, setShow] = useState(false)
@@ -26,6 +25,7 @@ function Tournament({ user }) {
 		try {
 			const tournamentData = await axiosInstance.get("/pong/tournament/list/")
 			const matchData = await axiosInstance.get(`/pong/matches/?player_id=${user.id}`)
+			const idData = await axiosInstance.get("/pong/tournament/get-id/")
 			const a = tournamentData.data
 				.find(match => match.status == "Ouvert" &&
 				(match.player_1 == user.id || match.player_2 == user.id ||
@@ -42,13 +42,13 @@ function Tournament({ user }) {
 				setUrl(b.url.ws_url)
 				setState("play")
 			}
-		}
-		catch {
-			if (error && error.response && error.response.data && error.response.data.message) {
-				setInfo(error.response.data.message)
-				setShow(true)
+			if (idData && idData.data.finalist1 != null && idData.data.finalist2 != null &&
+				(idData.data.finalist1 == user.name || idData.data.finalist2 == user.name && !b)) {
+				await axiosInstance.put(`/pong/tournament/${idData.data.tournament_id}/start-final/`)
+				await axiosInstance.post("/live_chat/general/send/", {content: `#Time for final : ${idData.data.finalist1} vs ${idData.data.finalist2}`})
 			}
 		}
+		catch {}
 	}
 
 	const create = async () => {
@@ -68,6 +68,16 @@ function Tournament({ user }) {
 			}
 		}
 	}
+
+	useEffect(() => {
+		if (NotifMessages.type == "match_created" && state == "") {
+			if (NotifMessages.player_1 == user.name) setType("paddle_l")
+			else if (NotifMessages.player_2 == user.name) setType("paddle_r")
+			setUrl(NotifMessages.ws_url)
+			setNotifMessages([])
+			setState("play")
+		}
+	}, [NotifMessages])
 
 	useEffect(() => {
 		if (state == "")

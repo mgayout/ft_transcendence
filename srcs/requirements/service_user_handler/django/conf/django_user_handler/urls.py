@@ -18,10 +18,12 @@ from django.urls import path, include
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.authtoken.views import obtain_auth_token
+from core.views import health_check
 
 
 
 urlpatterns = [
+	path('users/health/', health_check, name='health_check'),
     path('users/api-auth/', include('rest_framework.urls')),
     path('users/admin/', admin.site.urls),
     path('users/', include('core.urls')),

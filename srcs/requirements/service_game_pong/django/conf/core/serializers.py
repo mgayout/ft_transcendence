@@ -132,7 +132,7 @@ class PongInvitationSerializer(serializers.ModelSerializer):
         # Vérifie si le joueur est dans un tournoi ouvert ou en cours
         tournament_query = Tournament.objects.filter(
             Q(player_1=player) | Q(player_2=player) | Q(player_3=player) | Q(player_4=player),
-            status__in=[TournamentStatusChoices.OUVERT, TournamentStatusChoices.EN_COURS]
+            status__in=[TournamentStatusChoices.EN_COURS]
         )
 
         if tournament_query.exists():
@@ -149,6 +149,17 @@ class PongInvitationSerializer(serializers.ModelSerializer):
                     "code": error_code,
                     "message": error_message
                 })
+
+        tournament_inv = Tournament.objects.filter(
+            Q(player_1=player) | Q(player_2=player) | Q(player_3=player) | Q(player_4=player),
+            status__in=[TournamentStatusChoices.OUVERT]
+        )
+
+        if tournament_inv.exists():
+            raise serializers.ValidationError({
+                "code": error_code,
+                "message": "Player is on a prematch"
+            })
             # Si le joueur est dans un tournoi mais n'a pas gagné de match, la validation passe
 
     def validate(self, attrs):
@@ -351,6 +362,17 @@ class InvitationAcceptSerializer(serializers.Serializer):
                     "message": error_message
                 })
 
+        tournament_inv = Tournament.objects.filter(
+        Q(player_1=player) | Q(player_2=player) | Q(player_3=player) | Q(player_4=player),
+        status__in=[TournamentStatusChoices.OUVERT]
+        )
+
+        if tournament_inv.exists():
+            raise serializers.ValidationError({
+                "code": error_code,
+                "message": "Player is on a prematch"
+            })
+
     def validate(self, attrs):
         invitation = self.instance
         user = self.context["request"].user
@@ -538,6 +560,10 @@ class TournamentCreateSerializer(serializers.Serializer):
             4009,
             "Player has won a match in an open or ongoing tournament and cannot create a new tournament"
         )
+        
+        invite_query = Invitation.objects.filter(from_player=player, status=StatusChoices.EN_ATTENTE)
+        if invite_query.exists():
+            raise serializers.ValidationError({"code": 4009, "message": "Player on a prematch"})
 
         if attrs["max_score_per_round"] % 2 == 0:
             raise serializers.ValidationError({"code": 4013, "message": "The maximum score per round must be odd"})
@@ -647,6 +673,11 @@ class TournamentJoinSerializer(serializers.Serializer):
             4009,
             "Player has won a match in an open or ongoing tournament and cannot join a new tournament"
         )
+
+        invite_query = Invitation.objects.filter(from_player=player, status=StatusChoices.EN_ATTENTE)
+        if invite_query.exists():
+            raise serializers.ValidationError({"code": 4009, "message": "Player on a prematch"})
+
 
         if all([tournament.player_1, tournament.player_2, tournament.player_3, tournament.player_4]):
             raise serializers.ValidationError({"code": 4015, "message": "Full tournament"})

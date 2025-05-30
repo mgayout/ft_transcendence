@@ -103,7 +103,7 @@ CSRF_TRUSTED_ORIGINS = [
     f"https://{DOMAIN_NAME}",
 ]
 
-ALLOWED_HOSTS = [DOMAIN_NAME]
+ALLOWED_HOSTS = [DOMAIN_NAME, 'localhost']
 
 MEDIA_URL = f"https://{DOMAIN_NAME}:{PORT_NUM}/media/"
 MEDIA_ROOT = BASE_DIR / "media"

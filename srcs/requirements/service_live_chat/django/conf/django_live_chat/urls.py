@@ -16,9 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from core.views import health_check
 
 
 urlpatterns = [
+	path('live_chat/health/', health_check, name='health_check'),
     path('live_chat/admin/', admin.site.urls),
     path('live_chat/', include('core.urls')),
     path('live_chat/api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

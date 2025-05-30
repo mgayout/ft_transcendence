@@ -8,7 +8,7 @@ import dispose from "./dispose"
 
 const BGprivate = ({ state, type }) => {
 
-	const { getSocket, PongMessages } = useGame()
+	const { getSocket, PongMessages, setPongMessages, messages } = useGame()
 	const { NotifMessages } = useNotification()
 	const [groupName, setGroupName] = useState({name1: "...", name2: "..."})
 	const [groupScore, setGroupScore] = useState({score1: "0", score2: "0"})
@@ -19,21 +19,25 @@ const BGprivate = ({ state, type }) => {
 	const MessageRef = useRef(PongMessages)
 	
 	const canva = useRef(null)
+	const rendererRef = useRef(null)
 
 	useEffect(() => {
 		if (canva.current) canva.current.style.filter = state !== "play" ? 'blur(5px)' : ''
 		else return
 
 		const scene = new THREE.Scene()
+		stateRef.current = state
 		
 		const { renderer, camera, objects } = createCanva(canva.current, state, groupName, groupScore, scene)
-		const { animationFrameId } = animate(stateRef, objects, MessageRef, renderer, scene, camera,
-			setGroupScore, setGroupName, groupScoreRef, groupNameRef)
+		rendererRef.current = renderer
+
+		const { animationFrameId } = animate(stateRef, objects, MessageRef, rendererRef, scene, camera,
+			setGroupScore, setGroupName, groupScoreRef,	groupNameRef)
 
 		const resizeCanva = () => {
 			canva.current.width = window.innerWidth
 			canva.current.height = window.innerHeight
-			renderer.setSize(window.innerWidth, window.innerHeight)
+			rendererRef.current.setSize(window.innerWidth, window.innerHeight)
 			camera.aspect = window.innerWidth / window.innerHeight
 			camera.updateProjectionMatrix()
 		}
@@ -47,7 +51,7 @@ const BGprivate = ({ state, type }) => {
 			window.removeEventListener("resize", resizeCanva)
 			window.removeEventListener('keydown', handleKeyDown)
 			window.removeEventListener('keyup', handleKeyUp)
-			dispose(objects, scene, renderer, animationFrameId)
+			dispose(objects, scene, rendererRef, animationFrameId)
 		}
 	}, [state])
 
@@ -65,6 +69,15 @@ const BGprivate = ({ state, type }) => {
 	useEffect(() => { stateRef.current = state }, [state])
 
 	useEffect(() => { MessageRef.current = PongMessages }, [PongMessages])
+
+	useEffect(() => {
+		if (!messages.length) return
+		const lastMessage = messages[messages.length - 1]
+		if (lastMessage.type == "score_update")
+			setPongMessages({ type: "data_pong", x: 0, y: 0, paddleL: 0, paddleR: 0,
+				scorePlayer1: lastMessage.scorePlayer1, scorePlayer2: lastMessage.scorePlayer2,
+				Player1_name: groupName.name1, Player2_name: groupName.name2 })
+	}, [messages])
 
 	const handleKeyDown = (e) => {
 		const socket = getSocket()

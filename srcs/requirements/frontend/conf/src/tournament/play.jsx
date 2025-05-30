@@ -7,10 +7,16 @@ import { confetti } from "dom-confetti"
 import { useAuth } from "../auth/context"
 import axiosInstance from "../auth/instance"
 
-function WinnerModal({ winnerName, show, onClose }) {
+function WinnerModal({ winnerName, show, onClose, setState }) {
 
 	const confettiRef = useRef(null)
 	const navigate = useNavigate()
+
+	const backToMenu = async () => {
+		onClose()
+		setState("end")
+		navigate("/home")
+	}
 
 	useEffect(() => {
 		if (show && confettiRef.current) {
@@ -21,11 +27,6 @@ function WinnerModal({ winnerName, show, onClose }) {
 			})
 		}
 	}, [show])
-
-	const backToMenu = () => {
-		onClose()
-		navigate("/home")
-	}
 
 	return (
 		<Modal show={show} onHide={ backToMenu } centered>
@@ -56,36 +57,13 @@ function PlayMatch({ setState, setType }) {
 		if (!messages.length) return
 		const lastMessage = messages[messages.length - 1]
 
-		const startFinal = async () => {
-			try {
-				let final
-				const idData = await axiosInstance.get("/pong/tournament/get-id/")
-				if (idData && idData.data.finalist1 != null && idData.data.finalist2 != null) {
-					final = await axiosInstance.put(`/pong/tournament/${idData.data.tournament_id}/start-final/`)
-					await axiosInstance.post("/live_chat/general/send/", {content: `#Time for final : ${idData.data.finalist1} vs ${idData.data.finalist2}`})
-				}
-			}
-			catch(error) {
-				if (error && error.response && error.response.data && error.response.data.message) {
-					setInfo(error.response.data.message)
-					setShow(true)
-				}
-			}
-		}
-
 		const handleMessage = async () => {
 			if (lastMessage.type == "match_ended" || lastMessage.type == "forfeit_success") {
 				closeSocket()
-				if (lastMessage.type == "match_ended") {
+				if (lastMessage.type == "match_ended")
 					setWinner(lastMessage.winner)
-					if (lastMessage.winner == user.name && lastMessage.match_number == 2)
-						startFinal()
-				}
-				else {
+				else
 					setWinner(user.name)
-					if (lastMessage.match_number == 2)
-						startFinal()
-				}
 				setPaused(false)
 				setEnd(true)
 			}
@@ -110,7 +88,7 @@ function PlayMatch({ setState, setType }) {
 				<Button className="" onClick={() => declareWin()}>Declare win in {timer}s</Button>
 			</div>
 		</div> : <></> }
-		<WinnerModal winnerName={ winner } show={ end } onClose={ closeEnd }/>
+		<WinnerModal winnerName={ winner } show={ end } onClose={ closeEnd } setState={ setState }/>
 		</>
 	)
 }

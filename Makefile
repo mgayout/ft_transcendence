@@ -55,6 +55,3 @@ fclean:
 	@if [ -e ./srcs/secrets/.vault_secrets_key.json ]; then \
 		rm ./srcs/secrets/.vault_secrets_key.json > /dev/null; \
 	fi
-
-debug_nginx:
-	@sh ./debug/nginx_error_code_displayer.sh

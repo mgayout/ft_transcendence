@@ -10,6 +10,7 @@ from django.db.models import Q
 from . import serializers
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.http import JsonResponse
 
 @method_decorator(csrf_exempt, name='dispatch')
 class StatusApi(APIView):
@@ -361,3 +362,6 @@ class TournamentSeeMatchesAPI(generics.GenericAPIView):
         tournament = self.get_object()
         serializer = self.get_serializer(instance=tournament, context={'request': request})
         return Response(serializer.to_representation(tournament))
+
+def health_check(request):
+    return JsonResponse({"status": "ok"})

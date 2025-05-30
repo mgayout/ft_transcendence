@@ -1,13 +1,13 @@
 import { updateScore, updateName } from './shapes'
 
-const createAnimate = (stateRef, objects, MessageRef, renderer, scene, camera, setGroupScore, setGroupName, groupScoreRef, groupNameRef) => {
+const createAnimate = (stateRef, objects, MessageRef, rendererRef, scene, camera, setGroupScore, setGroupName, groupScoreRef, groupNameRef) => {
     
 	let animationFrameId
 
     const animate = () => {
         if (stateRef.current === "play" && objects && objects.paddle?.paddleL && objects.paddle?.paddleR && objects.ball) {
-            const lastPongMessage = MessageRef.current[MessageRef.current.length - 1]
-            if (lastPongMessage) {
+            const lastPongMessage = MessageRef.current
+            if (lastPongMessage && lastPongMessage.type == "data_pong") {
                 objects.paddle.paddleL.position.set(0.5, lastPongMessage.paddleL + 2.5, 1)
                 objects.paddle.paddleR.position.set(70.5, lastPongMessage.paddleR + 2.5, 1)
                 objects.ball.position.set(lastPongMessage.x + 0.5, lastPongMessage.y + 0.5, 1)
@@ -29,7 +29,7 @@ const createAnimate = (stateRef, objects, MessageRef, renderer, scene, camera, s
                 }
             }
         }
-        renderer.render(scene, camera)
+		rendererRef.current.render(scene, camera)
         animationFrameId = requestAnimationFrame(animate)
     }
 
